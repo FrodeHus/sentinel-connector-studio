@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
@@ -26,58 +27,202 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Palette: expose as Tailwind colors */
+  --color-violet-50: #f5f3ff;
+  --color-violet-100: #ede9fe;
+  --color-violet-200: #ddd6fe;
+  --color-violet-300: #c4b5fd;
+  --color-violet-400: #a78bfa;
+  --color-violet-500: #8b5cf6;
+  --color-violet-600: #7c3aed;
+  --color-violet-700: #6d28d9;
+  --color-violet-800: #5b21b6;
+  --color-violet-900: #4c1d95;
+  --color-violet-950: #2e1065;
+
+  --color-fuchsia-50: #fdf4ff;
+  --color-fuchsia-100: #fae8ff;
+  --color-fuchsia-200: #f5d0fe;
+  --color-fuchsia-300: #f0abfc;
+  --color-fuchsia-400: #e879f9;
+  --color-fuchsia-500: #d946ef;
+  --color-fuchsia-600: #c026d3;
+  --color-fuchsia-700: #a21caf;
+  --color-fuchsia-800: #86198f;
+  --color-fuchsia-900: #701a75;
+  --color-fuchsia-950: #4a044e;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
+/* ── Light mode (default) ───────────────────────────── */
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.965 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.965 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.965 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --radius: 1rem;
+  --background: #f8f7fc;
+  --foreground: #0f0b24;
+  --card: rgba(255, 255, 255, 0.8);
+  --card-foreground: #0f0b24;
+  --popover: #ffffff;
+  --popover-foreground: #0f0b24;
+  --primary: #7c3aed;
+  --primary-foreground: #ffffff;
+  --secondary: #c026d3;
+  --secondary-foreground: #ffffff;
+  --muted: #eeedf5;
+  --muted-foreground: #6b6784;
+  --accent: #eeedf5;
+  --accent-foreground: #0f0b24;
+  --destructive: #f87171;
+  --destructive-foreground: #ffffff;
+  --border: rgba(221, 219, 232, 0.6);
+  --input: #dddbe8;
+  --ring: #7c3aed;
 }
 
+/* ── Dark mode ──────────────────────────────────────── */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
+  --background: #0f0b24;
+  --foreground: #f0eeff;
+  --card: rgba(39, 35, 64, 0.6);
+  --card-foreground: #f0eeff;
+  --popover: rgba(26, 22, 53, 0.85);
+  --popover-foreground: #f0eeff;
+  --primary: #8b5cf6;
+  --primary-foreground: #ffffff;
+  --secondary: #d946ef;
+  --secondary-foreground: #ffffff;
+  --muted: #1a1635;
+  --muted-foreground: #8f8ba3;
+  --accent: #3b3751;
+  --accent-foreground: #f0eeff;
+  --destructive: #f87171;
+  --destructive-foreground: #ffffff;
+  --border: rgba(59, 55, 81, 0.5);
+  --input: rgba(59, 55, 81, 0.4);
+  --ring: #8b5cf6;
 }
 
+/* ── Base styles ────────────────────────────────────── */
 body {
-  @apply bg-background text-foreground m-0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  @apply bg-background text-foreground m-0 antialiased;
+  font-family: var(--font-sans);
+}
+
+/* ── Background glow (dark mode only) ───────────────── */
+.dark body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(ellipse at 70% 10%, rgba(139, 92, 246, 0.12), transparent 60%);
+}
+
+/* ── Custom scrollbar ───────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: rgba(221, 219, 232, 0.5);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(184, 181, 200, 0.7);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(59, 55, 81, 0.5);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(81, 77, 102, 0.7);
+}
+
+/* ── Glassmorphism utility ──────────────────────────── */
+.glass-card {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-elevated {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ── Gradient utilities ─────────────────────────────── */
+.gradient-primary {
+  background: linear-gradient(135deg, #7c3aed, #d946ef);
+}
+.gradient-primary:hover {
+  background: linear-gradient(135deg, #8b5cf6, #e879f9);
+}
+
+.gradient-warm {
+  background: linear-gradient(135deg, #fb923c, #fb7185, #8b5cf6);
+}
+
+.gradient-cool {
+  background: linear-gradient(135deg, #22d3ee, #8b5cf6, #d946ef);
+}
+
+.gradient-top-border {
+  position: relative;
+}
+.gradient-top-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #22d3ee, #8b5cf6, #d946ef);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+/* ── Focus ring ─────────────────────────────────────── */
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+}
+:root .focus-ring:focus-visible {
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+
+/* ── CodeMirror theme overrides ─────────────────────── */
+.cm-editor {
+  font-family: var(--font-mono) !important;
+  font-size: 0.8125rem !important;
+}
+.dark .cm-editor {
+  background-color: rgba(15, 11, 36, 0.5) !important;
+}
+.dark .cm-editor .cm-gutters {
+  background-color: rgba(26, 22, 53, 0.8) !important;
+  border-right-color: rgba(59, 55, 81, 0.3) !important;
+  color: #6b6784 !important;
+}
+.dark .cm-editor .cm-activeLineGutter,
+.dark .cm-editor .cm-activeLine {
+  background-color: rgba(139, 92, 246, 0.05) !important;
+}
+.dark .cm-editor .cm-cursor {
+  border-left-color: #a78bfa !important;
+}
+.dark .cm-editor .cm-selectionBackground {
+  background-color: rgba(139, 92, 246, 0.2) !important;
+}
+
+/* Light mode CodeMirror */
+:root .cm-editor .cm-activeLine {
+  background-color: rgba(139, 92, 246, 0.06) !important;
+}
+:root .cm-editor .cm-cursor {
+  border-left-color: #7c3aed !important;
+}
+:root .cm-editor .cm-selectionBackground {
+  background-color: rgba(139, 92, 246, 0.15) !important;
 }

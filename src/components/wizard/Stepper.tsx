@@ -15,31 +15,42 @@ interface StepperProps {
 
 export function Stepper({ steps, currentStep, onStepClick }: StepperProps) {
   return (
-    <nav className="flex items-center justify-center gap-2 md:gap-4 py-4 px-2 overflow-x-auto">
+    <nav className="flex items-center justify-center gap-2 md:gap-4 py-6 px-2 overflow-x-auto">
       {steps.map((step, index) => {
-        const isCurrent = index === currentStep
-        const isCompleted = step.isVisited && step.isValid
-        const hasError = step.isVisited && !step.isValid
+        const isCurrent = index === currentStep;
+        const isCompleted = step.isVisited && step.isValid;
+        const hasError = step.isVisited && !step.isValid;
 
         return (
           <div key={index} className="flex items-center gap-2 md:gap-4">
             <button
               onClick={() => onStepClick(index)}
               className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap",
-                isCurrent && "bg-primary text-primary-foreground",
-                !isCurrent && isCompleted && "bg-muted text-foreground hover:bg-accent",
-                !isCurrent && hasError && "bg-destructive/10 text-destructive hover:bg-destructive/20",
-                !isCurrent && !step.isVisited && "text-muted-foreground hover:bg-muted"
+                "flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer whitespace-nowrap border",
+                isCurrent &&
+                  "gradient-primary text-white border-transparent shadow-lg shadow-primary/25",
+                !isCurrent &&
+                  isCompleted &&
+                  "bg-card border-border/50 text-foreground hover:border-primary/50 hover:bg-card/80",
+                !isCurrent &&
+                  hasError &&
+                  "bg-destructive/10 border-destructive/30 text-destructive hover:bg-destructive/20",
+                !isCurrent &&
+                  !step.isVisited &&
+                  "bg-muted/30 border-border/30 text-muted-foreground hover:bg-muted/50",
               )}
             >
               <span
                 className={cn(
-                  "flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0",
-                  isCurrent && "bg-primary-foreground text-primary",
-                  !isCurrent && isCompleted && "bg-green-500 text-white",
+                  "flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 transition-all",
+                  isCurrent && "bg-white/20 text-white",
+                  !isCurrent &&
+                    isCompleted &&
+                    "bg-primary/15 text-primary border border-primary/30",
                   !isCurrent && hasError && "bg-destructive text-white",
-                  !isCurrent && !step.isVisited && "bg-muted-foreground/30 text-muted-foreground"
+                  !isCurrent &&
+                    !step.isVisited &&
+                    "bg-muted text-muted-foreground",
                 )}
               >
                 {isCompleted && !isCurrent ? (
@@ -53,14 +64,18 @@ export function Stepper({ steps, currentStep, onStepClick }: StepperProps) {
               <span className="hidden sm:inline">{step.label}</span>
             </button>
             {index < steps.length - 1 && (
-              <div className={cn(
-                "w-8 h-[2px]",
-                isCompleted ? "bg-green-500" : "bg-border"
-              )} />
+              <div
+                className={cn(
+                  "w-8 h-0.5 rounded-full transition-all",
+                  isCompleted
+                    ? "bg-gradient-to-r from-primary to-secondary"
+                    : "bg-border/30",
+                )}
+              />
             )}
           </div>
-        )
+        );
       })}
     </nav>
-  )
+  );
 }

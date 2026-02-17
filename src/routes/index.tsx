@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { ConnectorConfigProvider } from '@/hooks/useConnectorConfig'
+import { ThemeProvider } from '@/hooks/useTheme'
 
 export const Route = createFileRoute('/')({ component: App })
 
@@ -32,16 +33,18 @@ const LazyConnectorWizard = React.lazy(() =>
 
 function ClientWizard() {
   return (
-    <ConnectorConfigProvider>
-      <React.Suspense
-        fallback={
-          <div className="h-screen flex items-center justify-center">
-            <p className="text-muted-foreground">Loading wizard...</p>
-          </div>
-        }
-      >
-        <LazyConnectorWizard />
-      </React.Suspense>
-    </ConnectorConfigProvider>
+    <ThemeProvider>
+      <ConnectorConfigProvider>
+        <React.Suspense
+          fallback={
+            <div className="h-screen flex items-center justify-center">
+              <p className="text-muted-foreground">Loading wizard...</p>
+            </div>
+          }
+        >
+          <LazyConnectorWizard />
+        </React.Suspense>
+      </ConnectorConfigProvider>
+    </ThemeProvider>
   )
 }

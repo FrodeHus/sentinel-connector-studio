@@ -54,7 +54,7 @@ const AccordionItemContext = React.createContext("")
 function AccordionItem({ value, className, ...props }: AccordionItemProps) {
   return (
     <AccordionItemContext.Provider value={value}>
-      <div className={cn("border-b", className)} {...props} />
+      <div className={cn("border-b border-border/30", className)} {...props} />
     </AccordionItemContext.Provider>
   )
 }
@@ -70,7 +70,7 @@ const AccordionTrigger = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAtt
         <button
           ref={ref}
           className={cn(
-            "flex flex-1 items-center justify-between py-4 text-sm font-medium transition-all hover:underline cursor-pointer [&[data-state=open]>svg]:rotate-180",
+            "flex flex-1 items-center justify-between py-4 text-sm font-semibold transition-all hover:text-primary cursor-pointer [&[data-state=open]>svg]:rotate-180",
             className
           )}
           data-state={isOpen ? "open" : "closed"}

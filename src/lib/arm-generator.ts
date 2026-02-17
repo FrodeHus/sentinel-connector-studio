@@ -22,21 +22,20 @@ export function generateArmTemplate(config: ConnectorConfig): Record<string, unk
     parameters: {
       workspace: {
         type: "string",
+        metadata: {
+          description: "The Microsoft Sentinel workspace into which the function will be deployed. Has to be in the selected Resource Group."
+        }
       },
       "workspace-location": {
         type: "string",
-      },
-      subscription: {
-        type: "string",
-        defaultValue: "[subscription().subscriptionId]",
-      },
-      resourceGroupName: {
-        type: "string",
-        defaultValue: "[resourceGroup().name]",
+        defaultValue: "[resourceGroup().location]",
+        metadata: {
+          description: "The location of the Microsoft Sentinel workspace"
+        }
       },
     },
     variables: {
-      workspaceResourceId: "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+      workspaceResourceId: "[parameters('workspace')]",
     },
     resources,
   }

@@ -31,10 +31,10 @@ export function ArmTemplatePreview() {
   }
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-3 shrink-0">
+    <Card className="h-full flex flex-col border-t-2 border-t-primary/50 shadow-lg">
+      <CardHeader className="pb-3 shrink-0 border-b border-border/30">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base">ARM Template Preview</CardTitle>
+          <CardTitle className="text-base font-semibold">ARM Template Preview</CardTitle>
           <div className="flex gap-2">
             <Button
               variant="ghost"
@@ -43,7 +43,7 @@ export function ArmTemplatePreview() {
               onClick={handleCopy}
               title="Copy to clipboard"
             >
-              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
             </Button>
             <Button
               variant="ghost"
@@ -57,9 +57,9 @@ export function ArmTemplatePreview() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 overflow-hidden p-0 pb-6 px-6">
-        <div className="h-full rounded-md border bg-muted/50 overflow-auto">
-          <pre className="p-4 text-xs font-mono">
+      <CardContent className="flex-1 overflow-hidden p-0 pb-5 px-5 pt-4">
+        <div className="h-full rounded-lg border border-border/50 bg-[rgba(15,11,36,0.3)] overflow-auto">
+          <pre className="p-4 text-xs font-mono leading-relaxed">
             <code>{template}</code>
           </pre>
         </div>

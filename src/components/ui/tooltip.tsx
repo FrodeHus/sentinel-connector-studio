@@ -16,7 +16,7 @@ function Tooltip({ content, children, side = "top" }: TooltipProps) {
       {show && (
         <div
           className={cn(
-            "absolute z-50 overflow-hidden rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground whitespace-nowrap",
+            "absolute z-50 overflow-hidden rounded-lg bg-popover/95 backdrop-blur-sm border border-border/50 px-3 py-2 text-xs text-popover-foreground whitespace-nowrap shadow-lg",
             side === "top" && "bottom-full left-1/2 -translate-x-1/2 mb-2",
             side === "bottom" && "top-full left-1/2 -translate-x-1/2 mt-2",
             side === "left" && "right-full top-1/2 -translate-y-1/2 mr-2",

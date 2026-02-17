@@ -15,13 +15,13 @@ export function generateDcrResource(
   return {
     type: "Microsoft.Insights/dataCollectionRules",
     apiVersion: "2023-03-11",
-    name: `[concat(parameters('workspace'), '-${dcrName}')]`,
+    name: dcrName,
     location: "[parameters('workspace-location')]",
     dependsOn: [
-      `[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), '${schema.tableName}')]`,
+      `[concat(variables('workspaceResourceId'), '/tables/', '${schema.tableName}')]`,
     ],
     properties: {
-      dataCollectionEndpointId: "[concat('/subscriptions/', parameters('subscription'), '/resourceGroups/', parameters('resourceGroupName'), '/providers/Microsoft.Insights/dataCollectionEndpoints/', parameters('workspace'))]",
+      dataCollectionEndpointId: `[concat(subscription().id, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Insights/dataCollectionEndpoints/', split(parameters('workspace'), '/')[8], '-dce')]`,
       streamDeclarations: {
         [dataFlow.streamName]: {
           columns: inputColumns.map(col => ({

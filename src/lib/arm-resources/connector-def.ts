@@ -11,9 +11,10 @@ export function generateConnectorDefinition(
   return {
     type: "Microsoft.SecurityInsights/dataConnectorDefinitions",
     apiVersion: "2022-09-01-preview",
-    name: `[concat(parameters('workspace'), '/Microsoft.SecurityInsights/${connectorDefName}')]`,
+    scope: "[parameters('workspace')]",
+    name: connectorDefName,
     dependsOn: [
-      `[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), '${schema.tableName}')]`,
+      `[concat(variables('workspaceResourceId'), '/tables/', '${schema.tableName}')]`,
     ],
     kind: "Customizable",
     properties: {

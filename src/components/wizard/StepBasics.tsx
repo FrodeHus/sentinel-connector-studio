@@ -1,6 +1,6 @@
 import * as React from "react"
 import { useConnectorConfig } from "@/hooks/useConnectorConfig"
-import { titleToConnectorId } from "@/lib/naming"
+import { titleToConnectorId, connectorIdToTableName, tableNameToStreamName } from "@/lib/naming"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -9,15 +9,31 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { HelpCircle } from "lucide-react"
 
 export function StepBasics() {
-  const { config, updateMeta } = useConnectorConfig()
-  const { meta } = config
+  const { config, updateMeta, updateSchema, updateDataFlow } = useConnectorConfig()
+  const { meta, schema, dataFlow } = config
   const [idManuallyEdited, setIdManuallyEdited] = React.useState(false)
 
   const handleTitleChange = (title: string) => {
+    const newConnectorId = titleToConnectorId(title)
+    const newTableName = connectorIdToTableName(newConnectorId)
+    const newStreamName = tableNameToStreamName(newTableName)
+
     if (!idManuallyEdited) {
-      updateMeta({ title, connectorId: titleToConnectorId(title) });
+      updateMeta({ title, connectorId: newConnectorId })
     } else {
-      updateMeta({ title });
+      updateMeta({ title })
+    }
+
+    // Auto-derive table name if empty or still matching the previous auto-derived value
+    const oldTableName = connectorIdToTableName(meta.connectorId)
+    if (!schema.tableName || schema.tableName === oldTableName) {
+      updateSchema({ tableName: newTableName })
+    }
+
+    // Auto-derive stream name if empty or still matching the previous auto-derived value
+    const oldStreamName = tableNameToStreamName(oldTableName)
+    if (!dataFlow.streamName || dataFlow.streamName === oldStreamName) {
+      updateDataFlow({ streamName: newStreamName })
     }
   };
 

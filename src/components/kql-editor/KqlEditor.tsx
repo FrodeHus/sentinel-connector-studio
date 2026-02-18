@@ -1,5 +1,5 @@
 import CodeMirror from "@uiw/react-codemirror"
-import { sql } from "@codemirror/lang-sql"
+import { kql } from "@/lib/codemirror-kql"
 import { Button } from "@/components/ui/button"
 
 const KQL_SNIPPETS = [
@@ -35,7 +35,7 @@ export function KqlEditor({ value, onChange }: KqlEditorProps) {
         <CodeMirror
           value={value}
           onChange={onChange}
-          extensions={[sql()]}
+          extensions={[kql()]}
           height="120px"
           basicSetup={{
             lineNumbers: true,

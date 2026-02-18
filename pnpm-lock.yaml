@@ -8,9 +8,9 @@ importers:
 
   .:
     dependencies:
-      '@codemirror/lang-sql':
-        specifier: ^6.8.0
-        version: 6.10.0
+      '@codemirror/language':
+        specifier: ^6.12.1
+        version: 6.12.1
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.1.18(vite@7.3.1(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0))
@@ -228,9 +228,6 @@ packages:
 
   '@codemirror/commands@6.10.2':
     resolution: {integrity: sha512-vvX1fsih9HledO1c9zdotZYUZnE4xV0m6i3m25s5DIfXofuprk6cRcLUZvSk3CASUbwjQX21tOGbkY2BH8TpnQ==}
-
-  '@codemirror/lang-sql@6.10.0':
-    resolution: {integrity: sha512-6ayPkEd/yRw0XKBx5uAiToSgGECo/GY2NoJIHXIIQh1EVwLuKoU8BP/qK0qH5NLXAbtJRLuT73hx7P9X34iO4w==}
 
   '@codemirror/language@6.12.1':
     resolution: {integrity: sha512-Fa6xkSiuGKc8XC8Cn96T+TQHYj4ZZ7RdFmXA3i9xe/3hLHfwPZdM+dqfX0Cp0zQklBKhVD8Yzc8LS45rkqcwpQ==}
@@ -2159,15 +2156,6 @@ snapshots:
       '@codemirror/state': 6.5.4
       '@codemirror/view': 6.39.14
       '@lezer/common': 1.5.1
-
-  '@codemirror/lang-sql@6.10.0':
-    dependencies:
-      '@codemirror/autocomplete': 6.20.0
-      '@codemirror/language': 6.12.1
-      '@codemirror/state': 6.5.4
-      '@lezer/common': 1.5.1
-      '@lezer/highlight': 1.2.3
-      '@lezer/lr': 1.4.8
 
   '@codemirror/language@6.12.1':
     dependencies:

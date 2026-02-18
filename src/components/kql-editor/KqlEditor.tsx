@@ -1,5 +1,7 @@
+import * as React from "react"
 import CodeMirror from "@uiw/react-codemirror"
 import { kql } from "@/lib/codemirror-kql"
+import { useTheme } from "@/hooks/useTheme"
 import { Button } from "@/components/ui/button"
 
 const KQL_SNIPPETS = [
@@ -14,6 +16,9 @@ interface KqlEditorProps {
 }
 
 export function KqlEditor({ value, onChange }: KqlEditorProps) {
+  const { theme } = useTheme()
+  const extensions = React.useMemo(() => kql(theme), [theme])
+
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap gap-2">
@@ -35,7 +40,8 @@ export function KqlEditor({ value, onChange }: KqlEditorProps) {
         <CodeMirror
           value={value}
           onChange={onChange}
-          extensions={[kql()]}
+          theme={theme}
+          extensions={extensions}
           height="120px"
           basicSetup={{
             lineNumbers: true,

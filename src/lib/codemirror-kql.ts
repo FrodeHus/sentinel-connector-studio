@@ -1,5 +1,13 @@
-import { StreamLanguage, type StringStream, type StreamParser } from "@codemirror/language"
+import {
+  StreamLanguage,
+  HighlightStyle,
+  syntaxHighlighting,
+  type StringStream,
+  type StreamParser,
+} from "@codemirror/language"
 import { LanguageSupport } from "@codemirror/language"
+import { tags } from "@lezer/highlight"
+import type { Extension } from "@codemirror/state"
 
 // Tabular operators supported in DCR transformations
 const OPERATORS = new Set([
@@ -117,14 +125,6 @@ const kqlParser: StreamParser<{ inString: false | "'" | '"' }> = {
       return "number"
     }
 
-    // Timespan literals like 1d, 2h, 30m, 15s
-    if (/\d/.test(ch)) {
-      stream.match(/^\d+[dhms]/)
-      return "number"
-    }
-
-    // datetime(...) literal content is handled as a function call
-
     // Identifiers and keywords
     if (/[a-zA-Z_]/.test(ch)) {
       stream.match(/^[a-zA-Z_][\w-]*/)
@@ -133,12 +133,7 @@ const kqlParser: StreamParser<{ inString: false | "'" | '"' }> = {
       if (OPERATORS.has(word)) return "keyword"
       if (KEYWORDS.has(word)) return "keyword"
       if (TYPES.has(word)) return "typeName"
-      if (FUNCTIONS.has(word)) {
-        // Check if followed by ( to confirm it's a function call
-        if (stream.peek() === "(") return "keyword"
-        // Still highlight known functions even without parens
-        return "keyword"
-      }
+      if (FUNCTIONS.has(word)) return "keyword"
 
       return "variableName"
     }
@@ -162,6 +157,34 @@ const kqlParser: StreamParser<{ inString: false | "'" | '"' }> = {
 
 const kqlStreamLanguage = StreamLanguage.define(kqlParser)
 
-export function kql(): LanguageSupport {
-  return new LanguageSupport(kqlStreamLanguage)
+// ── Light theme highlight style ──────────────────────
+const kqlLightHighlight = HighlightStyle.define([
+  { tag: tags.keyword, color: "#7c3aed" },
+  { tag: tags.string, color: "#059669" },
+  { tag: tags.number, color: "#b45309" },
+  { tag: tags.comment, color: "#6b7280", fontStyle: "italic" },
+  { tag: tags.operator, color: "#be185d" },
+  { tag: tags.punctuation, color: "#6b6784" },
+  { tag: tags.typeName, color: "#0369a1" },
+  { tag: tags.variableName, color: "#0f0b24" },
+])
+
+// ── Dark theme highlight style ───────────────────────
+const kqlDarkHighlight = HighlightStyle.define([
+  { tag: tags.keyword, color: "#c4b5fd" },
+  { tag: tags.string, color: "#34d399" },
+  { tag: tags.number, color: "#fbbf24" },
+  { tag: tags.comment, color: "#8f8ba3", fontStyle: "italic" },
+  { tag: tags.operator, color: "#f0abfc" },
+  { tag: tags.punctuation, color: "#8f8ba3" },
+  { tag: tags.typeName, color: "#67e8f9" },
+  { tag: tags.variableName, color: "#f0eeff" },
+])
+
+export function kql(variant: "light" | "dark" = "light"): Extension[] {
+  const highlight = variant === "dark" ? kqlDarkHighlight : kqlLightHighlight
+  return [
+    new LanguageSupport(kqlStreamLanguage),
+    syntaxHighlighting(highlight),
+  ]
 }

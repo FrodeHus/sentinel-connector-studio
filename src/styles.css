@@ -227,26 +227,6 @@ body {
   background-color: rgba(139, 92, 246, 0.15) !important;
 }
 
-/* ── CodeMirror KQL syntax — light mode ───────────── */
-:root .cm-editor .tok-keyword { color: #7c3aed; }
-:root .cm-editor .tok-string { color: #059669; }
-:root .cm-editor .tok-number { color: #b45309; }
-:root .cm-editor .tok-comment { color: #6b7280; font-style: italic; }
-:root .cm-editor .tok-operator { color: #be185d; }
-:root .cm-editor .tok-punctuation { color: #6b6784; }
-:root .cm-editor .tok-typeName { color: #0369a1; }
-:root .cm-editor .tok-variableName { color: #0f0b24; }
-
-/* ── CodeMirror KQL syntax — dark mode ────────────── */
-.dark .cm-editor .tok-keyword { color: #c4b5fd; }
-.dark .cm-editor .tok-string { color: #34d399; }
-.dark .cm-editor .tok-number { color: #fbbf24; }
-.dark .cm-editor .tok-comment { color: #8f8ba3; font-style: italic; }
-.dark .cm-editor .tok-operator { color: #f0abfc; }
-.dark .cm-editor .tok-punctuation { color: #8f8ba3; }
-.dark .cm-editor .tok-typeName { color: #67e8f9; }
-.dark .cm-editor .tok-variableName { color: #f0eeff; }
-
 /* ── JSON syntax highlighting ─────────────────────── */
 .json-key { color: #7c3aed; }
 .json-string { color: #059669; }

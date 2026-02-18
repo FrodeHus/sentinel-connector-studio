@@ -85,14 +85,22 @@ export function ConnectorWizard() {
     setVisitedSteps(prev => new Set(prev).add(index))
   }
 
-  const currentStepIsValid = steps[currentStep].isValid
+  const handleReset = () => {
+    if (confirm("Reset all configuration and start fresh?")) {
+      reset();
+    }
+  };
+
+  const currentStepIsValid = steps[currentStep].isValid;
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
       {/* Resume banner */}
       {hasSavedConfig && (
         <div className="shrink-0 bg-primary/10 border-b border-primary/30 px-6 py-3 flex items-center justify-between backdrop-blur-sm">
-          <p className="text-sm font-medium">You have unsaved progress from a previous session.</p>
+          <p className="text-sm font-medium">
+            You have unsaved progress from a previous session.
+          </p>
           <div className="flex gap-2">
             <Button size="sm" onClick={resumeSavedConfig}>
               Resume
@@ -112,7 +120,8 @@ export function ConnectorWizard() {
               Sentinel CCF Push Connector Builder
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Build Microsoft Sentinel Codeless Connector Framework (CCF) push connectors
+              Build Microsoft Sentinel Codeless Connector Framework (CCF) push
+              connectors
             </p>
           </div>
           <div className="flex gap-2">
@@ -120,31 +129,37 @@ export function ConnectorWizard() {
               variant="ghost"
               size="icon"
               onClick={toggleTheme}
-              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              title={
+                theme === "dark"
+                  ? "Switch to light mode"
+                  : "Switch to dark mode"
+              }
             >
-              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4" />
+              ) : (
+                <Moon className="w-4 h-4" />
+              )}
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                if (confirm("Reset all configuration and start fresh?")) {
-                  reset()
-                }
-              }}
-            >
+            <Button variant="ghost" size="sm" onClick={handleReset}>
               <RotateCcw className="w-4 h-4 mr-1.5" /> Reset
             </Button>
           </div>
         </div>
-        <Stepper steps={steps} currentStep={currentStep} onStepClick={handleStepClick} />
+        <Stepper
+          steps={steps}
+          currentStep={currentStep}
+          onStepClick={handleStepClick}
+        />
       </header>
 
       {/* Main content */}
       <div className="flex-1 overflow-hidden">
         <div className="h-full flex">
           {/* Form panel */}
-          <div className={`${showPreview ? "w-full lg:w-3/5" : "w-full"} overflow-auto p-6 transition-all`}>
+          <div
+            className={`${showPreview ? "w-full lg:w-3/5" : "w-full"} overflow-auto p-6 transition-all`}
+          >
             <div className="max-w-3xl mx-auto">
               {currentStep === 0 && <StepBasics />}
               {currentStep === 1 && <StepSchema />}
@@ -155,7 +170,9 @@ export function ConnectorWizard() {
           </div>
 
           {/* Preview panel */}
-          <div className={`${showPreview ? "w-2/5 border-l border-border/50" : "w-0"} hidden lg:block overflow-auto p-6 bg-card/30 backdrop-blur-sm transition-all`}>
+          <div
+            className={`${showPreview ? "w-2/5 border-l border-border/50" : "w-0"} hidden lg:block overflow-auto p-6 bg-card/30 backdrop-blur-sm transition-all`}
+          >
             {showPreview && <ArmTemplatePreview />}
           </div>
         </div>
@@ -164,11 +181,18 @@ export function ConnectorWizard() {
       {/* Mobile preview drawer */}
       {mobilePreview && (
         <div className="lg:hidden fixed inset-0 z-50 flex flex-col">
-          <div className="flex-1 bg-black/80 backdrop-blur-sm" onClick={() => setMobilePreview(false)} />
+          <div
+            className="flex-1 bg-black/80 backdrop-blur-sm"
+            onClick={() => setMobilePreview(false)}
+          />
           <div className="h-[60vh] glass-card bg-card border-t border-border/50 overflow-auto p-4 rounded-t-3xl">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-lg">ARM Template Preview</h3>
-              <Button variant="ghost" size="sm" onClick={() => setMobilePreview(false)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setMobilePreview(false)}
+              >
                 Close
               </Button>
             </div>
@@ -205,16 +229,17 @@ export function ConnectorWizard() {
               size="sm"
               onClick={() => setShowPreview(!showPreview)}
             >
-              {showPreview ? <EyeOff className="w-4 h-4 mr-1.5" /> : <Eye className="w-4 h-4 mr-1.5" />}
+              {showPreview ? (
+                <EyeOff className="w-4 h-4 mr-1.5" />
+              ) : (
+                <Eye className="w-4 h-4 mr-1.5" />
+              )}
               {showPreview ? "Hide" : "Show"} Preview
             </Button>
           </div>
 
           {currentStep < steps.length - 1 ? (
-            <Button
-              onClick={handleNext}
-              disabled={!currentStepIsValid}
-            >
+            <Button onClick={handleNext} disabled={!currentStepIsValid}>
               Next <ChevronRight className="w-4 h-4 ml-1.5" />
             </Button>
           ) : (
@@ -225,5 +250,5 @@ export function ConnectorWizard() {
         </div>
       </footer>
     </div>
-  )
+  );
 }

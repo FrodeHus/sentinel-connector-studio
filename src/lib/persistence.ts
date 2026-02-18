@@ -5,31 +5,33 @@ const STORAGE_KEY = "sentinel-ccf-builder-config"
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 export function saveConfig(config: ConnectorConfig): void {
-  if (debounceTimer) clearTimeout(debounceTimer)
+  if (debounceTimer) clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(config))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
     } catch {
-      // localStorage might be full or unavailable
+      // localStorage may be unavailable (private browsing) or full — config is still
+      // held in memory for the current session, so the user can still export.
     }
-  }, 500)
+  }, 500);
 }
 
 export function loadConfig(): ConnectorConfig | null {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (!stored) return null
-    return JSON.parse(stored) as ConnectorConfig
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return null;
+    return JSON.parse(stored) as ConnectorConfig;
   } catch {
-    return null
+    // JSON.parse throws if the stored value is corrupt; treat as no saved config.
+    return null;
   }
 }
 
 export function clearConfig(): void {
   try {
-    localStorage.removeItem(STORAGE_KEY)
+    localStorage.removeItem(STORAGE_KEY);
   } catch {
-    // ignore
+    // localStorage unavailable in this context — no-op, nothing to clear.
   }
 }
 

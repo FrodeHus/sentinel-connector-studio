@@ -14,13 +14,12 @@ export function StepBasics() {
   const [idManuallyEdited, setIdManuallyEdited] = React.useState(false)
 
   const handleTitleChange = (title: string) => {
-    updateMeta({ title })
     if (!idManuallyEdited) {
-      updateMeta({ title, connectorId: titleToConnectorId(title) })
+      updateMeta({ title, connectorId: titleToConnectorId(title) });
     } else {
-      updateMeta({ title })
+      updateMeta({ title });
     }
-  }
+  };
 
   return (
     <div className="space-y-6">

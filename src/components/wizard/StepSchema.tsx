@@ -15,15 +15,30 @@ export function StepSchema() {
   const { schema } = config
   const [pasteDialogOpen, setPasteDialogOpen] = React.useState(false)
 
-  const handleApplyInferred = (columns: Column[]) => {
-    const timeGenerated = schema.columns.find(c => c.name === "TimeGenerated")
-    updateSchema({
-      columns: [
-        timeGenerated || { name: "TimeGenerated", type: "datetime" as const },
-        ...columns,
-      ],
-    })
-  }
+  const handleColumnsChange = React.useCallback(
+    (columns: Column[]) => updateSchema({ columns }),
+    [updateSchema],
+  );
+
+  const handleOpenPasteDialog = React.useCallback(
+    () => setPasteDialogOpen(true),
+    [],
+  );
+
+  const handleApplyInferred = React.useCallback(
+    (columns: Column[]) => {
+      const timeGenerated = schema.columns.find(
+        (c) => c.name === "TimeGenerated",
+      );
+      updateSchema({
+        columns: [
+          timeGenerated || { name: "TimeGenerated", type: "datetime" as const },
+          ...columns,
+        ],
+      });
+    },
+    [schema.columns, updateSchema],
+  );
 
   return (
     <div className="space-y-6">
@@ -31,7 +46,8 @@ export function StepSchema() {
         <CardHeader>
           <CardTitle>Table Schema</CardTitle>
           <CardDescription>
-            Define the custom Log Analytics table where ingested data will be stored.
+            Define the custom Log Analytics table where ingested data will be
+            stored.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -41,10 +57,12 @@ export function StepSchema() {
               id="tableName"
               placeholder="e.g., ContosoSecurityAlerts_CL"
               value={schema.tableName}
-              onChange={e => updateSchema({ tableName: e.target.value })}
+              onChange={(e) => updateSchema({ tableName: e.target.value })}
             />
             {schema.tableName && !schema.tableName.endsWith("_CL") && (
-              <p className="text-xs text-destructive">Table name must end with _CL</p>
+              <p className="text-xs text-destructive">
+                Table name must end with _CL
+              </p>
             )}
             <p className="text-xs text-muted-foreground">
               Custom tables in Log Analytics must end with &quot;_CL&quot;.
@@ -53,18 +71,14 @@ export function StepSchema() {
 
           <div className="flex items-center justify-between">
             <Label>Columns</Label>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPasteDialogOpen(true)}
-            >
+            <Button variant="outline" size="sm" onClick={handleOpenPasteDialog}>
               <ClipboardPaste className="w-4 h-4 mr-1" /> Paste sample event
             </Button>
           </div>
 
           <SchemaEditor
             columns={schema.columns}
-            onChange={columns => updateSchema({ columns })}
+            onChange={handleColumnsChange}
           />
         </CardContent>
       </Card>
@@ -77,9 +91,21 @@ export function StepSchema() {
         <CollapsibleContent>
           <Card className="mt-2">
             <CardContent className="pt-4 text-sm text-muted-foreground space-y-2">
-              <p>This table is where your data lands in Log Analytics. Think of columns as the fields in your events.</p>
-              <p><strong>Tip:</strong> Paste a sample JSON event from your application to auto-generate the schema.</p>
-              <p>Column types: <strong>string</strong> (text), <strong>long</strong> (integer), <strong>real</strong> (decimal), <strong>bool</strong> (true/false), <strong>datetime</strong> (timestamp), <strong>dynamic</strong> (JSON object/array), <strong>guid</strong> (UUID).</p>
+              <p>
+                This table is where your data lands in Log Analytics. Think of
+                columns as the fields in your events.
+              </p>
+              <p>
+                <strong>Tip:</strong> Paste a sample JSON event from your
+                application to auto-generate the schema.
+              </p>
+              <p>
+                Column types: <strong>string</strong> (text),{" "}
+                <strong>long</strong> (integer), <strong>real</strong>{" "}
+                (decimal), <strong>bool</strong> (true/false),{" "}
+                <strong>datetime</strong> (timestamp), <strong>dynamic</strong>{" "}
+                (JSON object/array), <strong>guid</strong> (UUID).
+              </p>
             </CardContent>
           </Card>
         </CollapsibleContent>
@@ -91,5 +117,5 @@ export function StepSchema() {
         onApply={handleApplyInferred}
       />
     </div>
-  )
+  );
 }

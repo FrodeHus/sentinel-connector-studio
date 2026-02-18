@@ -97,24 +97,30 @@ export const SolutionSchema = z.object({
   publisherId: z.string().default(""),
   offerId: z.string().default(""),
   version: z.string().default("1.0.0"),
-  categories: z.object({
-    domains: z.array(z.string()).default(["Security - Threat Protection"]),
-    verticals: z.array(z.string()).default([]),
-  }).default({
-    domains: ["Security - Threat Protection"],
-    verticals: [],
-  }),
-  support: z.object({
-    name: z.string().default(""),
-    tier: z.enum(["Microsoft", "Partner", "Community"]).default("Partner"),
-    link: z.string().default(""),
-  }).default({
-    name: "",
-    tier: "Partner",
-    link: "",
-  }),
+  categories: z
+    .object({
+      domains: z.array(z.string()).default(["Security - Threat Protection"]),
+      verticals: z.array(z.string()).default([]),
+    })
+    .default({
+      domains: ["Security - Threat Protection"],
+      verticals: [],
+    }),
+  support: z
+    .object({
+      name: z.string().default(""),
+      email: z.string().default(""),
+      tier: z.enum(["Microsoft", "Partner", "Community"]).default("Partner"),
+      link: z.string().default(""),
+    })
+    .default({
+      name: "",
+      email: "",
+      tier: "Partner",
+      link: "",
+    }),
   firstPublishDate: z.string().default(new Date().toISOString().split("T")[0]),
-})
+});
 
 export const ConnectorConfigSchema = z.object({
   meta: MetaSchema.default({}),

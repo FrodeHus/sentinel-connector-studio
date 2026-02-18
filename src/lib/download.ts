@@ -77,7 +77,7 @@ export async function downloadSolutionZip(config: ConnectorConfig) {
   const dataFolder = root.folder("Data")!;
   const solutionDataFile = {
     Name: connectorName,
-    Author: `${meta.publisher} - ${solution.support.link}`,
+    Author: `${meta.publisher} - ${solution.support.email}`,
     Logo: meta.logo ?? "",
     Description: meta.descriptionMarkdown,
     "Data Connectors": [

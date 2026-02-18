@@ -75,6 +75,14 @@ export function ArmTemplatePreview() {
     }
   };
 
+  const handleTabClick = React.useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      const tab = e.currentTarget.dataset.tab as FileTab
+      setActiveTab(tab)
+    },
+    []
+  )
+
   return (
     <Card className="h-full flex flex-col border-t-2 border-t-primary/50 shadow-lg">
       <CardHeader className="pb-3 shrink-0 border-b border-border/30">
@@ -100,7 +108,8 @@ export function ArmTemplatePreview() {
           {FILE_TABS.map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              data-tab={tab}
+              onClick={handleTabClick}
               className={`px-2 py-1 text-xs rounded font-mono transition-colors ${
                 activeTab === tab
                   ? "bg-primary text-primary-foreground"
@@ -113,7 +122,7 @@ export function ArmTemplatePreview() {
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden p-0 pb-5 px-5 pt-4">
-        <div className="h-full rounded-lg border border-border/50 bg-[rgba(15,11,36,0.3)] overflow-auto">
+        <div className="h-full rounded-lg border border-border/50 bg-card/30 overflow-auto">
           <pre className="p-4 text-xs font-mono leading-relaxed">
             <code>{content[activeTab]}</code>
           </pre>

@@ -116,7 +116,25 @@ export function StepExport() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="supportLink">Support Link *</Label>
+            <Label htmlFor="supportEmail">Support Email *</Label>
+            <Input
+              id="supportEmail"
+              type="email"
+              placeholder="support@contoso.com"
+              value={solution.support.email}
+              onChange={(e) =>
+                updateSolution({
+                  support: { ...solution.support, email: e.target.value },
+                })
+              }
+            />
+            <p className="text-xs text-muted-foreground">
+              Used in the solution Author field for Content Hub.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="supportLink">Support Link</Label>
             <Input
               id="supportLink"
               placeholder="https://support.contoso.com"

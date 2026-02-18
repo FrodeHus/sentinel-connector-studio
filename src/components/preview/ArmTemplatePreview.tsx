@@ -9,6 +9,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Copy, Check } from "lucide-react";
 
+function highlightJson(json: string): string {
+  return json.replace(
+    /("(?:\\.|[^"\\])*")\s*:|("(?:\\.|[^"\\])*")|(\b(?:true|false)\b)|(\bnull\b)|(-?\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b)/g,
+    (match, key, str, bool, nil, num) => {
+      if (key) return `<span class="json-key">${key}</span>:`
+      if (str) return `<span class="json-string">${str}</span>`
+      if (bool) return `<span class="json-bool">${bool}</span>`
+      if (nil) return `<span class="json-null">${nil}</span>`
+      if (num) return `<span class="json-number">${num}</span>`
+      return match
+    }
+  )
+}
+
 const FILE_TABS = [
   "table.json",
   "DCR.json",
@@ -124,7 +138,7 @@ export function ArmTemplatePreview() {
       <CardContent className="flex-1 overflow-hidden p-0 pb-5 px-5 pt-4">
         <div className="h-full rounded-lg border border-border/50 bg-card/30 overflow-auto">
           <pre className="p-4 text-xs font-mono leading-relaxed">
-            <code>{content[activeTab]}</code>
+            <code dangerouslySetInnerHTML={{ __html: highlightJson(content[activeTab]) }} />
           </pre>
         </div>
       </CardContent>

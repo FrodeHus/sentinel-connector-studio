@@ -226,3 +226,16 @@ body {
 :root .cm-editor .cm-selectionBackground {
   background-color: rgba(139, 92, 246, 0.15) !important;
 }
+
+/* ── JSON syntax highlighting ─────────────────────── */
+.json-key { color: #7c3aed; }
+.json-string { color: #059669; }
+.json-number { color: #d97706; }
+.json-bool { color: #2563eb; }
+.json-null { color: #6b7280; font-style: italic; }
+
+.dark .json-key { color: #a78bfa; }
+.dark .json-string { color: #34d399; }
+.dark .json-number { color: #fbbf24; }
+.dark .json-bool { color: #60a5fa; }
+.dark .json-null { color: #8f8ba3; font-style: italic; }

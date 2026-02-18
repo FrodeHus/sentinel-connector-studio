@@ -18,7 +18,7 @@ export function generateDcrResource(
     type: "Microsoft.Insights/dataCollectionRules",
     location: "[parameters('workspace-location')]",
     properties: {
-      dataCollectionEndpointId: `[concat(subscription().id, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Insights/dataCollectionEndpoints/', split(parameters('workspace'), '/')[8], '-dce')]`,
+      dataCollectionEndpointId: `[concat(subscription().id, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Insights/dataCollectionEndpoints/', parameters('workspace'), '-dce')]`,
       streamDeclarations: {
         [dataFlow.streamName]: {
           columns: inputColumns.map((col) => ({

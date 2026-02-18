@@ -26,17 +26,23 @@ function createDefaultConfig(): ConnectorConfig {
 export function ConnectorConfigProvider({ children }: { children: React.ReactNode }) {
   const [hasSavedConfig, setHasSavedConfig] = React.useState(false)
   const [config, setConfig] = React.useState<ConnectorConfig>(createDefaultConfig)
+  const savedConfigRef = React.useRef<ConnectorConfig | null>(null)
 
   React.useEffect(() => {
     const saved = loadConfig()
     if (saved) {
+      savedConfigRef.current = saved
       setHasSavedConfig(true)
     }
   }, [])
 
+  // Don't auto-save while the resume banner is showing — that would overwrite
+  // the previously saved config with the fresh defaults before the user decides.
   React.useEffect(() => {
-    saveConfig(config)
-  }, [config])
+    if (!hasSavedConfig) {
+      saveConfig(config)
+    }
+  }, [config, hasSavedConfig])
 
   const updateConfig = React.useCallback((updater: (prev: ConnectorConfig) => ConnectorConfig) => {
     setConfig(updater)
@@ -73,9 +79,9 @@ export function ConnectorConfigProvider({ children }: { children: React.ReactNod
   }, [])
 
   const resumeSavedConfig = React.useCallback(() => {
-    const saved = loadConfig()
-    if (saved) {
-      setConfig(saved)
+    if (savedConfigRef.current) {
+      setConfig(savedConfigRef.current)
+      savedConfigRef.current = null
     }
     setHasSavedConfig(false)
   }, [])

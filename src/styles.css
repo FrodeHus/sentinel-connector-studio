@@ -239,3 +239,13 @@ body {
 .dark .json-number { color: #fbbf24; }
 .dark .json-bool { color: #60a5fa; }
 .dark .json-null { color: #8f8ba3; font-style: italic; }
+
+/* ── CodeMirror lint overrides ─────────────────────── */
+.cm-editor .cm-lintRange-warning {
+  background-image: none;
+  text-decoration: underline wavy #d97706;
+  text-underline-offset: 3px;
+}
+.dark .cm-editor .cm-lintRange-warning {
+  text-decoration: underline wavy #fbbf24;
+}

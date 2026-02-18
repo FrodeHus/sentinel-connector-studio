@@ -1,17 +1,27 @@
 import * as React from "react"
 import { useConnectorConfig } from "@/hooks/useConnectorConfig"
-import { downloadArmTemplate, downloadSolutionZip, downloadIndividualFile } from "@/lib/download"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Download, FileJson, FolderArchive, ChevronDown, HelpCircle } from "lucide-react"
+import { downloadSolutionZip, downloadIndividualFile } from "@/lib/download";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Download, FolderArchive, ChevronDown, HelpCircle } from "lucide-react";
 
 export function StepExport() {
-  const { config, updateSolution } = useConnectorConfig()
-  const { solution } = config
-  const [expanded, setExpanded] = React.useState(false)
+  const { config, updateSolution } = useConnectorConfig();
+  const { solution } = config;
+  const [expanded, setExpanded] = React.useState(false);
 
   return (
     <div className="space-y-6">
@@ -30,7 +40,9 @@ export function StepExport() {
                 id="publisherId"
                 placeholder="contoso"
                 value={solution.publisherId}
-                onChange={e => updateSolution({ publisherId: e.target.value.toLowerCase() })}
+                onChange={(e) =>
+                  updateSolution({ publisherId: e.target.value.toLowerCase() })
+                }
               />
               <p className="text-xs text-muted-foreground">
                 Lowercase, no spaces. Used in Content Hub.
@@ -43,7 +55,9 @@ export function StepExport() {
                 id="offerId"
                 placeholder="contoso-security-alerts"
                 value={solution.offerId}
-                onChange={e => updateSolution({ offerId: e.target.value.toLowerCase() })}
+                onChange={(e) =>
+                  updateSolution({ offerId: e.target.value.toLowerCase() })
+                }
               />
               <p className="text-xs text-muted-foreground">
                 Lowercase with hyphens. Globally unique.
@@ -58,7 +72,7 @@ export function StepExport() {
                 id="version"
                 placeholder="1.0.0"
                 value={solution.version}
-                onChange={e => updateSolution({ version: e.target.value })}
+                onChange={(e) => updateSolution({ version: e.target.value })}
               />
             </div>
 
@@ -67,9 +81,17 @@ export function StepExport() {
               <select
                 id="supportTier"
                 value={solution.support.tier}
-                onChange={e => updateSolution({
-                  support: { ...solution.support, tier: e.target.value as "Microsoft" | "Partner" | "Community" }
-                })}
+                onChange={(e) =>
+                  updateSolution({
+                    support: {
+                      ...solution.support,
+                      tier: e.target.value as
+                        | "Microsoft"
+                        | "Partner"
+                        | "Community",
+                    },
+                  })
+                }
                 className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <option value="Microsoft">Microsoft</option>
@@ -85,9 +107,11 @@ export function StepExport() {
               id="supportName"
               placeholder="Contoso Support"
               value={solution.support.name}
-              onChange={e => updateSolution({
-                support: { ...solution.support, name: e.target.value }
-              })}
+              onChange={(e) =>
+                updateSolution({
+                  support: { ...solution.support, name: e.target.value },
+                })
+              }
             />
           </div>
 
@@ -97,9 +121,11 @@ export function StepExport() {
               id="supportLink"
               placeholder="https://support.contoso.com"
               value={solution.support.link}
-              onChange={e => updateSolution({
-                support: { ...solution.support, link: e.target.value }
-              })}
+              onChange={(e) =>
+                updateSolution({
+                  support: { ...solution.support, link: e.target.value },
+                })
+              }
             />
           </div>
         </CardContent>
@@ -109,25 +135,13 @@ export function StepExport() {
         <CardHeader>
           <CardTitle>Download</CardTitle>
           <CardDescription>
-            Export your connector as an ARM template ready for deployment.
+            Export your connector files for packaging with the Azure-Sentinel
+            packaging tool.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <Button
-            onClick={() => downloadArmTemplate(config)}
-            className="w-full justify-start"
-            size="lg"
-          >
-            <FileJson className="w-5 h-5 mr-2" />
-            Download ARM Template
-          </Button>
-          <p className="text-xs text-muted-foreground">
-            Single JSON file ready for Azure Portal, CLI, or PowerShell deployment.
-          </p>
-
-          <Button
             onClick={() => downloadSolutionZip(config)}
-            variant="outline"
             className="w-full justify-start"
             size="lg"
           >
@@ -135,12 +149,17 @@ export function StepExport() {
             Download Solution Package (ZIP)
           </Button>
           <p className="text-xs text-muted-foreground">
-            Full folder structure for Azure-Sentinel packaging tool.
+            Full folder structure for the Azure-Sentinel{" "}
+            <code>createSolutionV3.ps1</code> packaging tool. Run the packaging
+            script after extracting to generate the deployable{" "}
+            <code>mainTemplate.json</code>.
           </p>
 
           <Collapsible open={expanded} onOpenChange={setExpanded}>
             <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-2 cursor-pointer">
-              <ChevronDown className={`w-4 h-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${expanded ? "rotate-180" : ""}`}
+              />
               Download individual files
             </CollapsibleTrigger>
             <CollapsibleContent>
@@ -176,7 +195,9 @@ export function StepExport() {
                   variant="ghost"
                   size="sm"
                   className="justify-start"
-                  onClick={() => downloadIndividualFile("dataConnector", config)}
+                  onClick={() =>
+                    downloadIndividualFile("dataConnector", config)
+                  }
                 >
                   <Download className="w-3.5 h-3.5 mr-2" />
                   dataConnector.json
@@ -193,33 +214,87 @@ export function StepExport() {
         </CardHeader>
         <CardContent className="space-y-4 text-sm text-muted-foreground">
           <div>
-            <h4 className="font-medium text-foreground mb-2">Deploy via Azure Portal</h4>
+            <h4 className="font-medium text-foreground mb-2">
+              1. Clone the Azure-Sentinel repository
+            </h4>
+            <pre className="bg-muted p-3 rounded-md text-xs font-mono overflow-x-auto">
+              {`git clone https://github.com/<YOUR_FORK>/Azure-Sentinel.git`}
+            </pre>
+          </div>
+
+          <div>
+            <h4 className="font-medium text-foreground mb-2">
+              2. Extract the ZIP into Solutions/
+            </h4>
+            <p>
+              Extract the downloaded ZIP so that your connector folder is placed
+              at:
+            </p>
+            <pre className="bg-muted p-3 rounded-md text-xs font-mono overflow-x-auto mt-1">
+              {`Azure-Sentinel/Solutions/<ConnectorName>/`}
+            </pre>
+            <p className="mt-1">
+              Update <code>BasePath</code> in <code>Data/Solution_*.json</code>{" "}
+              to point to your local path.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-medium text-foreground mb-2">
+              3. Run the packaging script
+            </h4>
+            <pre className="bg-muted p-3 rounded-md text-xs font-mono overflow-x-auto">
+              {`cd Tools/Create-Azure-Sentinel-Solution/V3\n.\\createSolutionV3.ps1`}
+            </pre>
+            <p className="mt-1">
+              When prompted, enter the absolute path to your <code>Data/</code>{" "}
+              folder. The script generates{" "}
+              <code>Package/mainTemplate.json</code>.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-medium text-foreground mb-2">
+              4. Deploy via Azure Portal
+            </h4>
             <ol className="list-decimal list-inside space-y-1">
-              <li>Navigate to <a href="https://portal.azure.com/#create/Microsoft.Template" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Deploy a custom template</a></li>
+              <li>
+                Navigate to{" "}
+                <a
+                  href="https://portal.azure.com/#create/Microsoft.Template"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Deploy a custom template
+                </a>
+              </li>
               <li>Click &quot;Build your own template in the editor&quot;</li>
-              <li>Upload mainTemplate.json</li>
+              <li>
+                Upload the generated <code>Package/mainTemplate.json</code>
+              </li>
               <li>Select your subscription, resource group, and workspace</li>
               <li>Review and create</li>
             </ol>
           </div>
 
           <div>
-            <h4 className="font-medium text-foreground mb-2">Deploy via Azure CLI</h4>
-            <pre className="bg-muted p-3 rounded-md text-xs font-mono overflow-x-auto">
-              {`az deployment group create \\
-  --resource-group <your-resource-group> \\
-  --template-file mainTemplate.json \\
-  --parameters workspace=<workspace-name> workspace-location=<location>`}
-            </pre>
-          </div>
-
-          <div>
-            <h4 className="font-medium text-foreground mb-2">After Deployment</h4>
+            <h4 className="font-medium text-foreground mb-2">
+              5. Enable the connector in Sentinel
+            </h4>
             <ul className="list-disc list-inside space-y-1">
               <li>Find your connector in Sentinel Data Connectors gallery</li>
-              <li>Click &quot;Deploy&quot; button to provision the push endpoint</li>
-              <li>Copy the connection credentials from the connector page</li>
-              <li>Configure your application to send data to the ingestion endpoint</li>
+              <li>
+                Click &quot;Deploy&quot; to provision the push endpoint and
+                Entra app
+              </li>
+              <li>
+                Copy the connection credentials shown on the connector page
+              </li>
+              <li>
+                Configure your application to send data to the ingestion
+                endpoint
+              </li>
             </ul>
           </div>
         </CardContent>
@@ -233,13 +308,25 @@ export function StepExport() {
         <CollapsibleContent>
           <Card className="mt-2">
             <CardContent className="pt-4 text-sm text-muted-foreground space-y-2">
-              <p>This final step packages your connector for deployment to Azure.</p>
-              <p>The <strong>ARM template</strong> contains all resources needed to deploy your connector to Sentinel.</p>
-              <p>The <strong>solution package</strong> is the full folder structure used by Microsoft&apos;s packaging tools for Content Hub distribution.</p>
+              <p>
+                This final step packages your connector for deployment to Azure.
+              </p>
+              <p>
+                The <strong>solution package (ZIP)</strong> contains the
+                individual resource files (<code>table.json</code>,{" "}
+                <code>DCR.json</code>, <code>connectorDefinition.json</code>,{" "}
+                <code>dataConnector.json</code>) and solution metadata needed by
+                the Azure-Sentinel packaging tool.
+              </p>
+              <p>
+                Run <code>createSolutionV3.ps1</code> from the Azure-Sentinel
+                repository to generate the deployable{" "}
+                <code>mainTemplate.json</code> from these files.
+              </p>
             </CardContent>
           </Card>
         </CollapsibleContent>
       </Collapsible>
     </div>
-  )
+  );
 }

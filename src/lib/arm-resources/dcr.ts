@@ -13,9 +13,9 @@ export function generateDcrResource(
   const outputStreamName = tableNameToOutputStreamName(schema.tableName)
 
   return {
-    type: "Microsoft.Insights/dataCollectionRules",
-    apiVersion: "2023-03-11",
     name: dcrName,
+    apiVersion: "2021-09-01-preview",
+    type: "Microsoft.Insights/dataCollectionRules",
     location: "[parameters('workspace-location')]",
     properties: {
       dataCollectionEndpointId: `[concat(subscription().id, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Insights/dataCollectionEndpoints/', split(parameters('workspace'), '/')[8], '-dce')]`,
@@ -27,7 +27,6 @@ export function generateDcrResource(
           })),
         },
       },
-      dataSources: {},
       destinations: {
         logAnalytics: [
           {

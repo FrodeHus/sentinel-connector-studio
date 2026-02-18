@@ -69,21 +69,30 @@ export function generateDefaultPermissions() {
   }
 }
 
-export function generateDefaultInstructionSteps(_connectorId: string, _tableName: string, streamName: string): InstructionStep[] {
+export function generateDefaultInstructionSteps(
+  connectorId: string,
+  _tableName: string,
+  streamName: string,
+): InstructionStep[] {
   return [
     {
       title: "Deploy the Push Connector",
-      description: "Click the **Deploy to Azure** button below to deploy the required resources.",
+      description:
+        "Click the **Deploy to Azure** button below to deploy the required resources.",
       instructions: [
         {
           type: "DeployPushConnectorButton" as const,
-          parameters: {},
+          parameters: {
+            label: `Deploy ${connectorId} Push connector resources`,
+            applicationDisplayName: `${connectorId} Push Connector Application`,
+          },
         },
       ],
     },
     {
       title: "Configure Your Application",
-      description: "Use the following connection details to configure your application to send data to this connector.",
+      description:
+        "Use the following connection details to configure your application to send data to this connector.",
       instructions: [
         {
           type: "CopyableLabel" as const,
@@ -97,7 +106,7 @@ export function generateDefaultInstructionSteps(_connectorId: string, _tableName
           type: "CopyableLabel" as const,
           parameters: {
             label: "Application (Client) ID",
-            fillWith: ["AppRegistrationClientId"],
+            fillWith: ["ApplicationId"],
             isBlankValueEnabled: true,
           },
         },
@@ -105,7 +114,7 @@ export function generateDefaultInstructionSteps(_connectorId: string, _tableName
           type: "CopyableLabel" as const,
           parameters: {
             label: "Application Client Secret",
-            fillWith: ["AppRegistrationClientSecret"],
+            fillWith: ["ApplicationSecret"],
             isBlankValueEnabled: true,
           },
         },
@@ -135,7 +144,7 @@ export function generateDefaultInstructionSteps(_connectorId: string, _tableName
         },
       ],
     },
-  ]
+  ];
 }
 
 export function generateDefaultConnectorUI(connectorId: string, tableName: string, streamName: string, columns: Column[]): ConnectorUI {

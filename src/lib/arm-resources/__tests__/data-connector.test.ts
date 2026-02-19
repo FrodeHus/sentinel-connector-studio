@@ -1,4 +1,3 @@
-import { describe, it, expect } from "vitest"
 import { generateDataConnector } from "@/lib/arm-resources/data-connector"
 import {
   pushMeta,
@@ -14,6 +13,7 @@ import {
 
 describe("Push connector", () => {
   const result = generateDataConnector(pushMeta, testDataFlow)
+  const props = result.properties as Record<string, any>
 
   it("kind is Push", () => {
     expect(result.kind).toBe("Push")
@@ -24,24 +24,24 @@ describe("Push connector", () => {
   })
 
   it("connectorDefinitionName is TestConnectorPush", () => {
-    expect(result.properties.connectorDefinitionName).toBe("TestConnectorPush")
+    expect(props.connectorDefinitionName).toBe("TestConnectorPush")
   })
 
   it("dcrConfig.streamName matches testDataFlow.streamName", () => {
-    expect(result.properties.dcrConfig.streamName).toBe("Custom-TestConnector")
+    expect(props.dcrConfig.streamName).toBe("Custom-TestConnector")
   })
 
   it("dcrConfig uses [[parameters escape syntax for dataCollectionEndpoint and dataCollectionRuleImmutableId", () => {
-    expect(result.properties.dcrConfig.dataCollectionEndpoint).toBe(
+    expect(props.dcrConfig.dataCollectionEndpoint).toBe(
       "[[parameters('dcrConfig').dataCollectionEndpoint]",
     )
-    expect(result.properties.dcrConfig.dataCollectionRuleImmutableId).toBe(
+    expect(props.dcrConfig.dataCollectionRuleImmutableId).toBe(
       "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
     )
   })
 
   it("auth.type is Push with AppId and ServicePrincipalId ARM parameters", () => {
-    expect(result.properties.auth).toEqual({
+    expect(props.auth).toEqual({
       type: "Push",
       AppId: "[[parameters('auth').appId]",
       ServicePrincipalId: "[[parameters('auth').servicePrincipalId]",
@@ -49,11 +49,11 @@ describe("Push connector", () => {
   })
 
   it("request.RetryCount is 1", () => {
-    expect(result.properties.request.RetryCount).toBe(1)
+    expect(props.request.RetryCount).toBe(1)
   })
 
   it("response.eventsJsonPaths is ['$']", () => {
-    expect(result.properties.response.eventsJsonPaths).toEqual(["$"])
+    expect(props.response.eventsJsonPaths).toEqual(["$"])
   })
 })
 
@@ -173,7 +173,8 @@ describe("Pull connector — Paging", () => {
 
   it("NextPageToken includes pagingType, nextPageTokenJsonPath, nextPageParaName", () => {
     const result = generateDataConnector(pullMeta, testDataFlow, nextPageTokenPollerConfig)
-    expect(result.properties.paging).toEqual({
+    const props = result.properties as Record<string, any>
+    expect(props.paging).toEqual({
       pagingType: "NextPageToken",
       nextPageTokenJsonPath: "$.nextToken",
       nextPageParaName: "cursor",
@@ -182,7 +183,8 @@ describe("Pull connector — Paging", () => {
 
   it("Offset includes pagingType, pageSize, pageSizeParaName", () => {
     const result = generateDataConnector(pullMeta, testDataFlow, offsetPollerConfig)
-    expect(result.properties.paging).toEqual({
+    const props = result.properties as Record<string, any>
+    expect(props.paging).toEqual({
       pagingType: "Offset",
       pageSize: 100,
       pageSizeParaName: "limit",

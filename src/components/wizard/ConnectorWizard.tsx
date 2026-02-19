@@ -1,10 +1,13 @@
 import * as React from "react"
 import { useConnectorConfig } from "@/hooks/useConnectorConfig"
 import { useTheme } from "@/hooks/useTheme"
+import { PollerConfigSchema } from "@/lib/schemas"
+import type { ConnectorKind, ConnectorData } from "@/lib/schemas"
 import { Stepper, type StepInfo } from "./Stepper"
 import { StepBasics } from "./StepBasics"
 import { StepSchema } from "./StepSchema"
 import { StepDcr } from "./StepDcr"
+import { StepApiConfig } from "./StepApiConfig"
 import { StepConnectorUI } from "./StepConnectorUI"
 import { StepExport } from "./StepExport"
 import { ConnectorSidebar } from "./ConnectorSidebar"
@@ -16,17 +19,123 @@ import {
   tableNameToStreamName,
 } from "@/lib/naming"
 
+interface StepDef {
+  id: string
+  label: string
+  component: React.ComponentType
+  isValid: (connectors: ConnectorData[], config: ReturnType<typeof useConnectorConfig>["config"]) => boolean
+  showSidebar: boolean
+  kinds?: ConnectorKind[]
+}
+
+const ALL_STEPS: StepDef[] = [
+  {
+    id: "basics",
+    label: "Basics",
+    component: StepBasics,
+    isValid: (cs) =>
+      cs.every(
+        (c) =>
+          !!c.meta.connectorId &&
+          !!c.meta.title &&
+          !!c.meta.publisher &&
+          !!c.meta.descriptionMarkdown,
+      ),
+    showSidebar: true,
+  },
+  {
+    id: "schema",
+    label: "Schema",
+    component: StepSchema,
+    isValid: (cs) =>
+      cs.every(
+        (c) =>
+          !!c.schema.tableName &&
+          c.schema.tableName.endsWith("_CL") &&
+          c.schema.columns.length >= 1,
+      ),
+    showSidebar: true,
+  },
+  {
+    id: "dcr",
+    label: "DCR",
+    component: StepDcr,
+    isValid: (cs) =>
+      cs.every(
+        (c) =>
+          !!c.dataFlow.streamName &&
+          c.dataFlow.streamName.startsWith("Custom-") &&
+          !!c.dataFlow.transformKql,
+      ),
+    showSidebar: true,
+  },
+  {
+    id: "api-config",
+    label: "API Config",
+    component: StepApiConfig,
+    isValid: (cs) =>
+      cs.every((c) => {
+        if (c.meta.connectorKind !== "RestApiPoller") return true
+        return (
+          !!c.pollerConfig?.request.apiEndpoint &&
+          (c.pollerConfig?.response.eventsJsonPaths?.length ?? 0) > 0
+        )
+      }),
+    showSidebar: true,
+    kinds: ["RestApiPoller"],
+  },
+  {
+    id: "connector-ui",
+    label: "Connector UI",
+    component: StepConnectorUI,
+    isValid: () => true,
+    showSidebar: true,
+  },
+  {
+    id: "export",
+    label: "Export",
+    component: StepExport,
+    isValid: (_cs, config) =>
+      !!config.solution.publisherId &&
+      !!config.solution.offerId &&
+      !!config.solution.support.name,
+    showSidebar: false,
+  },
+]
+
 export function ConnectorWizard() {
+  const hookValue = useConnectorConfig()
   const {
-    config, updateSchema, updateDataFlow,
+    config, updateSchema, updateDataFlow, updatePollerConfig,
     hasSavedConfig, resumeSavedConfig, dismissSavedConfig, reset,
     connectors, activeConnectorIndex, addConnector, removeConnector, setActiveConnector,
-  } = useConnectorConfig()
+  } = hookValue
   const { theme, toggleTheme } = useTheme()
   const [currentStep, setCurrentStep] = React.useState(0)
   const [visitedSteps, setVisitedSteps] = React.useState(new Set([0]))
   const [showPreview, setShowPreview] = React.useState(true)
   const [mobilePreview, setMobilePreview] = React.useState(false)
+
+  // Filter steps based on active connector's kind
+  const activeKind = config.meta.connectorKind || "Push"
+  const visibleSteps = React.useMemo(
+    () => ALL_STEPS.filter((s) => !s.kinds || s.kinds.includes(activeKind)),
+    [activeKind],
+  )
+
+  // Clamp currentStep if it exceeds visible steps after kind change
+  React.useEffect(() => {
+    if (currentStep >= visibleSteps.length) {
+      setCurrentStep(visibleSteps.length - 1)
+    }
+  }, [visibleSteps.length, currentStep])
+
+  // Auto-init pollerConfig when kind switches to RestApiPoller
+  React.useEffect(() => {
+    if (config.meta.connectorKind === "RestApiPoller" && !config.pollerConfig) {
+      updatePollerConfig(() => PollerConfigSchema.parse({}))
+    }
+  }, [config.meta.connectorKind, config.pollerConfig, updatePollerConfig])
 
   // Auto-derive table name and stream name
   React.useEffect(() => {
@@ -43,39 +152,11 @@ export function ConnectorWizard() {
     }
   }, [config.schema.tableName, config.dataFlow.streamName, updateDataFlow])
 
-  const steps: StepInfo[] = [
-    {
-      label: "Basics",
-      isValid: connectors.every(c =>
-        !!c.meta.connectorId && !!c.meta.title && !!c.meta.publisher && !!c.meta.descriptionMarkdown,
-      ),
-      isVisited: visitedSteps.has(0),
-    },
-    {
-      label: "Schema",
-      isValid: connectors.every(c =>
-        !!c.schema.tableName && c.schema.tableName.endsWith("_CL") && c.schema.columns.length >= 1,
-      ),
-      isVisited: visitedSteps.has(1),
-    },
-    {
-      label: "DCR",
-      isValid: connectors.every(c =>
-        !!c.dataFlow.streamName && c.dataFlow.streamName.startsWith("Custom-") && !!c.dataFlow.transformKql,
-      ),
-      isVisited: visitedSteps.has(2),
-    },
-    {
-      label: "Connector UI",
-      isValid: true, // This step is always valid (has auto-generation)
-      isVisited: visitedSteps.has(3),
-    },
-    {
-      label: "Export",
-      isValid: !!config.solution.publisherId && !!config.solution.offerId && !!config.solution.support.name,
-      isVisited: visitedSteps.has(4),
-    },
-  ]
+  const steps: StepInfo[] = visibleSteps.map((step, i) => ({
+    label: step.label,
+    isValid: step.isValid(connectors, config),
+    isVisited: visitedSteps.has(i),
+  }))
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -104,7 +185,9 @@ export function ConnectorWizard() {
     }
   };
 
-  const currentStepIsValid = steps[currentStep].isValid;
+  const currentStepIsValid = steps[currentStep]?.isValid ?? true;
+  const ActiveStepComponent = visibleSteps[currentStep]?.component
+  const currentStepDef = visibleSteps[currentStep]
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
@@ -130,10 +213,10 @@ export function ConnectorWizard() {
         <div className="px-6 py-5 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Sentinel CCF Push Connector Solution Builder
+              Sentinel CCF Connector Solution Builder
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Build Microsoft Sentinel Codeless Connector Framework (CCF) push
+              Build Microsoft Sentinel Codeless Connector Framework (CCF)
               connectors
             </p>
           </div>
@@ -183,8 +266,8 @@ export function ConnectorWizard() {
       {/* Main content */}
       <div className="flex-1 overflow-hidden">
         <div className="h-full flex">
-          {/* Connector sidebar — visible on connector steps (0-3), hidden on Export */}
-          {currentStep < 4 && (
+          {/* Connector sidebar — visible when step has showSidebar */}
+          {currentStepDef?.showSidebar && (
             <ConnectorSidebar
               connectors={connectors}
               activeIndex={activeConnectorIndex}
@@ -199,11 +282,7 @@ export function ConnectorWizard() {
             className={`${showPreview ? "w-full lg:w-3/5" : "w-full"} overflow-auto p-6 transition-all`}
           >
             <div className="max-w-3xl mx-auto">
-              {currentStep === 0 && <StepBasics />}
-              {currentStep === 1 && <StepSchema />}
-              {currentStep === 2 && <StepDcr />}
-              {currentStep === 3 && <StepConnectorUI />}
-              {currentStep === 4 && <StepExport />}
+              {ActiveStepComponent && <ActiveStepComponent />}
             </div>
           </div>
 

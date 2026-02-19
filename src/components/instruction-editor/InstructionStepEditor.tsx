@@ -107,7 +107,9 @@ export function InstructionStepEditor({ steps, onChange }: InstructionStepEditor
               <Label>Title</Label>
               <Input
                 value={step.title}
-                onChange={e => updateStep(stepIndex, { title: e.target.value })}
+                onChange={(e) =>
+                  updateStep(stepIndex, { title: e.target.value })
+                }
                 placeholder="Step title"
               />
             </div>
@@ -115,27 +117,44 @@ export function InstructionStepEditor({ steps, onChange }: InstructionStepEditor
               <Label>Description</Label>
               <Textarea
                 value={step.description}
-                onChange={e => updateStep(stepIndex, { description: e.target.value })}
+                onChange={(e) =>
+                  updateStep(stepIndex, { description: e.target.value })
+                }
                 placeholder="Step description (supports Markdown)"
                 rows={2}
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Instructions</Label>
+              <Label className="text-xs text-muted-foreground">
+                Instructions
+              </Label>
               {step.instructions.map((instr, instrIndex) => (
-                <div key={instrIndex} className="flex items-start gap-2 p-2 border rounded-md bg-muted/50">
+                <div
+                  key={instrIndex}
+                  className="flex items-start gap-2 p-2 border rounded-md bg-muted/50"
+                >
                   <GripVertical className="w-4 h-4 mt-2.5 text-muted-foreground shrink-0" />
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
                       <select
                         value={instr.type}
-                        onChange={e => updateInstruction(stepIndex, instrIndex, { ...instr, type: e.target.value as Instruction["type"] })}
+                        onChange={(e) =>
+                          updateInstruction(stepIndex, instrIndex, {
+                            ...instr,
+                            type: e.target.value as Instruction["type"],
+                          })
+                        }
                         className="flex h-8 rounded-md border border-input bg-transparent px-2 py-1 text-xs shadow-sm"
                       >
                         <option value="Markdown">Markdown</option>
                         <option value="CopyableLabel">Copyable Label</option>
-                        <option value="DeployPushConnectorButton">Deploy Button</option>
+                        <option value="DeployPushConnectorButton">
+                          Deploy Button
+                        </option>
+                        <option value="ConnectionToggleButton">
+                          Connection Toggle
+                        </option>
                       </select>
                       <Button
                         variant="ghost"
@@ -148,11 +167,19 @@ export function InstructionStepEditor({ steps, onChange }: InstructionStepEditor
                     </div>
                     {instr.type === "Markdown" && (
                       <Textarea
-                        value={(instr.parameters as Record<string, string>).content || ""}
-                        onChange={e => updateInstruction(stepIndex, instrIndex, {
-                          ...instr,
-                          parameters: { ...instr.parameters, content: e.target.value },
-                        })}
+                        value={
+                          (instr.parameters as Record<string, string>)
+                            .content || ""
+                        }
+                        onChange={(e) =>
+                          updateInstruction(stepIndex, instrIndex, {
+                            ...instr,
+                            parameters: {
+                              ...instr.parameters,
+                              content: e.target.value,
+                            },
+                          })
+                        }
                         placeholder="Markdown content..."
                         rows={2}
                         className="text-xs"
@@ -161,32 +188,60 @@ export function InstructionStepEditor({ steps, onChange }: InstructionStepEditor
                     {instr.type === "CopyableLabel" && (
                       <div className="grid grid-cols-2 gap-2">
                         <Input
-                          value={(instr.parameters as Record<string, string>).label || ""}
-                          onChange={e => updateInstruction(stepIndex, instrIndex, {
-                            ...instr,
-                            parameters: { ...instr.parameters, label: e.target.value },
-                          })}
+                          value={
+                            (instr.parameters as Record<string, string>)
+                              .label || ""
+                          }
+                          onChange={(e) =>
+                            updateInstruction(stepIndex, instrIndex, {
+                              ...instr,
+                              parameters: {
+                                ...instr.parameters,
+                                label: e.target.value,
+                              },
+                            })
+                          }
                           placeholder="Label"
                           className="text-xs"
                         />
                         <Input
-                          value={(instr.parameters as Record<string, string>).value || ""}
-                          onChange={e => updateInstruction(stepIndex, instrIndex, {
-                            ...instr,
-                            parameters: { ...instr.parameters, value: e.target.value },
-                          })}
+                          value={
+                            (instr.parameters as Record<string, string>)
+                              .value || ""
+                          }
+                          onChange={(e) =>
+                            updateInstruction(stepIndex, instrIndex, {
+                              ...instr,
+                              parameters: {
+                                ...instr.parameters,
+                                value: e.target.value,
+                              },
+                            })
+                          }
                           placeholder="Value (or fillWith)"
                           className="text-xs"
                         />
                       </div>
                     )}
                     {instr.type === "DeployPushConnectorButton" && (
-                      <p className="text-xs text-muted-foreground italic">Deploy button (no additional configuration needed)</p>
+                      <p className="text-xs text-muted-foreground italic">
+                        Deploy button (no additional configuration needed)
+                      </p>
+                    )}
+                    {instr.type === "ConnectionToggleButton" && (
+                      <p className="text-xs text-muted-foreground italic">
+                        Connection toggle button (enables/disables the poller)
+                      </p>
                     )}
                   </div>
                 </div>
               ))}
-              <Button variant="outline" size="sm" className="text-xs" onClick={() => addInstruction(stepIndex)}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs"
+                onClick={() => addInstruction(stepIndex)}
+              >
                 <Plus className="w-3 h-3 mr-1" /> Add instruction
               </Button>
             </div>
@@ -198,5 +253,5 @@ export function InstructionStepEditor({ steps, onChange }: InstructionStepEditor
         <Plus className="w-4 h-4 mr-1" /> Add instruction step
       </Button>
     </div>
-  )
+  );
 }

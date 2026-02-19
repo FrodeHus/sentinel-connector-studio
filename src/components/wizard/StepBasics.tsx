@@ -41,6 +41,47 @@ export function StepBasics() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
+          <CardTitle>Connector Type</CardTitle>
+          <CardDescription>
+            Choose how this connector ingests data into Microsoft Sentinel.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => updateMeta({ connectorKind: "Push" })}
+              className={`p-4 rounded-lg border-2 text-left transition-all cursor-pointer ${
+                meta.connectorKind !== "RestApiPoller"
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/50"
+              }`}
+            >
+              <div className="font-semibold text-sm">Push</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Your application sends data to the Sentinel ingestion endpoint.
+              </p>
+            </button>
+            <button
+              type="button"
+              onClick={() => updateMeta({ connectorKind: "RestApiPoller" })}
+              className={`p-4 rounded-lg border-2 text-left transition-all cursor-pointer ${
+                meta.connectorKind === "RestApiPoller"
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/50"
+              }`}
+            >
+              <div className="font-semibold text-sm">REST API Poller</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Sentinel polls a REST API on a schedule to pull data in.
+              </p>
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Connector Identity</CardTitle>
           <CardDescription>
             Define how your connector appears in the Sentinel data connector gallery.

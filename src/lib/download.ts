@@ -19,7 +19,7 @@ export function downloadIndividualFile(
   config: ConnectorConfig,
 ) {
   const { meta, schema, dataFlow, connectorUI } = config;
-  const dcrName = connectorIdToDcrName(meta.connectorId);
+  const dcrName = connectorIdToDcrName(meta.connectorId, meta.connectorKind);
 
   switch (type) {
     case "table":
@@ -35,7 +35,7 @@ export function downloadIndividualFile(
       );
       break;
     case "dataConnector":
-      downloadJson(generateDataConnector(meta, dataFlow), "dataConnector.json");
+      downloadJson(generateDataConnector(meta, dataFlow, config.pollerConfig), "dataConnector.json");
       break;
   }
 }
@@ -53,7 +53,7 @@ export async function downloadSolutionZip(appState: AppState) {
   // Generate files for each connector
   for (const connector of connectors) {
     const { meta, schema, dataFlow, connectorUI } = connector;
-    const dcrName = connectorIdToDcrName(meta.connectorId);
+    const dcrName = connectorIdToDcrName(meta.connectorId, meta.connectorKind);
     const connectorFolder = dataConnectorsFolder.folder(
       `${meta.connectorId}_ccf`,
     )!;
@@ -76,7 +76,7 @@ export async function downloadSolutionZip(appState: AppState) {
     );
     connectorFolder.file(
       "dataConnector.json",
-      JSON.stringify(generateDataConnector(meta, dataFlow), null, 2),
+      JSON.stringify(generateDataConnector(meta, dataFlow, connector.pollerConfig), null, 2),
     );
 
     connectorPaths.push(

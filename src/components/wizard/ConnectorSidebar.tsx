@@ -69,15 +69,30 @@ export function ConnectorSidebar({
               )}
             </div>
             {connector.meta.connectorId && (
-              <span
-                className={`text-xs truncate block ${
-                  index === activeIndex
-                    ? "text-primary-foreground/70"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {connector.meta.connectorId}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span
+                  className={`text-xs truncate ${
+                    index === activeIndex
+                      ? "text-primary-foreground/70"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {connector.meta.connectorId}
+                </span>
+                <span
+                  className={`text-[10px] px-1 py-0.5 rounded font-medium shrink-0 ${
+                    connector.meta.connectorKind === "RestApiPoller"
+                      ? index === activeIndex
+                        ? "bg-orange-400/30 text-orange-100"
+                        : "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300"
+                      : index === activeIndex
+                        ? "bg-sky-400/30 text-sky-100"
+                        : "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300"
+                  }`}
+                >
+                  {connector.meta.connectorKind === "RestApiPoller" ? "Pull" : "Push"}
+                </span>
+              </div>
             )}
           </button>
         ))}

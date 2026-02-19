@@ -6,7 +6,7 @@ export function generateConnectorDefinition(
   schema: TableSchema,
   connectorUI: ConnectorUI
 ) {
-  const connectorDefName = connectorIdToConnectorDefName(meta.connectorId)
+  const connectorDefName = connectorIdToConnectorDefName(meta.connectorId, meta.connectorKind)
 
   return {
     name: connectorDefName,

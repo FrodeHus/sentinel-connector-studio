@@ -1,4 +1,5 @@
 import type { AppState } from "./schemas"
+import { AppStateSchema } from "./schemas"
 
 const STORAGE_KEY = "sentinel-ccf-builder-config"
 
@@ -24,7 +25,7 @@ export function loadConfig(): AppState | null {
 
     // Migrate old format: single ConnectorConfig → AppState
     if ("meta" in parsed && !("connectors" in parsed)) {
-      return {
+      const migrated = {
         solution: parsed.solution ?? {},
         connectors: [
           {
@@ -35,10 +36,13 @@ export function loadConfig(): AppState | null {
           },
         ],
         activeConnectorIndex: 0,
-      } as AppState;
+      };
+      // Parse through schema to apply new defaults (connectorKind, etc.)
+      return AppStateSchema.parse(migrated);
     }
 
-    return parsed as AppState;
+    // Parse through schema to fill new field defaults
+    return AppStateSchema.parse(parsed);
   } catch {
     // JSON.parse throws if the stored value is corrupt; treat as no saved config.
     return null;
@@ -59,7 +63,7 @@ export function exportConfig(state: AppState): string {
 
 export function importConfig(json: string): AppState | null {
   try {
-    return JSON.parse(json) as AppState
+    return AppStateSchema.parse(JSON.parse(json))
   } catch {
     return null
   }

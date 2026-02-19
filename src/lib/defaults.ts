@@ -1,4 +1,4 @@
-import type { ConnectorUI, GraphQuery, SampleQuery, ConnectivityCriteria, InstructionStep, Column } from "./schemas"
+import type { ConnectorUI, ConnectorKind, GraphQuery, SampleQuery, ConnectivityCriteria, InstructionStep, Column } from "./schemas"
 
 export function generateDefaultGraphQueries(_tableName: string): GraphQuery[] {
   return [
@@ -29,7 +29,13 @@ export function generateDefaultSampleQueries(tableName: string, columns: Column[
   return queries
 }
 
-export function generateDefaultConnectivityCriteria(tableName: string): ConnectivityCriteria[] {
+export function generateDefaultConnectivityCriteria(
+  tableName: string,
+  kind: ConnectorKind = "Push",
+): ConnectivityCriteria[] {
+  if (kind === "RestApiPoller") {
+    return [{ type: "HasDataConnectors", value: [] }]
+  }
   return [
     {
       type: "IsConnectedQuery",
@@ -73,7 +79,23 @@ export function generateDefaultInstructionSteps(
   connectorId: string,
   _tableName: string,
   streamName: string,
+  kind: ConnectorKind = "Push",
 ): InstructionStep[] {
+  if (kind === "RestApiPoller") {
+    return [
+      {
+        title: "Connect",
+        description:
+          "Enable the connector to start polling the REST API.",
+        instructions: [
+          {
+            type: "ConnectionToggleButton" as const,
+            parameters: {},
+          },
+        ],
+      },
+    ]
+  }
   return [
     {
       title: "Deploy the Push Connector",
@@ -147,12 +169,18 @@ export function generateDefaultInstructionSteps(
   ];
 }
 
-export function generateDefaultConnectorUI(connectorId: string, tableName: string, streamName: string, columns: Column[]): ConnectorUI {
+export function generateDefaultConnectorUI(
+  connectorId: string,
+  tableName: string,
+  streamName: string,
+  columns: Column[],
+  kind: ConnectorKind = "Push",
+): ConnectorUI {
   return {
     graphQueries: generateDefaultGraphQueries(tableName),
     sampleQueries: generateDefaultSampleQueries(tableName, columns),
-    connectivityCriteria: generateDefaultConnectivityCriteria(tableName),
+    connectivityCriteria: generateDefaultConnectivityCriteria(tableName, kind),
     permissions: generateDefaultPermissions(),
-    instructionSteps: generateDefaultInstructionSteps(connectorId, tableName, streamName),
+    instructionSteps: generateDefaultInstructionSteps(connectorId, tableName, streamName, kind),
   }
 }

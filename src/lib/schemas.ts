@@ -11,6 +11,9 @@ export const ColumnSchema = z.object({
   type: z.enum(columnTypes),
 })
 
+// Connector kind
+export const ConnectorKindSchema = z.enum(["Push", "RestApiPoller"]).default("Push")
+
 // Lenient schemas for state storage — no strict validation, just shape
 export const MetaSchema = z.object({
   connectorId: z.string().default(""),
@@ -18,6 +21,7 @@ export const MetaSchema = z.object({
   publisher: z.string().default(""),
   descriptionMarkdown: z.string().default(""),
   logo: z.string().optional().default(""),
+  connectorKind: ConnectorKindSchema,
 })
 
 export const TableSchemaSchema = z.object({
@@ -72,7 +76,7 @@ export const PermissionsSchema = z.object({
 })
 
 export const InstructionSchema = z.object({
-  type: z.enum(["Markdown", "CopyableLabel", "DeployPushConnectorButton"]),
+  type: z.enum(["Markdown", "CopyableLabel", "DeployPushConnectorButton", "ConnectionToggleButton"]),
   parameters: z.record(z.unknown()).default({}),
 })
 
@@ -123,11 +127,92 @@ export const SolutionSchema = z.object({
   firstPublishDate: z.string().default(new Date().toISOString().split("T")[0]),
 });
 
+// --- REST API Poller (pull) connector schemas ---
+
+export const PollerAuthTypeSchema = z.enum(["Basic", "APIKey", "OAuth2"]).default("Basic")
+
+export const PollerAuthSchema = z.object({
+  type: PollerAuthTypeSchema,
+  // Basic
+  userName: z.string().default("{{username}}"),
+  password: z.string().default("{{password}}"),
+  // APIKey
+  apiKey: z.string().default("{{apiKey}}"),
+  apiKeyName: z.string().default(""),
+  apiKeyIdentifier: z.string().default(""),
+  isApiKeyInPostPayload: z.boolean().default(false),
+  // OAuth2
+  clientId: z.string().default("{{clientId}}"),
+  clientSecret: z.string().default("{{clientSecret}}"),
+  grantType: z.enum(["client_credentials", "authorization_code"]).default("client_credentials"),
+  tokenEndpointUrl: z.string().default(""),
+  scope: z.string().default(""),
+  tokenEndpointHeaders: z.record(z.string()).optional().default({}),
+  tokenEndpointQueryParameters: z.record(z.string()).optional().default({}),
+  authorizationEndpoint: z.string().default(""),
+  authorizationEndpointQueryParameters: z.record(z.string()).optional().default({}),
+  redirectUri: z.string().default(""),
+})
+
+export const PollerRequestSchema = z.object({
+  apiEndpoint: z.string().default(""),
+  httpMethod: z.enum(["GET", "POST"]).default("GET"),
+  startTimeAttributeName: z.string().default(""),
+  endTimeAttributeName: z.string().default(""),
+  queryWindowInMin: z.number().default(5),
+  queryTimeFormat: z.string().default("yyyy-MM-ddTHH:mm:ssZ"),
+  rateLimitQPS: z.number().default(10),
+  retryCount: z.number().default(3),
+  timeoutInSeconds: z.number().default(60),
+  headers: z.record(z.string()).optional().default({}),
+  queryParameters: z.record(z.string()).optional().default({}),
+  queryParametersTemplate: z.string().default(""),
+  isPostPayloadJson: z.boolean().default(true),
+})
+
+export const PollerResponseSchema = z.object({
+  eventsJsonPaths: z.array(z.string()).default(["$"]),
+  successStatusJsonPath: z.string().default(""),
+  successStatusValue: z.string().default(""),
+  isGzipCompressed: z.boolean().default(false),
+  format: z.enum(["json", "csv", "xml"]).default("json"),
+  convertChildPropertiesToArray: z.boolean().default(false),
+})
+
+export const PagingTypeSchema = z.enum([
+  "None",
+  "LinkHeader",
+  "NextPageUrl",
+  "NextPageToken",
+  "Offset",
+  "PersistentToken",
+  "PersistentLink",
+]).default("None")
+
+export const PollerPagingSchema = z.object({
+  pagingType: PagingTypeSchema,
+  nextPageParaName: z.string().default(""),
+  nextPageTokenJsonPath: z.string().default(""),
+  nextPageUrl: z.string().default(""),
+  hasNextFlagJsonPath: z.string().default(""),
+  nextPageRequestHeader: z.string().default(""),
+  pageSizeParaName: z.string().default(""),
+  pageSize: z.number().default(0),
+})
+
+export const PollerConfigSchema = z.object({
+  auth: PollerAuthSchema.default({}),
+  request: PollerRequestSchema.default({}),
+  response: PollerResponseSchema.default({}),
+  paging: PollerPagingSchema.default({}),
+})
+
 export const ConnectorConfigSchema = z.object({
   meta: MetaSchema.default({}),
   schema: TableSchemaSchema.default({}),
   dataFlow: DataFlowSchema.default({}),
   connectorUI: ConnectorUISchema.default({}),
+  pollerConfig: PollerConfigSchema.optional(),
   solution: SolutionSchema.default({}),
 })
 
@@ -169,6 +254,7 @@ export const ConnectorDataSchema = z.object({
   schema: TableSchemaSchema.default({}),
   dataFlow: DataFlowSchema.default({}),
   connectorUI: ConnectorUISchema.default({}),
+  pollerConfig: PollerConfigSchema.optional(),
 })
 
 // --- Top-level app state (solution shared across connectors) ---
@@ -182,6 +268,7 @@ export const AppStateSchema = z.object({
 // --- Inferred types ---
 
 export type Column = z.infer<typeof ColumnSchema>
+export type ConnectorKind = z.infer<typeof ConnectorKindSchema>
 export type Meta = z.infer<typeof MetaSchema>
 export type TableSchema = z.infer<typeof TableSchemaSchema>
 export type DataFlow = z.infer<typeof DataFlowSchema>
@@ -193,6 +280,11 @@ export type InstructionStep = z.infer<typeof InstructionStepSchema>
 export type Instruction = z.infer<typeof InstructionSchema>
 export type ConnectorUI = z.infer<typeof ConnectorUISchema>
 export type Solution = z.infer<typeof SolutionSchema>
+export type PollerAuth = z.infer<typeof PollerAuthSchema>
+export type PollerRequest = z.infer<typeof PollerRequestSchema>
+export type PollerResponse = z.infer<typeof PollerResponseSchema>
+export type PollerPaging = z.infer<typeof PollerPagingSchema>
+export type PollerConfig = z.infer<typeof PollerConfigSchema>
 export type ConnectorConfig = z.infer<typeof ConnectorConfigSchema>
 export type ConnectorData = z.infer<typeof ConnectorDataSchema>
 export type AppState = z.infer<typeof AppStateSchema>

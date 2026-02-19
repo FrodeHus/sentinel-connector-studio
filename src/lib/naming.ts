@@ -1,3 +1,5 @@
+import type { ConnectorKind } from "./schemas"
+
 export function titleToConnectorId(title: string): string {
   return title
     .replace(/[^a-zA-Z0-9\s]/g, "")
@@ -20,14 +22,18 @@ export function tableNameToOutputStreamName(tableName: string): string {
   return `Custom-${tableName}`
 }
 
-export function connectorIdToDcrName(connectorId: string): string {
-  return `${connectorId}PushDCR`
+function kindSuffix(kind: ConnectorKind = "Push"): string {
+  return kind === "RestApiPoller" ? "Poller" : "Push"
 }
 
-export function connectorIdToConnectorDefName(connectorId: string): string {
-  return `${connectorId}Push`
+export function connectorIdToDcrName(connectorId: string, kind?: ConnectorKind): string {
+  return `${connectorId}${kindSuffix(kind)}DCR`
 }
 
-export function connectorIdToConnectorConfigName(connectorId: string): string {
-  return `${connectorId}PushConnector`
+export function connectorIdToConnectorDefName(connectorId: string, kind?: ConnectorKind): string {
+  return `${connectorId}${kindSuffix(kind)}`
+}
+
+export function connectorIdToConnectorConfigName(connectorId: string, kind?: ConnectorKind): string {
+  return `${connectorId}${kindSuffix(kind)}Connector`
 }

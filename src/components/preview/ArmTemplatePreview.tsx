@@ -45,7 +45,7 @@ export function ArmTemplatePreview() {
   React.useEffect(() => {
     try {
       const { meta, schema, dataFlow, connectorUI } = config;
-      const dcrName = connectorIdToDcrName(meta.connectorId);
+      const dcrName = connectorIdToDcrName(meta.connectorId, meta.connectorKind);
       setContent({
         "table.json": JSON.stringify(
           generateTableResource(schema, ""),
@@ -63,7 +63,7 @@ export function ArmTemplatePreview() {
           2,
         ),
         "dataConnector.json": JSON.stringify(
-          generateDataConnector(meta, dataFlow),
+          generateDataConnector(meta, dataFlow, config.pollerConfig),
           null,
           2,
         ),

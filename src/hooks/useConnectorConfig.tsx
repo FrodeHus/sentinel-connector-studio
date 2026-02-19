@@ -1,6 +1,6 @@
 import * as React from "react"
-import type { ConnectorConfig, ConnectorData, AppState } from "@/lib/schemas"
-import { ConnectorDataSchema, AppStateSchema } from "@/lib/schemas"
+import type { ConnectorConfig, ConnectorData, AppState, PollerConfig } from "@/lib/schemas"
+import { ConnectorDataSchema, AppStateSchema, PollerConfigSchema } from "@/lib/schemas"
 import { saveConfig, loadConfig, clearConfig } from "@/lib/persistence"
 
 interface ConnectorConfigContextValue {
@@ -11,6 +11,7 @@ interface ConnectorConfigContextValue {
   updateSchema: (schema: Partial<ConnectorConfig["schema"]>) => void
   updateDataFlow: (dataFlow: Partial<ConnectorConfig["dataFlow"]>) => void
   updateConnectorUI: (connectorUI: Partial<ConnectorConfig["connectorUI"]>) => void
+  updatePollerConfig: (updater: (prev: PollerConfig) => PollerConfig) => void
   updateSolution: (solution: Partial<ConnectorConfig["solution"]>) => void
   reset: () => void
   hasSavedConfig: boolean
@@ -60,6 +61,7 @@ export function ConnectorConfigProvider({ children }: { children: React.ReactNod
       schema: c.schema,
       dataFlow: c.dataFlow,
       connectorUI: c.connectorUI,
+      pollerConfig: c.pollerConfig,
       solution: appState.solution,
     }
   }, [appState])
@@ -91,6 +93,7 @@ export function ConnectorConfigProvider({ children }: { children: React.ReactNod
           schema: newConfig.schema,
           dataFlow: newConfig.dataFlow,
           connectorUI: newConfig.connectorUI,
+          pollerConfig: newConfig.pollerConfig,
         }
         return {
           ...prev,
@@ -128,6 +131,16 @@ export function ConnectorConfigProvider({ children }: { children: React.ReactNod
       updateActiveConnector((prev) => ({
         ...prev,
         connectorUI: { ...prev.connectorUI, ...connectorUI },
+      }))
+    },
+    [updateActiveConnector],
+  )
+
+  const updatePollerConfig = React.useCallback(
+    (updater: (prev: PollerConfig) => PollerConfig) => {
+      updateActiveConnector((prev) => ({
+        ...prev,
+        pollerConfig: updater(prev.pollerConfig ?? PollerConfigSchema.parse({})),
       }))
     },
     [updateActiveConnector],
@@ -193,6 +206,7 @@ export function ConnectorConfigProvider({ children }: { children: React.ReactNod
       updateSchema,
       updateDataFlow,
       updateConnectorUI,
+      updatePollerConfig,
       updateSolution,
       reset,
       hasSavedConfig,
@@ -211,6 +225,7 @@ export function ConnectorConfigProvider({ children }: { children: React.ReactNod
       updateSchema,
       updateDataFlow,
       updateConnectorUI,
+      updatePollerConfig,
       updateSolution,
       reset,
       hasSavedConfig,

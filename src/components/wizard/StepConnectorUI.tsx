@@ -33,12 +33,14 @@ export function StepConnectorUI() {
       ),
       connectivityCriteria: generateDefaultConnectivityCriteria(
         schema.tableName,
+        meta.connectorKind,
       ),
       permissions: generateDefaultPermissions(),
       instructionSteps: generateDefaultInstructionSteps(
         meta.connectorId,
         schema.tableName,
         dataFlow.streamName,
+        meta.connectorKind,
       ),
     });
   };

@@ -8,17 +8,21 @@ import tailwindcss from '@tailwindcss/vite'
 const config = defineConfig({
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
   plugins: [
     viteTsConfigPaths({
-      projects: ['./tsconfig.json'],
+      projects: ["./tsconfig.json"],
     }),
     tailwindcss(),
     tanstackStart({ spa: { enabled: true, prerender: { enabled: false } } }),
     viteReact(),
   ],
-})
+  test: {
+    globals: true,
+    environment: "node",
+  },
+});
 
 export default config

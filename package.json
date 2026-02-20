@@ -19,6 +19,7 @@
     "@codemirror/lint": "^6.9.4",
     "@codemirror/state": "^6.5.4",
     "@lezer/highlight": "^1.2.3",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "^0.7.0",
     "@tanstack/react-router": "^1.132.0",

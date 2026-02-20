@@ -13,11 +13,19 @@ import { StepExport } from "./StepExport"
 import { ConnectorSidebar } from "./ConnectorSidebar"
 import { ArmTemplatePreview } from "@/components/preview/ArmTemplatePreview"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, Eye, EyeOff, RotateCcw, Moon, Sun, Github } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { ChevronLeft, ChevronRight, Eye, EyeOff, RotateCcw, Moon, Sun, Github, FileText, Save, Upload } from "lucide-react"
 import {
   connectorIdToTableName,
   tableNameToStreamName,
 } from "@/lib/naming"
+import { downloadProjectFile, readProjectFile } from "@/lib/persistence"
 
 interface StepDef {
   id: string
@@ -109,12 +117,15 @@ export function ConnectorWizard() {
     config, updateSchema, updateDataFlow, updatePollerConfig,
     hasSavedConfig, resumeSavedConfig, dismissSavedConfig, reset,
     connectors, activeConnectorIndex, addConnector, removeConnector, setActiveConnector,
+    importAppState,
   } = hookValue
   const { theme, toggleTheme } = useTheme()
   const [currentStep, setCurrentStep] = React.useState(0)
   const [visitedSteps, setVisitedSteps] = React.useState(new Set([0]))
   const [showPreview, setShowPreview] = React.useState(true)
   const [mobilePreview, setMobilePreview] = React.useState(false)
+  const [importError, setImportError] = React.useState<string | null>(null)
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
 
   // Filter steps based on active connector's kind
   const activeKind = config.meta.connectorKind || "Push"
@@ -151,6 +162,58 @@ export function ConnectorWizard() {
       updateDataFlow({ streamName })
     }
   }, [config.schema.tableName, config.dataFlow.streamName, updateDataFlow])
+
+  // File operations handlers
+  const handleSaveProject = () => {
+    downloadProjectFile({
+      solution: config.solution,
+      connectors,
+      activeConnectorIndex,
+    })
+  }
+
+  const handleLoadProject = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImportError(null)
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Reset the input so the same file can be re-selected
+    e.target.value = ""
+
+    try {
+      const state = await readProjectFile(file)
+      if (!confirm("This will replace your current configuration. Continue?")) {
+        return
+      }
+      importAppState(state)
+      setCurrentStep(0)
+      setVisitedSteps(new Set([0]))
+    } catch (err) {
+      setImportError(
+        err instanceof Error ? err.message : "Failed to load project file."
+      )
+      alert(importError || "Failed to load project file.")
+    }
+  }
+
+  // Keyboard shortcuts
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+S or Cmd+S to save
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault()
+        handleSaveProject()
+      }
+      // Ctrl+O or Cmd+O to open
+      if ((e.ctrlKey || e.metaKey) && e.key === "o") {
+        e.preventDefault()
+        fileInputRef.current?.click()
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [connectors, config, activeConnectorIndex])
 
   const steps: StepInfo[] = visibleSteps.map((step, i) => ({
     label: step.label,
@@ -246,6 +309,33 @@ export function ConnectorWizard() {
                 <Moon className="w-4 h-4" />
               )}
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" title="File">
+                  <FileText className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleSaveProject}>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Project
+                  <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Load Project
+                  <DropdownMenuShortcut>⌘O</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              className="hidden"
+              onChange={handleLoadProject}
+              aria-label="Load project file"
+            />
             <Button
               variant="ghost"
               size="icon"

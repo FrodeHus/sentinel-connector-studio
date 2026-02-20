@@ -1,7 +1,6 @@
 import * as React from "react"
 import { useConnectorConfig } from "@/hooks/useConnectorConfig"
 import { downloadSolutionZip, downloadIndividualFile } from "@/lib/download";
-import { downloadProjectFile, readProjectFile } from "@/lib/persistence";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -22,8 +21,6 @@ import {
   FolderArchive,
   ChevronDown,
   HelpCircle,
-  Save,
-  Upload,
 } from "lucide-react";
 
 export function StepExport() {
@@ -32,36 +29,36 @@ export function StepExport() {
     connectors,
     activeConnectorIndex,
     updateSolution,
-    importAppState,
   } = useConnectorConfig();
   const { solution } = config;
   const [expanded, setExpanded] = React.useState(false);
-  const [importError, setImportError] = React.useState<string | null>(null);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  const handleLoadProject = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setImportError(null);
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Reset the input so the same file can be re-selected
-    e.target.value = "";
-
-    try {
-      const state = await readProjectFile(file);
-      if (!confirm("This will replace your current configuration. Continue?")) {
-        return;
-      }
-      importAppState(state);
-    } catch (err) {
-      setImportError(
-        err instanceof Error ? err.message : "Failed to load project file.",
-      );
-    }
-  };
 
   return (
     <div className="space-y-6">
+      <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+        <p className="text-sm text-muted-foreground">
+          <strong>Tip:</strong> Use the <strong>File menu</strong> (
+          <span className="inline-flex items-center gap-1">
+            <svg
+              className="inline w-3.5 h-3.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+          </span>
+          ) in the header to save or load your project configuration at any
+          time. Keyboard shortcuts: <kbd className="px-1.5 py-0.5 text-xs bg-muted rounded">⌘S</kbd> to
+          save, <kbd className="px-1.5 py-0.5 text-xs bg-muted rounded">⌘O</kbd> to open.
+        </p>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Solution Metadata</CardTitle>
@@ -197,56 +194,6 @@ export function StepExport() {
               }
             />
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Project File</CardTitle>
-          <CardDescription>
-            Save or load your editor configuration as a project file. This
-            preserves all settings for later editing.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              variant="outline"
-              className="justify-start"
-              onClick={() =>
-                downloadProjectFile({
-                  solution: config.solution,
-                  connectors,
-                  activeConnectorIndex,
-                })
-              }
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Save Project
-            </Button>
-            <Button
-              variant="outline"
-              className="justify-start"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              Load Project
-            </Button>
-          </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json"
-            className="hidden"
-            onChange={handleLoadProject}
-          />
-          {importError && (
-            <p className="text-sm text-destructive">{importError}</p>
-          )}
-          <p className="text-xs text-muted-foreground">
-            The project file (.json) stores your raw editor state. Use the ZIP
-            download below for deployment.
-          </p>
         </CardContent>
       </Card>
 

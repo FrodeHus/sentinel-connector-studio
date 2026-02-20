@@ -256,6 +256,36 @@ src/
 
 ---
 
+## Linting
+
+- **ESLint is the project linter.** Run `pnpm run lint` before committing. CI will fail on lint errors.
+
+- **Configuration lives in `eslint.config.js`** (ESLint v9 flat config format).
+
+- **Enabled rule sets:**
+  - `@eslint/js` recommended
+  - `typescript-eslint` recommended
+  - `eslint-plugin-react-hooks` — enforces Rules of Hooks and exhaustive dependencies
+  - `eslint-plugin-react-refresh` — warns when a file exports non-component values that break Fast Refresh
+
+- **Unused variables must be prefixed with `_`.**  The `@typescript-eslint/no-unused-vars` rule allows `_`-prefixed args, vars, and caught errors.
+
+  ```ts
+  // Correct
+  } catch (_error) {
+    return { valid: false, error: "Invalid URL format." };
+  }
+
+  // Wrong — lint error
+  } catch (error) {
+    return { valid: false, error: "Invalid URL format." };
+  }
+  ```
+
+- **`react-refresh/only-export-components` is disabled** for `src/routes/`, `src/hooks/`, and `src/components/ui/` because those directories legitimately co-export non-component values (route configs, context helpers, variant functions).
+
+---
+
 ## Imports
 
 **Order (top to bottom):**

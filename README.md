@@ -21,6 +21,7 @@ The UX is designed for users who may have no prior experience with ARM templates
 - **KQL transform editor** — syntax-highlighted editor with template snippets for common patterns
 - **Smart defaults** — table names, stream names, connectivity queries, permissions, and instruction steps are all auto-generated
 - **Session persistence** — your work is saved to `localStorage` so you can resume across sessions
+- **Save / Load projects** — export your project as a `.json` file, reload it later, or load from a URL
 - **Multiple export options** — download the ARM template, a full solution package (ZIP), or individual resource files
 
 ## Wizard Steps
@@ -78,6 +79,12 @@ pnpm build
 pnpm test
 ```
 
+### Lint
+
+```bash
+pnpm run lint
+```
+
 ## Tech Stack
 
 - [TanStack Start](https://tanstack.com/start) / [TanStack Router](https://tanstack.com/router) — SPA framework with file-based routing
@@ -86,6 +93,8 @@ pnpm test
 - [Zod](https://zod.dev/) — schema validation for all connector data structures
 - [CodeMirror](https://codemirror.net/) — KQL transform editor
 - [JSZip](https://stuk.github.io/jszip/) — solution package ZIP generation
+- [ESLint](https://eslint.org/) — linting with TypeScript, React Hooks, and React Refresh plugins
+- [Trivy](https://trivy.dev/) — Docker image vulnerability scanning in CI
 
 ## Project Structure
 

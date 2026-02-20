@@ -12,49 +12,50 @@ import {
 } from "./fixtures"
 
 describe("Push connector", () => {
-  const result = generateDataConnector(pushMeta, testDataFlow)
-  const props = result.properties as Record<string, any>
+  const result = generateDataConnector(pushMeta, testDataFlow);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const props = result.properties as Record<string, any>;
 
   it("kind is Push", () => {
-    expect(result.kind).toBe("Push")
-  })
+    expect(result.kind).toBe("Push");
+  });
 
   it("name is TestConnectorPushConnector", () => {
-    expect(result.name).toBe("TestConnectorPushConnector")
-  })
+    expect(result.name).toBe("TestConnectorPushConnector");
+  });
 
   it("connectorDefinitionName is TestConnectorPush", () => {
-    expect(props.connectorDefinitionName).toBe("TestConnectorPush")
-  })
+    expect(props.connectorDefinitionName).toBe("TestConnectorPush");
+  });
 
   it("dcrConfig.streamName matches testDataFlow.streamName", () => {
-    expect(props.dcrConfig.streamName).toBe("Custom-TestConnector")
-  })
+    expect(props.dcrConfig.streamName).toBe("Custom-TestConnector");
+  });
 
   it("dcrConfig uses [[parameters escape syntax for dataCollectionEndpoint and dataCollectionRuleImmutableId", () => {
     expect(props.dcrConfig.dataCollectionEndpoint).toBe(
       "[[parameters('dcrConfig').dataCollectionEndpoint]",
-    )
+    );
     expect(props.dcrConfig.dataCollectionRuleImmutableId).toBe(
       "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
-    )
-  })
+    );
+  });
 
   it("auth.type is Push with AppId and ServicePrincipalId ARM parameters", () => {
     expect(props.auth).toEqual({
       type: "Push",
       AppId: "[[parameters('auth').appId]",
       ServicePrincipalId: "[[parameters('auth').servicePrincipalId]",
-    })
-  })
+    });
+  });
 
   it("request.RetryCount is 1", () => {
-    expect(props.request.RetryCount).toBe(1)
-  })
+    expect(props.request.RetryCount).toBe(1);
+  });
 
   it("response.eventsJsonPaths is ['$']", () => {
-    expect(props.response.eventsJsonPaths).toEqual(["$"])
-  })
+    expect(props.response.eventsJsonPaths).toEqual(["$"]);
+  });
 })
 
 describe("Pull connector — Basic auth", () => {
@@ -172,23 +173,33 @@ describe("Pull connector — Paging", () => {
   })
 
   it("NextPageToken includes pagingType, nextPageTokenJsonPath, nextPageParaName", () => {
-    const result = generateDataConnector(pullMeta, testDataFlow, nextPageTokenPollerConfig)
-    const props = result.properties as Record<string, any>
+    const result = generateDataConnector(
+      pullMeta,
+      testDataFlow,
+      nextPageTokenPollerConfig,
+    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const props = result.properties as Record<string, any>;
     expect(props.paging).toEqual({
       pagingType: "NextPageToken",
       nextPageTokenJsonPath: "$.nextToken",
       nextPageParaName: "cursor",
-    })
+    });
   })
 
   it("Offset includes pagingType, pageSize, pageSizeParaName", () => {
-    const result = generateDataConnector(pullMeta, testDataFlow, offsetPollerConfig)
-    const props = result.properties as Record<string, any>
+    const result = generateDataConnector(
+      pullMeta,
+      testDataFlow,
+      offsetPollerConfig,
+    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const props = result.properties as Record<string, any>;
     expect(props.paging).toEqual({
       pagingType: "Offset",
       pageSize: 100,
       pageSizeParaName: "limit",
-    })
+    });
   })
 })
 

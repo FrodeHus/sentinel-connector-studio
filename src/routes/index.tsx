@@ -16,9 +16,7 @@ function App() {
     return (
       <div className="h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">
-            Sentinel CCF Push Connector Solution Builder
-          </h1>
+          <h1 className="text-2xl font-bold mb-2">Sentinel Connector Studio</h1>
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>

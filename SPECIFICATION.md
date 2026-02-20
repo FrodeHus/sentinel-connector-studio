@@ -1,4 +1,4 @@
-# Sentinel CCF Push Connector Builder — Specification
+# Sentinel Connector Studio — Specification
 
 ## Overview
 

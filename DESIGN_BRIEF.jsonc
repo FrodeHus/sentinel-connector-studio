@@ -1,6 +1,6 @@
 {
   // ─────────────────────────────────────────────────────────
-  // SENTINEL CCF BUILDER — UI DESIGN BRIEF
+  // SENTINEL CONNECTOR STUDIO — UI DESIGN BRIEF
   // Source: ~/temp/design.png (dark dashboard, "SMARTNET" style)
   // Scope: Visual language only — applied to existing wizard layout
   // ─────────────────────────────────────────────────────────
@@ -14,23 +14,22 @@
   // translucent cards. Two core palettes drive everything.
 
   "palettes": {
-
     // ── PRIMARY: Violet ──────────────────────────────────────
     // Used for: active states, primary buttons, stepper active
     // step, focused inputs, links, the "glow" on interactive
     // elements. Mapped from Tailwind `violet`.
     "primary": {
-      "50":  "#f5f3ff",
+      "50": "#f5f3ff",
       "100": "#ede9fe",
       "200": "#ddd6fe",
       "300": "#c4b5fd",
       "400": "#a78bfa",
-      "500": "#8b5cf6",  // ← main accent seen on active nav, buttons
+      "500": "#8b5cf6", // ← main accent seen on active nav, buttons
       "600": "#7c3aed",
       "700": "#6d28d9",
       "800": "#5b21b6",
       "900": "#4c1d95",
-      "950": "#2e1065"
+      "950": "#2e1065",
     },
 
     // ── SECONDARY: Fuchsia / Pink ────────────────────────────
@@ -38,45 +37,45 @@
     // highlights, badge accents, the "hot" end of gradients.
     // Mapped from Tailwind `fuchsia`.
     "secondary": {
-      "50":  "#fdf4ff",
+      "50": "#fdf4ff",
       "100": "#fae8ff",
       "200": "#f5d0fe",
       "300": "#f0abfc",
-      "400": "#e879f9",  // ← visible on gradient card right edges
+      "400": "#e879f9", // ← visible on gradient card right edges
       "500": "#d946ef",
       "600": "#c026d3",
       "700": "#a21caf",
       "800": "#86198f",
       "900": "#701a75",
-      "950": "#4a044e"
+      "950": "#4a044e",
     },
 
     // ── GRAY: Purple-tinted neutrals ─────────────────────────
     // NOT pure gray. Every neutral has a subtle blue-violet
     // undertone matching the deep-space background.
     "gray": {
-      "50":  "#f8f7fc",  // light mode body bg
+      "50": "#f8f7fc", // light mode body bg
       "100": "#eeedf5",
       "200": "#dddbe8",
       "300": "#b8b5c8",
       "400": "#8f8ba3",
       "500": "#6b6784",
       "600": "#514d66",
-      "700": "#3b3751",  // card border (dark)
-      "800": "#272340",  // card surface (dark)
-      "900": "#1a1635",  // sidebar / raised surface (dark)
-      "950": "#0f0b24"   // body background (dark) — the deepest tone
+      "700": "#3b3751", // card border (dark)
+      "800": "#272340", // card surface (dark)
+      "900": "#1a1635", // sidebar / raised surface (dark)
+      "950": "#0f0b24", // body background (dark) — the deepest tone
     },
 
     // ── ACCENTS ──────────────────────────────────────────────
     // Extracted from gradient cards and chart fills in the design.
     "accents": {
-      "cyan":   "#22d3ee",  // used sparingly: chart line highlight, info badges
-      "orange": "#fb923c",  // left edge of the warm gradient card
-      "rose":   "#fb7185",  // mid-tone in the warm gradient
-      "green":  "#4ade80",  // success / valid step indicator
-      "red":    "#f87171"   // error / invalid step indicator
-    }
+      "cyan": "#22d3ee", // used sparingly: chart line highlight, info badges
+      "orange": "#fb923c", // left edge of the warm gradient card
+      "rose": "#fb7185", // mid-tone in the warm gradient
+      "green": "#4ade80", // success / valid step indicator
+      "red": "#f87171", // error / invalid step indicator
+    },
   },
 
   // ═══════════════════════════════════════════════════════════
@@ -87,47 +86,47 @@
 
   "tokens": {
     "dark": {
-      "--background":           "gray.950",    // #0f0b24
-      "--foreground":           "#f0eeff",      // near-white with violet tint
-      "--card":                 "gray.800",     // #272340
-      "--card-foreground":      "#f0eeff",
-      "--popover":              "gray.900",     // #1a1635
-      "--popover-foreground":   "#f0eeff",
-      "--primary":              "primary.500",  // #8b5cf6
-      "--primary-foreground":   "#ffffff",
-      "--secondary":            "secondary.500",// #d946ef
+      "--background": "gray.950", // #0f0b24
+      "--foreground": "#f0eeff", // near-white with violet tint
+      "--card": "gray.800", // #272340
+      "--card-foreground": "#f0eeff",
+      "--popover": "gray.900", // #1a1635
+      "--popover-foreground": "#f0eeff",
+      "--primary": "primary.500", // #8b5cf6
+      "--primary-foreground": "#ffffff",
+      "--secondary": "secondary.500", // #d946ef
       "--secondary-foreground": "#ffffff",
-      "--muted":                "gray.900",     // #1a1635
-      "--muted-foreground":     "gray.400",     // #8f8ba3
-      "--accent":               "gray.700",     // #3b3751
-      "--accent-foreground":    "#f0eeff",
-      "--destructive":          "accents.red",
+      "--muted": "gray.900", // #1a1635
+      "--muted-foreground": "gray.400", // #8f8ba3
+      "--accent": "gray.700", // #3b3751
+      "--accent-foreground": "#f0eeff",
+      "--destructive": "accents.red",
       "--destructive-foreground": "#ffffff",
-      "--border":               "gray.700",     // #3b3751, plus ~20% opacity
-      "--input":                "gray.700",
-      "--ring":                 "primary.500"
+      "--border": "gray.700", // #3b3751, plus ~20% opacity
+      "--input": "gray.700",
+      "--ring": "primary.500",
     },
     "light": {
-      "--background":           "gray.50",      // #f8f7fc
-      "--foreground":           "gray.950",     // #0f0b24
-      "--card":                 "#ffffff",
-      "--card-foreground":      "gray.950",
-      "--popover":              "#ffffff",
-      "--popover-foreground":   "gray.950",
-      "--primary":              "primary.600",  // #7c3aed — slightly darker for contrast on white
-      "--primary-foreground":   "#ffffff",
-      "--secondary":            "secondary.600",
+      "--background": "gray.50", // #f8f7fc
+      "--foreground": "gray.950", // #0f0b24
+      "--card": "#ffffff",
+      "--card-foreground": "gray.950",
+      "--popover": "#ffffff",
+      "--popover-foreground": "gray.950",
+      "--primary": "primary.600", // #7c3aed — slightly darker for contrast on white
+      "--primary-foreground": "#ffffff",
+      "--secondary": "secondary.600",
       "--secondary-foreground": "#ffffff",
-      "--muted":                "gray.100",
-      "--muted-foreground":     "gray.500",
-      "--accent":               "gray.100",
-      "--accent-foreground":    "gray.950",
-      "--destructive":          "accents.red",
+      "--muted": "gray.100",
+      "--muted-foreground": "gray.500",
+      "--accent": "gray.100",
+      "--accent-foreground": "gray.950",
+      "--destructive": "accents.red",
       "--destructive-foreground": "#ffffff",
-      "--border":               "gray.200",
-      "--input":                "gray.200",
-      "--ring":                 "primary.600"
-    }
+      "--border": "gray.200",
+      "--input": "gray.200",
+      "--ring": "primary.600",
+    },
   },
 
   // ═══════════════════════════════════════════════════════════
@@ -139,20 +138,45 @@
       // The design uses a clean geometric sans-serif.
       // Inter is the closest free match and pairs well with shadcn.
       "sans": "'Inter', system-ui, -apple-system, sans-serif",
-      "mono": "'JetBrains Mono', 'Fira Code', monospace"
+      "mono": "'JetBrains Mono', 'Fira Code', monospace",
     },
     "scale": {
       // Sizes observed from the design (approximate)
-      "pageTitle":       { "size": "1.5rem",  "weight": 700, "lineHeight": 1.2, "tracking": "-0.02em" },
-      "sectionTitle":    { "size": "1.125rem","weight": 600, "lineHeight": 1.3, "tracking": "-0.01em" },
-      "cardTitle":       { "size": "0.875rem","weight": 600, "lineHeight": 1.4 },
-      "body":            { "size": "0.875rem","weight": 400, "lineHeight": 1.5 },
-      "bodySmall":       { "size": "0.8125rem","weight": 400,"lineHeight": 1.5 },
-      "label":           { "size": "0.75rem", "weight": 500, "lineHeight": 1.4, "tracking": "0.01em" },
-      "caption":         { "size": "0.6875rem","weight": 400,"lineHeight": 1.4, "color": "muted-foreground" },
-      "statNumber":      { "size": "1.75rem", "weight": 700, "lineHeight": 1.1 },
-      "code":            { "size": "0.8125rem","weight": 400,"lineHeight": 1.6, "fontFamily": "mono" }
-    }
+      "pageTitle": {
+        "size": "1.5rem",
+        "weight": 700,
+        "lineHeight": 1.2,
+        "tracking": "-0.02em",
+      },
+      "sectionTitle": {
+        "size": "1.125rem",
+        "weight": 600,
+        "lineHeight": 1.3,
+        "tracking": "-0.01em",
+      },
+      "cardTitle": { "size": "0.875rem", "weight": 600, "lineHeight": 1.4 },
+      "body": { "size": "0.875rem", "weight": 400, "lineHeight": 1.5 },
+      "bodySmall": { "size": "0.8125rem", "weight": 400, "lineHeight": 1.5 },
+      "label": {
+        "size": "0.75rem",
+        "weight": 500,
+        "lineHeight": 1.4,
+        "tracking": "0.01em",
+      },
+      "caption": {
+        "size": "0.6875rem",
+        "weight": 400,
+        "lineHeight": 1.4,
+        "color": "muted-foreground",
+      },
+      "statNumber": { "size": "1.75rem", "weight": 700, "lineHeight": 1.1 },
+      "code": {
+        "size": "0.8125rem",
+        "weight": 400,
+        "lineHeight": 1.6,
+        "fontFamily": "mono",
+      },
+    },
   },
 
   // ═══════════════════════════════════════════════════════════
@@ -162,21 +186,29 @@
   "spacing": {
     // The design uses generous padding inside cards and tight
     // gaps between elements — a "breathable but dense" feel.
-    "pagePadding":      { "desktop": "1.5rem", "tablet": "1rem", "mobile": "0.75rem" },
-    "cardPadding":      { "desktop": "1.25rem","tablet": "1rem", "mobile": "0.875rem" },
-    "sectionGap":       "1.5rem",  // between cards / major sections
-    "fieldGap":         "1rem",    // between form fields
-    "inlineGap":        "0.5rem"   // between inline elements (buttons, badges)
+    "pagePadding": {
+      "desktop": "1.5rem",
+      "tablet": "1rem",
+      "mobile": "0.75rem",
+    },
+    "cardPadding": {
+      "desktop": "1.25rem",
+      "tablet": "1rem",
+      "mobile": "0.875rem",
+    },
+    "sectionGap": "1.5rem", // between cards / major sections
+    "fieldGap": "1rem", // between form fields
+    "inlineGap": "0.5rem", // between inline elements (buttons, badges)
   },
 
   "radius": {
     // Cards in the design have notably large rounding (~16px).
     // Buttons and inputs are slightly less rounded.
-    "card":    "1rem",     // 16px — the dominant radius
-    "button":  "0.625rem", // 10px
-    "input":   "0.625rem",
-    "badge":   "9999px",   // fully rounded pill
-    "dialog":  "1rem"
+    "card": "1rem", // 16px — the dominant radius
+    "button": "0.625rem", // 10px
+    "input": "0.625rem",
+    "badge": "9999px", // fully rounded pill
+    "dialog": "1rem",
   },
 
   // ═══════════════════════════════════════════════════════════
@@ -187,52 +219,51 @@
   // transparency, soft borders, and layered depth.
 
   "surfaces": {
-
     "card": {
       "dark": {
-        "background":   "rgba(39, 35, 64, 0.6)",   // gray.800 at 60% — the glass effect
-        "backdropBlur":  "12px",
-        "border":       "1px solid rgba(59, 55, 81, 0.5)", // gray.700 at 50%
-        "shadow":       "0 4px 24px rgba(0, 0, 0, 0.25)"
+        "background": "rgba(39, 35, 64, 0.6)", // gray.800 at 60% — the glass effect
+        "backdropBlur": "12px",
+        "border": "1px solid rgba(59, 55, 81, 0.5)", // gray.700 at 50%
+        "shadow": "0 4px 24px rgba(0, 0, 0, 0.25)",
       },
       "light": {
-        "background":   "rgba(255, 255, 255, 0.8)",
-        "backdropBlur":  "12px",
-        "border":       "1px solid rgba(221, 219, 232, 0.6)", // gray.200 at 60%
-        "shadow":       "0 2px 12px rgba(15, 11, 36, 0.06)"
-      }
+        "background": "rgba(255, 255, 255, 0.8)",
+        "backdropBlur": "12px",
+        "border": "1px solid rgba(221, 219, 232, 0.6)", // gray.200 at 60%
+        "shadow": "0 2px 12px rgba(15, 11, 36, 0.06)",
+      },
     },
 
     "cardElevated": {
       // For the preview panel, dialogs, popovers — one step above card.
       "dark": {
-        "background":   "rgba(26, 22, 53, 0.85)",  // gray.900 at 85%
-        "backdropBlur":  "16px",
-        "border":       "1px solid rgba(59, 55, 81, 0.4)",
-        "shadow":       "0 8px 32px rgba(0, 0, 0, 0.4)"
+        "background": "rgba(26, 22, 53, 0.85)", // gray.900 at 85%
+        "backdropBlur": "16px",
+        "border": "1px solid rgba(59, 55, 81, 0.4)",
+        "shadow": "0 8px 32px rgba(0, 0, 0, 0.4)",
       },
       "light": {
-        "background":   "#ffffff",
-        "border":       "1px solid rgba(221, 219, 232, 0.8)",
-        "shadow":       "0 4px 20px rgba(15, 11, 36, 0.08)"
-      }
+        "background": "#ffffff",
+        "border": "1px solid rgba(221, 219, 232, 0.8)",
+        "shadow": "0 4px 20px rgba(15, 11, 36, 0.08)",
+      },
     },
 
     "input": {
       // Inputs in the design appear as recessed, darker surfaces.
       "dark": {
-        "background":   "rgba(15, 11, 36, 0.5)",   // gray.950 at 50%
-        "border":       "1px solid rgba(59, 55, 81, 0.4)",
-        "focusBorder":  "1px solid primary.500",
-        "focusRing":    "0 0 0 3px rgba(139, 92, 246, 0.25)" // violet glow
+        "background": "rgba(15, 11, 36, 0.5)", // gray.950 at 50%
+        "border": "1px solid rgba(59, 55, 81, 0.4)",
+        "focusBorder": "1px solid primary.500",
+        "focusRing": "0 0 0 3px rgba(139, 92, 246, 0.25)", // violet glow
       },
       "light": {
-        "background":   "#ffffff",
-        "border":       "1px solid gray.200",
-        "focusBorder":  "1px solid primary.600",
-        "focusRing":    "0 0 0 3px rgba(124, 58, 237, 0.15)"
-      }
-    }
+        "background": "#ffffff",
+        "border": "1px solid gray.200",
+        "focusBorder": "1px solid primary.600",
+        "focusRing": "0 0 0 3px rgba(124, 58, 237, 0.15)",
+      },
+    },
   },
 
   // ═══════════════════════════════════════════════════════════
@@ -243,12 +274,11 @@
   // These map to the wizard's stepper indicators and CTA buttons.
 
   "gradients": {
-
     "primaryButton": {
       // Main CTA gradient — the "Next" button, download buttons.
       "value": "linear-gradient(135deg, primary.600, secondary.500)",
       // #7c3aed → #d946ef
-      "hover": "linear-gradient(135deg, primary.500, secondary.400)"
+      "hover": "linear-gradient(135deg, primary.500, secondary.400)",
     },
 
     "warmCard": {
@@ -256,7 +286,7 @@
       // Use for: active/current step indicator background in stepper.
       "value": "linear-gradient(135deg, accents.orange, accents.rose, primary.500)",
       // #fb923c → #fb7185 → #8b5cf6
-      "note": "Apply at reduced opacity (30-40%) as a background wash, not full-strength on text surfaces."
+      "note": "Apply at reduced opacity (30-40%) as a background wash, not full-strength on text surfaces.",
     },
 
     "coolCard": {
@@ -264,22 +294,22 @@
       // Use for: preview panel header accent, export section highlight.
       "value": "linear-gradient(135deg, accents.cyan, primary.500, secondary.500)",
       // #22d3ee → #8b5cf6 → #d946ef
-      "note": "Used sparingly. Works well as a 2px top-border gradient on cards."
+      "note": "Used sparingly. Works well as a 2px top-border gradient on cards.",
     },
 
     "surfaceGlow": {
       // Subtle gradient overlay visible on the page background.
       // Creates depth — like ambient light in the upper-right area.
       "value": "radial-gradient(ellipse at 70% 10%, rgba(139, 92, 246, 0.12), transparent 60%)",
-      "note": "Apply to the page body or main content area in dark mode only. Omit in light mode."
+      "note": "Apply to the page body or main content area in dark mode only. Omit in light mode.",
     },
 
     "chartArea": {
       // The area-fill seen in the design's charts.
       // Use for: decorative background in the preview panel.
       "value": "linear-gradient(180deg, rgba(139, 92, 246, 0.3), rgba(217, 70, 239, 0.05))",
-      "note": "Vertical fade. Used as bg behind the code preview."
-    }
+      "note": "Vertical fade. Used as bg behind the code preview.",
+    },
   },
 
   // ═══════════════════════════════════════════════════════════
@@ -287,53 +317,52 @@
   // ═══════════════════════════════════════════════════════════
 
   "components": {
-
     "header": {
       "layout": "Full-width bar, sticky top. Left: app logo + title. Right: theme toggle + reset button.",
       "dark": {
         "background": "gray.900 with bottom border in gray.700 at 50% opacity",
-        "logo": "Small SVG icon in primary.400, app name in foreground at fontWeight 700"
+        "logo": "Small SVG icon in primary.400, app name in foreground at fontWeight 700",
       },
       "light": {
-        "background": "white with bottom border in gray.200"
+        "background": "white with bottom border in gray.200",
       },
-      "height": "3.5rem"
+      "height": "3.5rem",
     },
 
     "stepper": {
       "layout": "Horizontal, centered below header. Steps are pill-shaped buttons with number + label.",
       "step": {
         "default": {
-          "dark":  "bg transparent, text gray.400, number circle bg gray.700 text gray.400",
-          "light": "bg transparent, text gray.500, number circle bg gray.200 text gray.500"
+          "dark": "bg transparent, text gray.400, number circle bg gray.700 text gray.400",
+          "light": "bg transparent, text gray.500, number circle bg gray.200 text gray.500",
         },
         "active": {
-          "dark":  "bg primaryButton gradient, text white, number circle bg white/20 text white. Subtle glow shadow: 0 0 20px rgba(139,92,246,0.3).",
-          "light": "bg primaryButton gradient, text white, same glow but at 0.15 opacity."
+          "dark": "bg primaryButton gradient, text white, number circle bg white/20 text white. Subtle glow shadow: 0 0 20px rgba(139,92,246,0.3).",
+          "light": "bg primaryButton gradient, text white, same glow but at 0.15 opacity.",
         },
         "completed": {
-          "dark":  "bg gray.700, text foreground, number replaced with checkmark icon in accents.green",
-          "light": "bg gray.100, text foreground, checkmark in accents.green"
+          "dark": "bg gray.700, text foreground, number replaced with checkmark icon in accents.green",
+          "light": "bg gray.100, text foreground, checkmark in accents.green",
         },
         "error": {
-          "dark":  "bg accents.red at 15% opacity, text accents.red, number circle bg accents.red text white",
-          "light": "bg accents.red at 10% opacity, text accents.red"
-        }
+          "dark": "bg accents.red at 15% opacity, text accents.red, number circle bg accents.red text white",
+          "light": "bg accents.red at 10% opacity, text accents.red",
+        },
       },
       "connector": {
         // The line between steps.
-        "default":   "2px solid gray.700 (dark) / gray.200 (light)",
-        "completed": "2px solid accents.green"
-      }
+        "default": "2px solid gray.700 (dark) / gray.200 (light)",
+        "completed": "2px solid accents.green",
+      },
     },
 
     "formPanel": {
       "layout": "Left 60% on desktop. Scrollable. Cards stacked vertically.",
       "card": {
-        "style":  "Use surfaces.card. Large radius (1rem). Padding 1.25rem.",
+        "style": "Use surfaces.card. Large radius (1rem). Padding 1.25rem.",
         "header": "cardTitle size, no border below — clean flat look.",
-        "description": "caption style, muted-foreground color, below title with 0.25rem gap."
-      }
+        "description": "caption style, muted-foreground color, below title with 0.25rem gap.",
+      },
     },
 
     "previewPanel": {
@@ -342,63 +371,63 @@
       "codeBlock": {
         "dark": {
           "background": "gray.950 at 80% opacity",
-          "text":       "gray.300 for code, primary.400 for JSON keys, secondary.400 for strings",
-          "border":     "1px solid gray.700 at 30%"
+          "text": "gray.300 for code, primary.400 for JSON keys, secondary.400 for strings",
+          "border": "1px solid gray.700 at 30%",
         },
         "light": {
           "background": "gray.50",
-          "text":       "gray.900 for code, primary.700 for JSON keys, secondary.700 for strings",
-          "border":     "1px solid gray.200"
+          "text": "gray.900 for code, primary.700 for JSON keys, secondary.700 for strings",
+          "border": "1px solid gray.200",
         },
         "radius": "0.75rem",
         "padding": "1rem",
         "fontFamily": "mono",
-        "fontSize": "code scale"
-      }
+        "fontSize": "code scale",
+      },
     },
 
     "buttons": {
       "primary": {
-        "style":   "primaryButton gradient background. White text. Medium shadow.",
-        "hover":   "Shift gradient lighter (use hover variant). Increase shadow.",
+        "style": "primaryButton gradient background. White text. Medium shadow.",
+        "hover": "Shift gradient lighter (use hover variant). Increase shadow.",
         "padding": "0.5rem 1.25rem",
-        "radius":  "0.625rem",
+        "radius": "0.625rem",
         "fontSize": "0.875rem",
         "fontWeight": 600,
-        "transition": "all 200ms ease"
+        "transition": "all 200ms ease",
       },
       "secondary": {
         "dark": {
           "background": "gray.700",
-          "text":       "foreground",
-          "border":     "none",
-          "hover":      "gray.600"
+          "text": "foreground",
+          "border": "none",
+          "hover": "gray.600",
         },
         "light": {
           "background": "gray.100",
-          "text":       "foreground",
-          "hover":      "gray.200"
-        }
+          "text": "foreground",
+          "hover": "gray.200",
+        },
       },
       "ghost": {
         "background": "transparent",
         "hover": {
-          "dark":  "gray.800 at 50%",
-          "light": "gray.100"
-        }
+          "dark": "gray.800 at 50%",
+          "light": "gray.100",
+        },
       },
       "outline": {
         "dark": {
           "background": "transparent",
           "border": "1px solid gray.700",
-          "hover":  "gray.800"
+          "hover": "gray.800",
         },
         "light": {
           "background": "transparent",
           "border": "1px solid gray.200",
-          "hover":  "gray.50"
-        }
-      }
+          "hover": "gray.50",
+        },
+      },
     },
 
     "inputs": {
@@ -406,117 +435,117 @@
       "placeholder": "gray.500 (dark) / gray.400 (light)",
       "label": {
         "style": "label typography scale. Uppercase NOT used — sentence case.",
-        "gap":   "0.375rem below label to input"
+        "gap": "0.375rem below label to input",
       },
       "validation": {
         "error": {
           "border": "accents.red",
-          "message": "accents.red, caption scale, 0.25rem below input"
-        }
-      }
+          "message": "accents.red, caption scale, 0.25rem below input",
+        },
+      },
     },
 
     "select": {
       "style": "Same as input. Chevron icon in muted-foreground on right.",
-      "dropdown": "Use surfaces.cardElevated. Items highlight with gray.700 (dark) / gray.100 (light) on hover."
+      "dropdown": "Use surfaces.cardElevated. Items highlight with gray.700 (dark) / gray.100 (light) on hover.",
     },
 
     "textarea": {
-      "style": "Same border/bg as input. Min-height 80px. Resize vertical only."
+      "style": "Same border/bg as input. Min-height 80px. Resize vertical only.",
     },
 
     "accordion": {
       "trigger": {
-        "padding":  "0.75rem 0",
-        "text":     "cardTitle scale",
-        "chevron":  "muted-foreground, rotates 180deg on open, transition 200ms",
-        "border":   "bottom border gray.700 (dark) / gray.200 (light)"
+        "padding": "0.75rem 0",
+        "text": "cardTitle scale",
+        "chevron": "muted-foreground, rotates 180deg on open, transition 200ms",
+        "border": "bottom border gray.700 (dark) / gray.200 (light)",
       },
       "content": {
         "padding": "0 0 1rem 0",
-        "animation": "slide-down 200ms ease"
-      }
+        "animation": "slide-down 200ms ease",
+      },
     },
 
     "dialog": {
       "overlay": {
-        "dark":  "rgba(0, 0, 0, 0.7) with backdrop-blur 4px",
-        "light": "rgba(15, 11, 36, 0.3) with backdrop-blur 4px"
+        "dark": "rgba(0, 0, 0, 0.7) with backdrop-blur 4px",
+        "light": "rgba(15, 11, 36, 0.3) with backdrop-blur 4px",
       },
       "content": "Use surfaces.cardElevated. Max-width 32rem. Padding 1.5rem. Radius 1rem.",
-      "animation": "fade-in + scale from 95% to 100%, 150ms ease-out"
+      "animation": "fade-in + scale from 95% to 100%, 150ms ease-out",
     },
 
     "badge": {
       "style": "Pill shape (radius 9999px). Padding 0.125rem 0.625rem.",
       "variants": {
-        "default":  "bg primary.500 at 15% opacity, text primary.400 (dark) / primary.700 (light)",
-        "success":  "bg accents.green at 15%, text accents.green",
-        "error":    "bg accents.red at 15%, text accents.red",
-        "muted":    "bg gray.700 (dark) / gray.200 (light), text muted-foreground"
-      }
+        "default": "bg primary.500 at 15% opacity, text primary.400 (dark) / primary.700 (light)",
+        "success": "bg accents.green at 15%, text accents.green",
+        "error": "bg accents.red at 15%, text accents.red",
+        "muted": "bg gray.700 (dark) / gray.200 (light), text muted-foreground",
+      },
     },
 
     "codeEditor": {
       "description": "KQL editor (CodeMirror). Same styling as previewPanel.codeBlock.",
       "gutters": {
-        "dark":  "bg gray.900, text gray.500, border-right gray.700 at 30%",
-        "light": "bg gray.50, text gray.400, border-right gray.200"
+        "dark": "bg gray.900, text gray.500, border-right gray.700 at 30%",
+        "light": "bg gray.50, text gray.400, border-right gray.200",
       },
       "activeLine": {
-        "dark":  "bg primary.500 at 5%",
-        "light": "bg primary.100 at 40%"
+        "dark": "bg primary.500 at 5%",
+        "light": "bg primary.100 at 40%",
       },
       "cursor": "primary.400 (dark) / primary.600 (light)",
       "selection": {
-        "dark":  "primary.500 at 20%",
-        "light": "primary.200 at 50%"
-      }
+        "dark": "primary.500 at 20%",
+        "light": "primary.200 at 50%",
+      },
     },
 
     "resumeBanner": {
       "style": "Full-width bar above header.",
       "dark": {
         "background": "primary.500 at 10% with left border 3px solid primary.500",
-        "text":       "foreground"
+        "text": "foreground",
       },
       "light": {
         "background": "primary.100 with left border 3px solid primary.600",
-        "text":       "foreground"
-      }
+        "text": "foreground",
+      },
     },
 
     "mobilePreviewDrawer": {
-      "overlay":  "Same as dialog overlay.",
-      "sheet":    "Slides up from bottom. Uses surfaces.cardElevated. Top radius 1rem. Max-height 65vh.",
-      "handle":   "Centered 32×4px pill in gray.600 (dark) / gray.300 (light) at top, 0.75rem from edge."
+      "overlay": "Same as dialog overlay.",
+      "sheet": "Slides up from bottom. Uses surfaces.cardElevated. Top radius 1rem. Max-height 65vh.",
+      "handle": "Centered 32×4px pill in gray.600 (dark) / gray.300 (light) at top, 0.75rem from edge.",
     },
 
     "scrollbar": {
       "dark": {
         "track": "transparent",
         "thumb": "gray.700 at 50%",
-        "thumbHover": "gray.600"
+        "thumbHover": "gray.600",
       },
       "light": {
         "track": "transparent",
         "thumb": "gray.300",
-        "thumbHover": "gray.400"
+        "thumbHover": "gray.400",
       },
       "width": "6px",
-      "radius": "3px"
+      "radius": "3px",
     },
 
     "helpCollapsible": {
       "trigger": {
-        "icon":  "HelpCircle in muted-foreground, 16px",
-        "text":  "caption scale, muted-foreground",
-        "hover": "text transitions to foreground"
+        "icon": "HelpCircle in muted-foreground, 16px",
+        "text": "caption scale, muted-foreground",
+        "hover": "text transitions to foreground",
       },
       "content": {
-        "style": "Use surfaces.card but at reduced padding (1rem). Text in bodySmall scale, muted-foreground."
-      }
-    }
+        "style": "Use surfaces.card but at reduced padding (1rem). Text in bodySmall scale, muted-foreground.",
+      },
+    },
   },
 
   // ═══════════════════════════════════════════════════════════
@@ -524,15 +553,14 @@
   // ═══════════════════════════════════════════════════════════
 
   "breakpoints": {
-    "sm":  "640px",
-    "md":  "768px",
-    "lg":  "1024px",
-    "xl":  "1280px",
-    "2xl": "1536px"
+    "sm": "640px",
+    "md": "768px",
+    "lg": "1024px",
+    "xl": "1280px",
+    "2xl": "1536px",
   },
 
   "responsive": {
-
     "mobile": {
       "range": "< 640px (below sm)",
       "layout": [
@@ -540,8 +568,8 @@
         "Stepper: numbers only, no labels. Horizontally scrollable if needed.",
         "Header: title truncated or uses short variant. Reset button icon-only.",
         "Cards: full-width, reduced padding (0.875rem).",
-        "Form grids collapse to single column."
-      ]
+        "Form grids collapse to single column.",
+      ],
     },
 
     "tablet": {
@@ -551,8 +579,8 @@
         "Stepper: shows labels. All steps visible.",
         "Header: full title visible.",
         "Cards: full-width, standard padding (1rem).",
-        "Form grids: 2-column where used (e.g., publisherId + offerId side by side)."
-      ]
+        "Form grids: 2-column where used (e.g., publisherId + offerId side by side).",
+      ],
     },
 
     "desktop": {
@@ -562,17 +590,17 @@
         "Stepper: full labels, centered with connector lines.",
         "Header: full title + subtitle. Reset button shows text label.",
         "Cards: standard padding (1.25rem).",
-        "Preview panel: sticky to viewport height, thin coolCard gradient top border."
-      ]
+        "Preview panel: sticky to viewport height, thin coolCard gradient top border.",
+      ],
     },
 
     "wideDesktop": {
       "range": "1280px+ (xl and up)",
       "layout": [
         "Same as desktop. Max content width 1400px, centered. Slight increase in page padding.",
-        "Preview panel code block can show more columns without horizontal scroll."
-      ]
-    }
+        "Preview panel code block can show more columns without horizontal scroll.",
+      ],
+    },
   },
 
   // ═══════════════════════════════════════════════════════════
@@ -580,24 +608,24 @@
   // ═══════════════════════════════════════════════════════════
 
   "motion": {
-    "default":       "200ms ease",
-    "fast":          "150ms ease",
-    "slow":          "300ms ease-out",
+    "default": "200ms ease",
+    "fast": "150ms ease",
+    "slow": "300ms ease-out",
     "reducedMotion": "Respect prefers-reduced-motion. Disable transforms, keep opacity fades at 0ms.",
 
     "stepTransition": {
       "description": "When switching wizard steps, the outgoing step fades + slides left, incoming fades + slides from right.",
       "duration": "200ms",
-      "easing":   "ease-out",
-      "note":     "Subtle — only 8-12px of horizontal translation. Not a full page slide."
+      "easing": "ease-out",
+      "note": "Subtle — only 8-12px of horizontal translation. Not a full page slide.",
     },
 
     "cardHover": {
       "description": "Cards lift slightly on hover (translateY -1px) and border brightens.",
       "transform": "translateY(-1px)",
-      "shadow":    "Increase shadow spread by 4px",
-      "border":    "Brighten border opacity by 20%"
-    }
+      "shadow": "Increase shadow spread by 4px",
+      "border": "Brighten border opacity by 20%",
+    },
   },
 
   // ═══════════════════════════════════════════════════════════
@@ -605,14 +633,14 @@
   // ═══════════════════════════════════════════════════════════
 
   "icons": {
-    "library":    "lucide-react (already installed)",
+    "library": "lucide-react (already installed)",
     "size": {
-      "sm": "14px",  // inside buttons, badges
-      "md": "16px",  // default inline
-      "lg": "20px"   // standalone actions, FAB
+      "sm": "14px", // inside buttons, badges
+      "md": "16px", // default inline
+      "lg": "20px", // standalone actions, FAB
     },
     "strokeWidth": 1.75,
-    "color":       "currentColor — inherits from text color"
+    "color": "currentColor — inherits from text color",
   },
 
   // ═══════════════════════════════════════════════════════════
@@ -624,14 +652,14 @@
 
   "pageBackground": {
     "dark": {
-      "base":    "gray.950",  // #0f0b24
+      "base": "gray.950", // #0f0b24
       "overlay": "surfaceGlow gradient applied to body::before or a fixed div behind content",
-      "note":    "The glow is very subtle — do not overdo it. It should feel like ambient light, not a spotlight."
+      "note": "The glow is very subtle — do not overdo it. It should feel like ambient light, not a spotlight.",
     },
     "light": {
-      "base":    "gray.50",   // #f8f7fc
+      "base": "gray.50", // #f8f7fc
       "overlay": "none — clean flat background in light mode",
-      "note":    "Light mode is clean and minimal. The 'magic' lives in dark mode."
-    }
-  }
+      "note": "Light mode is clean and minimal. The 'magic' lives in dark mode.",
+    },
+  },
 }

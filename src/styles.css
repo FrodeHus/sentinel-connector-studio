@@ -144,13 +144,13 @@ body {
 
 /* ── Glassmorphism utility ──────────────────────────── */
 .glass-card {
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
 }
 
 .glass-elevated {
-  backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
 }
 
 /* ── Gradient utilities ─────────────────────────────── */

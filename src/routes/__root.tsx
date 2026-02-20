@@ -13,7 +13,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "Sentinel CCF Push Connector Solution Builder",
+        title: "Sentinel Connector Studio",
       },
     ],
     links: [

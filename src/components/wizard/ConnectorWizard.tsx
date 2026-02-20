@@ -20,12 +20,38 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChevronLeft, ChevronRight, Eye, EyeOff, RotateCcw, Moon, Sun, Github, FileText, Save, Upload } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  EyeOff,
+  RotateCcw,
+  Moon,
+  Sun,
+  Github,
+  FileText,
+  Save,
+  Upload,
+  Link,
+} from "lucide-react";
 import {
   connectorIdToTableName,
   tableNameToStreamName,
 } from "@/lib/naming"
-import { downloadProjectFile, readProjectFile } from "@/lib/persistence"
+import {
+  downloadProjectFile,
+  readProjectFile,
+  readProjectFromUrl,
+} from "@/lib/persistence";
 
 interface StepDef {
   id: string
@@ -124,6 +150,9 @@ export function ConnectorWizard() {
   const [visitedSteps, setVisitedSteps] = React.useState(new Set([0]))
   const [showPreview, setShowPreview] = React.useState(true)
   const [mobilePreview, setMobilePreview] = React.useState(false);
+  const [urlDialogOpen, setUrlDialogOpen] = React.useState(false);
+  const [projectUrl, setProjectUrl] = React.useState("");
+  const [isLoadingUrl, setIsLoadingUrl] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null)
 
   // Filter steps based on active connector's kind
@@ -190,6 +219,34 @@ export function ConnectorWizard() {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to load project file.";
       alert(errorMessage);
+    }
+  };
+
+  const handleLoadFromUrl = async () => {
+    if (!projectUrl.trim()) {
+      alert("Please enter a URL");
+      return;
+    }
+
+    setIsLoadingUrl(true);
+    try {
+      const state = await readProjectFromUrl(projectUrl.trim());
+      setUrlDialogOpen(false);
+      setProjectUrl("");
+
+      if (!confirm("This will replace your current configuration. Continue?")) {
+        return;
+      }
+
+      importAppState(state);
+      setCurrentStep(0);
+      setVisitedSteps(new Set([0]));
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to load project from URL.";
+      alert(errorMessage);
+    } finally {
+      setIsLoadingUrl(false);
     }
   };
 
@@ -323,6 +380,10 @@ export function ConnectorWizard() {
                   Load Project
                   <DropdownMenuShortcut>⌘O</DropdownMenuShortcut>
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setUrlDialogOpen(true)}>
+                  <Link className="w-4 h-4 mr-2" />
+                  Load from URL
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             <input
@@ -453,6 +514,52 @@ export function ConnectorWizard() {
           )}
         </div>
       </footer>
+
+      {/* Load from URL Dialog */}
+      <Dialog open={urlDialogOpen} onOpenChange={setUrlDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Load Project from URL</DialogTitle>
+            <DialogDescription>
+              Enter the URL of a project JSON file to load. Only HTTP and HTTPS
+              URLs are supported.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              type="url"
+              placeholder="https://example.com/project.json"
+              value={projectUrl}
+              onChange={(e) => setProjectUrl(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !isLoadingUrl) {
+                  handleLoadFromUrl();
+                }
+              }}
+              disabled={isLoadingUrl}
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setUrlDialogOpen(false);
+                setProjectUrl("");
+              }}
+              disabled={isLoadingUrl}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleLoadFromUrl}
+              disabled={isLoadingUrl || !projectUrl.trim()}
+            >
+              {isLoadingUrl ? "Loading..." : "Load Project"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

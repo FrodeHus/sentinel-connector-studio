@@ -1,7 +1,12 @@
 import { saveAs } from "file-saver";
 import type { AppState } from "./schemas";
 import { AppStateSchema } from "./schemas";
-import { CONFIG, validateProjectFile } from "@/config";
+import {
+  CONFIG,
+  validateProjectFile,
+  validateProjectUrl,
+  formatFileSize,
+} from "@/config";
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -105,6 +110,101 @@ export async function readProjectFile(file: File): Promise<AppState> {
   } catch (error) {
     throw new Error(
       `The file is not a valid project file. It does not match the expected format: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
+  }
+}
+
+/**
+ * Load project from a URL
+ * @param url URL to fetch the project JSON from
+ * @returns Parsed and validated AppState
+ * @throws Error if URL is invalid, fetch fails, or content is invalid
+ */
+export async function readProjectFromUrl(url: string): Promise<AppState> {
+  // Validate URL format and protocol
+  const urlValidation = validateProjectUrl(url);
+  if (!urlValidation.valid) {
+    throw new Error(urlValidation.error!);
+  }
+
+  let response: Response;
+  try {
+    // Fetch with timeout and no credentials for security
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+    response = await fetch(url, {
+      method: 'GET',
+      credentials: 'omit', // Don't send credentials for security
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch URL: ${response.status} ${response.statusText}`);
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        throw new Error('Request timed out. The URL took too long to respond.');
+      }
+      throw new Error(`Failed to fetch URL: ${error.message}`);
+    }
+    throw new Error('Failed to fetch URL: Unknown error');
+  }
+
+  // Verify content type
+  const contentType = response.headers.get('content-type');
+  if (contentType && !contentType.includes('application/json') && !contentType.includes('text/json')) {
+    console.warn(`Warning: Expected JSON content-type, got: ${contentType}`);
+  }
+
+  // Check content length before reading
+  const contentLength = response.headers.get('content-length');
+  if (contentLength) {
+    const size = parseInt(contentLength, 10);
+    if (size > CONFIG.MAX_FILE_SIZE_BYTES) {
+      throw new Error(
+        `Content is too large (${formatFileSize(size)}). Maximum allowed size is ${formatFileSize(CONFIG.MAX_FILE_SIZE_BYTES)}.`
+      );
+    }
+  }
+
+  // Read and parse response
+  let text: string;
+  try {
+    text = await response.text();
+    
+    // Check actual size after reading
+    const actualSize = new Blob([text]).size;
+    if (actualSize > CONFIG.MAX_FILE_SIZE_BYTES) {
+      throw new Error(
+        `Content is too large (${formatFileSize(actualSize)}). Maximum allowed size is ${formatFileSize(CONFIG.MAX_FILE_SIZE_BYTES)}.`
+      );
+    }
+  } catch (error) {
+    throw new Error(
+      `Failed to read response: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
+
+  // Parse JSON
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch (error) {
+    throw new Error(
+      `The response does not contain valid JSON: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
+
+  // Validate against schema
+  try {
+    return AppStateSchema.parse(parsed);
+  } catch (error) {
+    throw new Error(
+      `The response is not a valid project file. It does not match the expected format: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
   }
 }

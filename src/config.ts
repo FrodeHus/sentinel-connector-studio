@@ -124,3 +124,25 @@ export function validateProjectFile(file: File): { valid: boolean; error?: strin
   
   return { valid: true };
 }
+
+/** Validate URL for project import */
+export function validateProjectUrl(url: string): { valid: boolean; error?: string } {
+  try {
+    const parsedUrl = new URL(url);
+    
+    // Only allow http and https protocols
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+      return {
+        valid: false,
+        error: 'Invalid URL protocol. Only HTTP and HTTPS URLs are allowed.'
+      };
+    }
+    
+    return { valid: true };
+  } catch (error) {
+    return {
+      valid: false,
+      error: 'Invalid URL format.'
+    };
+  }
+}

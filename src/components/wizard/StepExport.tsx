@@ -54,8 +54,10 @@ export function StepExport() {
             </svg>
           </span>
           ) in the header to save or load your project configuration at any
-          time. Keyboard shortcuts: <kbd className="px-1.5 py-0.5 text-xs bg-muted rounded">⌘S</kbd> to
-          save, <kbd className="px-1.5 py-0.5 text-xs bg-muted rounded">⌘O</kbd> to open.
+          time. Keyboard shortcuts:{" "}
+          <kbd className="px-1.5 py-0.5 text-xs bg-muted rounded">⌘S</kbd> to
+          save, <kbd className="px-1.5 py-0.5 text-xs bg-muted rounded">⌘O</kbd>{" "}
+          to open.
         </p>
       </div>
 
@@ -128,6 +130,7 @@ export function StepExport() {
               <Label htmlFor="supportTier">Support Tier *</Label>
               <select
                 id="supportTier"
+                title="Select support tier"
                 value={solution.support.tier}
                 onChange={(e) =>
                   updateSolution({

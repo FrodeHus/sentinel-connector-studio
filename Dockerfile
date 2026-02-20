@@ -19,7 +19,10 @@ COPY . .
 RUN pnpm build
 
 # ── Stage 2: Serve ────────────────────────────────────────
-FROM nginx:1.27-alpine AS runtime
+FROM nginx:1.28-alpine AS runtime
+
+# Upgrade all Alpine packages to pick up security patches
+RUN apk upgrade --no-cache
 
 # Remove default nginx config and html
 RUN rm -rf /etc/nginx/conf.d/default.conf /usr/share/nginx/html/*

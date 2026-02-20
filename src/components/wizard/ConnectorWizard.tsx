@@ -191,13 +191,13 @@ export function ConnectorWizard() {
   }, [config.schema.tableName, config.dataFlow.streamName, updateDataFlow])
 
   // File operations handlers
-  const handleSaveProject = () => {
+  const handleSaveProject = React.useCallback(() => {
     downloadProjectFile({
       solution: config.solution,
       connectors,
       activeConnectorIndex,
-    })
-  }
+    });
+  }, [config.solution, connectors, activeConnectorIndex]);
 
   const handleLoadProject = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -254,19 +254,19 @@ export function ConnectorWizard() {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ctrl+S or Cmd+S to save
       if ((e.ctrlKey || e.metaKey) && e.key === "s") {
-        e.preventDefault()
-        handleSaveProject()
+        e.preventDefault();
+        handleSaveProject();
       }
       // Ctrl+O or Cmd+O to open
       if ((e.ctrlKey || e.metaKey) && e.key === "o") {
-        e.preventDefault()
-        fileInputRef.current?.click()
+        e.preventDefault();
+        fileInputRef.current?.click();
       }
-    }
+    };
 
-    document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [connectors, config, activeConnectorIndex])
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleSaveProject]);
 
   const steps: StepInfo[] = visibleSteps.map((step, i) => ({
     label: step.label,

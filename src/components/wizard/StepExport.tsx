@@ -1,6 +1,14 @@
 import * as React from "react"
 import { useConnectorConfig } from "@/hooks/useConnectorConfig"
-import { downloadSolutionZip, downloadIndividualFile } from "@/lib/download";
+import {
+  downloadSolutionZip,
+  downloadIndividualFile,
+  buildSolutionZip,
+  submitPackagingJob,
+  pollJobStatus,
+  downloadJobResult,
+} from "@/lib/download";
+import { saveAs } from "file-saver";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -21,6 +29,11 @@ import {
   FolderArchive,
   ChevronDown,
   HelpCircle,
+  Hammer,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
 } from "lucide-react";
 
 export function StepExport() {
@@ -32,6 +45,74 @@ export function StepExport() {
   } = useConnectorConfig();
   const { solution } = config;
   const [expanded, setExpanded] = React.useState(false);
+
+  // Packaging state
+  const [packagingStatus, setPackagingStatus] = React.useState<
+    "idle" | "submitting" | "queued" | "running" | "completed" | "failed" | "unavailable"
+  >("idle");
+  const [packagingError, setPackagingError] = React.useState<string | null>(null);
+  const abortRef = React.useRef(false);
+
+  const handleBuildTemplate = React.useCallback(async () => {
+    abortRef.current = false;
+    setPackagingStatus("submitting");
+    setPackagingError(null);
+
+    try {
+      const blob = await buildSolutionZip({
+        solution: config.solution,
+        connectors,
+        activeConnectorIndex,
+      });
+
+      if (abortRef.current) return;
+
+      let job;
+      try {
+        job = await submitPackagingJob(blob);
+      } catch (err) {
+        setPackagingStatus("unavailable");
+        setPackagingError(
+          err instanceof TypeError
+            ? "Packager sidecar is not running. Start it with: docker compose up packager"
+            : String(err instanceof Error ? err.message : err),
+        );
+        return;
+      }
+
+      if (abortRef.current) return;
+      setPackagingStatus("queued");
+
+      // Poll until terminal state
+      const { job_id, token } = job;
+      while (!abortRef.current) {
+        await new Promise((r) => setTimeout(r, 2000));
+        if (abortRef.current) return;
+
+        const status = await pollJobStatus(job_id, token);
+        setPackagingStatus(status.status);
+
+        if (status.status === "completed") {
+          const resultBlob = await downloadJobResult(job_id, token);
+          saveAs(resultBlob, "deployable-template.zip");
+          return;
+        }
+
+        if (status.status === "failed") {
+          setPackagingError(status.error || "Packaging failed");
+          return;
+        }
+      }
+    } catch (err) {
+      setPackagingStatus("failed");
+      setPackagingError(String(err instanceof Error ? err.message : err));
+    }
+  }, [config.solution, connectors, activeConnectorIndex]);
+
+  // Cancel polling on unmount
+  React.useEffect(() => {
+    return () => { abortRef.current = true; };
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -229,6 +310,51 @@ export function StepExport() {
             script after extracting to generate the deployable{" "}
             <code>mainTemplate.json</code>.
           </p>
+
+          <div className="border-t pt-3 mt-3">
+            <Button
+              onClick={handleBuildTemplate}
+              disabled={packagingStatus === "submitting" || packagingStatus === "queued" || packagingStatus === "running"}
+              variant="secondary"
+              className="w-full justify-start"
+              size="lg"
+            >
+              {(packagingStatus === "submitting" || packagingStatus === "queued" || packagingStatus === "running") ? (
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              ) : packagingStatus === "completed" ? (
+                <CheckCircle2 className="w-5 h-5 mr-2 text-green-600" />
+              ) : packagingStatus === "failed" ? (
+                <XCircle className="w-5 h-5 mr-2 text-destructive" />
+              ) : packagingStatus === "unavailable" ? (
+                <AlertTriangle className="w-5 h-5 mr-2 text-yellow-600" />
+              ) : (
+                <Hammer className="w-5 h-5 mr-2" />
+              )}
+              {packagingStatus === "submitting" && "Submitting..."}
+              {packagingStatus === "queued" && "Queued..."}
+              {packagingStatus === "running" && "Building template..."}
+              {packagingStatus === "completed" && "Build Deployable Template"}
+              {packagingStatus === "failed" && "Build Deployable Template (retry)"}
+              {packagingStatus === "unavailable" && "Build Deployable Template"}
+              {packagingStatus === "idle" && "Build Deployable Template"}
+            </Button>
+            {packagingStatus === "completed" && (
+              <p className="text-xs text-green-600 mt-1">
+                Template built successfully and downloaded.
+              </p>
+            )}
+            {(packagingStatus === "failed" || packagingStatus === "unavailable") && packagingError && (
+              <p className="text-xs text-destructive mt-1 whitespace-pre-wrap">
+                {packagingError}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">
+              Runs <code>createSolutionV3.ps1</code> in a sidecar container to
+              generate <code>mainTemplate.json</code> and{" "}
+              <code>createUiDefinition.json</code> directly. Requires the
+              packager sidecar to be running.
+            </p>
+          </div>
 
           <Collapsible open={expanded} onOpenChange={setExpanded}>
             <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-2 cursor-pointer">

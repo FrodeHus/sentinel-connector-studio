@@ -15,3 +15,5 @@ todos.json
 tmpclaude*-cwd
 nul
 .pnpm-debug.log
+.nwave/
+memory/

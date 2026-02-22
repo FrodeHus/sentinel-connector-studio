@@ -15,3 +15,22 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
+
+  packager:
+    build: ./packager
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - DAC_OVERRIDE
+    tmpfs:
+      - /tmp:size=512M
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8081/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

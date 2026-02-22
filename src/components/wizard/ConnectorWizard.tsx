@@ -13,6 +13,7 @@ import { StepContent } from "./StepContent"
 import { StepExport } from "./StepExport"
 import { ConnectorSidebar } from "./ConnectorSidebar"
 import { ArmTemplatePreview } from "@/components/preview/ArmTemplatePreview"
+import { ContentPreview } from "@/components/preview/ContentPreview"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -129,7 +130,6 @@ const ALL_STEPS: StepDef[] = [
   {
     id: "content",
     label: "Content",
-    badge: "Preview",
     component: StepContent,
     isValid: () => true,
     showSidebar: false,
@@ -522,7 +522,11 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
           <div
             className={`${showPreview ? "w-2/5 border-l border-border/50" : "w-0"} hidden lg:block overflow-auto p-6 bg-card/30 backdrop-blur-sm transition-all`}
           >
-            {showPreview && <ArmTemplatePreview />}
+            {showPreview && (
+              currentStepDef?.id === "content"
+                ? <ContentPreview />
+                : <ArmTemplatePreview />
+            )}
           </div>
         </div>
       </div>
@@ -536,7 +540,9 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
           />
           <div className="h-[60vh] glass-card bg-card border-t border-border/50 overflow-auto p-4 rounded-t-3xl">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-semibold text-lg">ARM Template Preview</h3>
+              <h3 className="font-semibold text-lg">
+                {currentStepDef?.id === "content" ? "YAML Preview" : "ARM Template Preview"}
+              </h3>
               <Button
                 variant="ghost"
                 size="sm"
@@ -545,7 +551,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
                 Close
               </Button>
             </div>
-            <ArmTemplatePreview />
+            {currentStepDef?.id === "content" ? <ContentPreview /> : <ArmTemplatePreview />}
           </div>
         </div>
       )}

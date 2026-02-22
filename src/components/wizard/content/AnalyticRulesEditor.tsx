@@ -143,6 +143,43 @@ export function AnalyticRulesEditor() {
     updateRule(ruleIndex, { tactics })
   }
 
+  const availableConnectors = connectors
+    .filter((c) => c.meta.connectorId)
+    .map((c) => ({
+      connectorId: c.meta.connectorId,
+      dataTypes: c.schema.tableName ? [c.schema.tableName] : [],
+      label: c.meta.title || c.meta.connectorId,
+    }))
+
+  const toggleConnector = (ruleIndex: number, connectorId: string) => {
+    const rule = analyticRules[ruleIndex]
+    const existing = rule.requiredDataConnectors.find(
+      (r) => r.connectorId === connectorId,
+    )
+    if (existing) {
+      updateRule(ruleIndex, {
+        requiredDataConnectors: rule.requiredDataConnectors.filter(
+          (r) => r.connectorId !== connectorId,
+        ),
+      })
+    } else {
+      const connector = availableConnectors.find(
+        (c) => c.connectorId === connectorId,
+      )
+      if (connector) {
+        updateRule(ruleIndex, {
+          requiredDataConnectors: [
+            ...rule.requiredDataConnectors,
+            {
+              connectorId: connector.connectorId,
+              dataTypes: connector.dataTypes,
+            },
+          ],
+        })
+      }
+    }
+  }
+
   const addEntityMapping = (ruleIndex: number) => {
     const rule = analyticRules[ruleIndex]
     const mapping: EntityMapping = {
@@ -543,6 +580,41 @@ export function AnalyticRulesEditor() {
                     </div>
                   ))}
                 </div>
+
+                {/* Required Data Connectors */}
+                {availableConnectors.length > 0 && (
+                  <div>
+                    <Label>Required Data Connectors</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {availableConnectors.map((c) => (
+                        <label
+                          key={c.connectorId}
+                          className="flex items-center gap-1.5 text-xs cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={rule.requiredDataConnectors.some(
+                              (r) => r.connectorId === c.connectorId,
+                            )}
+                            onChange={() =>
+                              toggleConnector(ruleIndex, c.connectorId)
+                            }
+                            className="rounded"
+                          />
+                          <span>{c.label}</span>
+                          {c.dataTypes.length > 0 && (
+                            <span className="text-muted-foreground">
+                              ({c.dataTypes.join(", ")})
+                            </span>
+                          )}
+                        </label>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Select which data connectors this rule depends on.
+                    </p>
+                  </div>
+                )}
 
                 {/* Version */}
                 <div className="grid grid-cols-2 gap-4">

@@ -1,4 +1,3 @@
-import * as React from "react"
 import { useConnectorConfig } from "@/hooks/useConnectorConfig"
 import { KqlEditor } from "@/components/kql-editor/KqlEditor"
 import { Input } from "@/components/ui/input"

@@ -240,6 +240,21 @@ body {
 .dark .json-bool { color: #60a5fa; }
 .dark .json-null { color: #8f8ba3; font-style: italic; }
 
+/* ── YAML syntax highlighting ─────────────────────── */
+.yaml-key { color: #7c3aed; }
+.yaml-string { color: #059669; }
+.yaml-number { color: #d97706; }
+.yaml-bool { color: #2563eb; }
+.yaml-comment { color: #6b7280; font-style: italic; }
+.yaml-punctuation { color: #9ca3af; }
+
+.dark .yaml-key { color: #a78bfa; }
+.dark .yaml-string { color: #34d399; }
+.dark .yaml-number { color: #fbbf24; }
+.dark .yaml-bool { color: #60a5fa; }
+.dark .yaml-comment { color: #8f8ba3; font-style: italic; }
+.dark .yaml-punctuation { color: #6b7280; }
+
 /* ── CodeMirror lint overrides ─────────────────────── */
 .cm-editor .cm-lintRange-warning {
   background-image: none;

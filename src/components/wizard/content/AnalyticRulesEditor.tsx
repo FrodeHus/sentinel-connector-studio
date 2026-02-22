@@ -1,17 +1,28 @@
+import * as React from "react"
 import { useConnectorConfig } from "@/hooks/useConnectorConfig"
 import { KqlEditor } from "@/components/kql-editor/KqlEditor"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Plus, Trash2 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Plus, Trash2, ClipboardPaste } from "lucide-react"
 import type { AnalyticRule, EntityMapping, EntityFieldMapping } from "@/lib/schemas"
+import { parseAnalyticRuleYaml } from "@/lib/yaml-import"
 
 const MITRE_TACTICS = [
   "InitialAccess",
@@ -60,6 +71,29 @@ const SEVERITY_COLORS: Record<string, "default" | "secondary" | "destructive" | 
 
 export function AnalyticRulesEditor() {
   const { analyticRules, updateAnalyticRules, connectors } = useConnectorConfig()
+  const [pasteDialogOpen, setPasteDialogOpen] = React.useState(false)
+  const [yamlText, setYamlText] = React.useState("")
+  const [parseError, setParseError] = React.useState("")
+
+  const handleImportYaml = () => {
+    setParseError("")
+    try {
+      const rule = parseAnalyticRuleYaml(yamlText)
+      updateAnalyticRules([...analyticRules, rule])
+      setYamlText("")
+      setPasteDialogOpen(false)
+    } catch (e) {
+      setParseError(e instanceof Error ? e.message : "Failed to parse YAML")
+    }
+  }
+
+  const handlePasteDialogClose = (open: boolean) => {
+    if (!open) {
+      setYamlText("")
+      setParseError("")
+    }
+    setPasteDialogOpen(open)
+  }
 
   const addRule = () => {
     const newRule: AnalyticRule = {
@@ -107,6 +141,43 @@ export function AnalyticRulesEditor() {
       ? rule.tactics.filter((t) => t !== tactic)
       : [...rule.tactics, tactic]
     updateRule(ruleIndex, { tactics })
+  }
+
+  const availableConnectors = connectors
+    .filter((c) => c.meta.connectorId)
+    .map((c) => ({
+      connectorId: c.meta.connectorId,
+      dataTypes: c.schema.tableName ? [c.schema.tableName] : [],
+      label: c.meta.title || c.meta.connectorId,
+    }))
+
+  const toggleConnector = (ruleIndex: number, connectorId: string) => {
+    const rule = analyticRules[ruleIndex]
+    const existing = rule.requiredDataConnectors.find(
+      (r) => r.connectorId === connectorId,
+    )
+    if (existing) {
+      updateRule(ruleIndex, {
+        requiredDataConnectors: rule.requiredDataConnectors.filter(
+          (r) => r.connectorId !== connectorId,
+        ),
+      })
+    } else {
+      const connector = availableConnectors.find(
+        (c) => c.connectorId === connectorId,
+      )
+      if (connector) {
+        updateRule(ruleIndex, {
+          requiredDataConnectors: [
+            ...rule.requiredDataConnectors,
+            {
+              connectorId: connector.connectorId,
+              dataTypes: connector.dataTypes,
+            },
+          ],
+        })
+      }
+    }
   }
 
   const addEntityMapping = (ruleIndex: number) => {
@@ -185,9 +256,14 @@ export function AnalyticRulesEditor() {
         <p className="text-sm text-muted-foreground">
           Define analytic rules for threat detection in your solution.
         </p>
-        <Button size="sm" onClick={addRule}>
-          <Plus className="w-4 h-4 mr-1" /> Add Rule
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => setPasteDialogOpen(true)}>
+            <ClipboardPaste className="w-4 h-4 mr-1" /> Paste YAML
+          </Button>
+          <Button size="sm" onClick={addRule}>
+            <Plus className="w-4 h-4 mr-1" /> Add Rule
+          </Button>
+        </div>
       </div>
 
       {analyticRules.length === 0 && (
@@ -505,6 +581,41 @@ export function AnalyticRulesEditor() {
                   ))}
                 </div>
 
+                {/* Required Data Connectors */}
+                {availableConnectors.length > 0 && (
+                  <div>
+                    <Label>Required Data Connectors</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {availableConnectors.map((c) => (
+                        <label
+                          key={c.connectorId}
+                          className="flex items-center gap-1.5 text-xs cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={rule.requiredDataConnectors.some(
+                              (r) => r.connectorId === c.connectorId,
+                            )}
+                            onChange={() =>
+                              toggleConnector(ruleIndex, c.connectorId)
+                            }
+                            className="rounded"
+                          />
+                          <span>{c.label}</span>
+                          {c.dataTypes.length > 0 && (
+                            <span className="text-muted-foreground">
+                              ({c.dataTypes.join(", ")})
+                            </span>
+                          )}
+                        </label>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Select which data connectors this rule depends on.
+                    </p>
+                  </div>
+                )}
+
                 {/* Version */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -534,6 +645,37 @@ export function AnalyticRulesEditor() {
           </AccordionItem>
         ))}
       </Accordion>
+
+      <Dialog open={pasteDialogOpen} onOpenChange={handlePasteDialogClose}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Import Analytic Rule from YAML</DialogTitle>
+            <DialogDescription>
+              Paste a Sentinel analytic rule YAML definition. Fields like name, severity, query, tactics, and entity mappings will be imported automatically.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Textarea
+              placeholder={"id: ...\nname: My Detection Rule\nseverity: Medium\nkind: Scheduled\nquery: |\n  MyTable_CL\n  | where ..."}
+              rows={12}
+              value={yamlText}
+              onChange={(e) => setYamlText(e.target.value)}
+              className="font-mono text-sm"
+            />
+            {parseError && (
+              <p className="text-sm text-destructive">{parseError}</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handlePasteDialogClose(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleImportYaml} disabled={!yamlText.trim()}>
+              Import
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

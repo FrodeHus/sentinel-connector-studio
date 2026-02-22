@@ -343,7 +343,7 @@ export function StepExport() {
       setPackagingStatus("failed");
       setPackagingError(String(err instanceof Error ? err.message : err));
     }
-  }, [config.solution, connectors, activeConnectorIndex]);
+  }, [config.solution, connectors, activeConnectorIndex, analyticRules, asimParsers]);
 
   // Cancel polling on unmount
   React.useEffect(() => {

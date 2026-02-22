@@ -1,9 +1,26 @@
-FROM mcr.microsoft.com/powershell:7.4-ubuntu-22.04
+FROM ubuntu:22.04
 
-# Install Python 3 and pip, then remove git after clone step
+ARG TARGETARCH
+ARG PWSH_VERSION=7.4.13
+
+# Install system dependencies
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3 python3-pip git ca-certificates && \
+    apt-get install -y --no-install-recommends \
+        python3 python3-pip git ca-certificates wget libicu70 && \
     rm -rf /var/lib/apt/lists/*
+
+# Install PowerShell from GitHub releases (supports amd64 and arm64)
+RUN case "$TARGETARCH" in \
+        arm64) PWSH_ARCH="arm64" ;; \
+        *)     PWSH_ARCH="x64" ;; \
+    esac && \
+    wget -q "https://github.com/PowerShell/PowerShell/releases/download/v${PWSH_VERSION}/powershell-${PWSH_VERSION}-linux-${PWSH_ARCH}.tar.gz" \
+        -O /tmp/pwsh.tar.gz && \
+    mkdir -p /opt/microsoft/powershell/7 && \
+    tar zxf /tmp/pwsh.tar.gz -C /opt/microsoft/powershell/7 && \
+    rm /tmp/pwsh.tar.gz && \
+    chmod +x /opt/microsoft/powershell/7/pwsh && \
+    ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
 
 # Install PowerShell YAML module
 RUN pwsh -Command "Install-Module -Name powershell-yaml -Force -Scope AllUsers"

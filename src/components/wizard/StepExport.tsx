@@ -267,6 +267,8 @@ export function StepExport() {
     connectors,
     activeConnectorIndex,
     updateSolution,
+    analyticRules,
+    asimParsers,
   } = useConnectorConfig();
   const { solution } = config;
   const [expanded, setExpanded] = React.useState(false);
@@ -295,6 +297,8 @@ export function StepExport() {
         solution: config.solution,
         connectors,
         activeConnectorIndex,
+        analyticRules,
+        asimParsers,
       });
 
       if (abortRef.current) return;
@@ -595,6 +599,8 @@ export function StepExport() {
                   solution: config.solution,
                   connectors,
                   activeConnectorIndex,
+                  analyticRules,
+                  asimParsers,
                 })
               }
               variant={packagerOnline ? "secondary" : "default"}

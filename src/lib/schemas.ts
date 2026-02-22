@@ -127,6 +127,50 @@ export const SolutionSchema = z.object({
   firstPublishDate: z.string().default(new Date().toISOString().split("T")[0]),
 });
 
+// --- Analytic Rules & ASIM Parsers ---
+
+export const EntityFieldMappingSchema = z.object({
+  identifier: z.string().default(""),
+  columnName: z.string().default(""),
+})
+
+export const EntityMappingSchema = z.object({
+  entityType: z.string().default(""),
+  fieldMappings: z.array(EntityFieldMappingSchema).default([]),
+})
+
+export const RequiredDataConnectorSchema = z.object({
+  connectorId: z.string().default(""),
+  dataTypes: z.array(z.string()).default([]),
+})
+
+export const AnalyticRuleSchema = z.object({
+  id: z.string().default(""),
+  name: z.string().default(""),
+  description: z.string().default(""),
+  severity: z.enum(["High", "Medium", "Low", "Informational"]).default("Medium"),
+  kind: z.enum(["Scheduled", "NRT"]).default("Scheduled"),
+  queryPeriod: z.string().default("PT5H"),
+  queryFrequency: z.string().default("PT5H"),
+  triggerOperator: z.enum(["GreaterThan", "LessThan", "Equal", "NotEqual"]).default("GreaterThan"),
+  triggerThreshold: z.number().default(0),
+  tactics: z.array(z.string()).default([]),
+  relevantTechniques: z.array(z.string()).default([]),
+  query: z.string().default(""),
+  entityMappings: z.array(EntityMappingSchema).default([]),
+  requiredDataConnectors: z.array(RequiredDataConnectorSchema).default([]),
+  version: z.string().default("1.0.0"),
+  enabled: z.boolean().default(true),
+})
+
+export const AsimParserSchema = z.object({
+  id: z.string().default(""),
+  name: z.string().default(""),
+  targetSchema: z.string().default(""),
+  query: z.string().default(""),
+  version: z.string().default("1.0.0"),
+})
+
 // --- REST API Poller (pull) connector schemas ---
 
 export const PollerAuthTypeSchema = z.enum(["Basic", "APIKey", "OAuth2"]).default("Basic")
@@ -263,6 +307,8 @@ export const AppStateSchema = z.object({
   solution: SolutionSchema.default({}),
   connectors: z.array(ConnectorDataSchema).default([ConnectorDataSchema.parse({})]),
   activeConnectorIndex: z.number().default(0),
+  analyticRules: z.array(AnalyticRuleSchema).default([]),
+  asimParsers: z.array(AsimParserSchema).default([]),
 })
 
 // --- Inferred types ---
@@ -288,3 +334,7 @@ export type PollerConfig = z.infer<typeof PollerConfigSchema>
 export type ConnectorConfig = z.infer<typeof ConnectorConfigSchema>
 export type ConnectorData = z.infer<typeof ConnectorDataSchema>
 export type AppState = z.infer<typeof AppStateSchema>
+export type EntityFieldMapping = z.infer<typeof EntityFieldMappingSchema>
+export type EntityMapping = z.infer<typeof EntityMappingSchema>
+export type AnalyticRule = z.infer<typeof AnalyticRuleSchema>
+export type AsimParser = z.infer<typeof AsimParserSchema>

@@ -6,6 +6,7 @@ import { generateDcrResource } from "./arm-resources/dcr";
 import { generateConnectorDefinition } from "./arm-resources/connector-def";
 import { generateDataConnector } from "./arm-resources/data-connector";
 import { connectorIdToDcrName } from "./naming";
+import { generateAnalyticRuleYaml, generateAsimParserYaml } from "./content-export";
 
 const PACKAGER_URL = import.meta.env.VITE_PACKAGER_URL || "/api/packager";
 
@@ -43,7 +44,7 @@ export function downloadIndividualFile(
 }
 
 export async function buildSolutionZip(appState: AppState): Promise<Blob> {
-  const { solution, connectors } = appState;
+  const { solution, connectors, analyticRules, asimParsers } = appState;
   const solutionName =
     solution.name || connectors[0]?.meta.connectorId || "MySolution";
   const zip = new JSZip();
@@ -51,6 +52,8 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
   const root = zip.folder(solutionName)!;
   const dataConnectorsFolder = root.folder("Data Connectors")!;
   const connectorPaths: string[] = [];
+  const analyticRulePaths: string[] = [];
+  const parserPaths: string[] = [];
 
   // Generate files for each connector
   for (const connector of connectors) {
@@ -86,6 +89,26 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
     );
   }
 
+  // Generate analytic rules
+  if (analyticRules.length > 0) {
+    const rulesFolder = root.folder("Analytic Rules")!;
+    for (const rule of analyticRules) {
+      const safeName = (rule.name || rule.id).replace(/[^a-zA-Z0-9_-]/g, "_");
+      rulesFolder.file(`${safeName}.yaml`, generateAnalyticRuleYaml(rule));
+      analyticRulePaths.push(`Analytic Rules/${safeName}.yaml`);
+    }
+  }
+
+  // Generate ASIM parsers
+  if (asimParsers.length > 0) {
+    const parsersFolder = root.folder("Parsers")!;
+    for (const parser of asimParsers) {
+      const safeName = (parser.name || parser.id).replace(/[^a-zA-Z0-9_-]/g, "_");
+      parsersFolder.file(`${safeName}.yaml`, generateAsimParserYaml(parser));
+      parserPaths.push(`Parsers/${safeName}.yaml`);
+    }
+  }
+
   // Data folder with solution metadata
   const dataFolder = root.folder("Data")!;
   const firstConnector = connectors[0];
@@ -95,6 +118,8 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
     Logo: firstConnector?.meta.logo ?? "",
     Description: firstConnector?.meta.descriptionMarkdown || "",
     "Data Connectors": connectorPaths,
+    ...(analyticRulePaths.length > 0 && { "Analytic Rules": analyticRulePaths }),
+    ...(parserPaths.length > 0 && { Parsers: parserPaths }),
     BasePath: `C:\\GitHub\\Azure-Sentinel\\Solutions\\${solutionName}`,
     Version: solution.version,
     Metadata: "SolutionMetadata.json",

@@ -1,5 +1,5 @@
 import * as React from "react"
-import type { ConnectorConfig, ConnectorData, AppState, PollerConfig } from "@/lib/schemas"
+import type { ConnectorConfig, ConnectorData, AppState, PollerConfig, AnalyticRule, AsimParser } from "@/lib/schemas"
 import { ConnectorDataSchema, AppStateSchema, PollerConfigSchema } from "@/lib/schemas"
 import { saveConfig, loadConfig, clearConfig } from "@/lib/persistence"
 
@@ -25,6 +25,12 @@ interface ConnectorConfigContextValue {
   addConnector: () => void
   removeConnector: (index: number) => void
   setActiveConnector: (index: number) => void
+
+  // Content: analytic rules & ASIM parsers
+  analyticRules: AnalyticRule[]
+  asimParsers: AsimParser[]
+  updateAnalyticRules: (rules: AnalyticRule[]) => void
+  updateAsimParsers: (parsers: AsimParser[]) => void
 }
 
 const ConnectorConfigContext = React.createContext<ConnectorConfigContextValue | null>(null)
@@ -181,6 +187,14 @@ export function ConnectorConfigProvider({ children }: { children: React.ReactNod
     })
   }, [])
 
+  const updateAnalyticRules = React.useCallback((rules: AnalyticRule[]) => {
+    setAppState((prev) => ({ ...prev, analyticRules: rules }))
+  }, [])
+
+  const updateAsimParsers = React.useCallback((parsers: AsimParser[]) => {
+    setAppState((prev) => ({ ...prev, asimParsers: parsers }))
+  }, [])
+
   const reset = React.useCallback(() => {
     clearConfig()
     setAppState(createDefaultAppState())
@@ -224,6 +238,10 @@ export function ConnectorConfigProvider({ children }: { children: React.ReactNod
       addConnector,
       removeConnector,
       setActiveConnector,
+      analyticRules: appState.analyticRules,
+      asimParsers: appState.asimParsers,
+      updateAnalyticRules,
+      updateAsimParsers,
     }),
     [
       config,
@@ -244,6 +262,10 @@ export function ConnectorConfigProvider({ children }: { children: React.ReactNod
       addConnector,
       removeConnector,
       setActiveConnector,
+      appState.analyticRules,
+      appState.asimParsers,
+      updateAnalyticRules,
+      updateAsimParsers,
     ],
   )
 

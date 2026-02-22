@@ -5,6 +5,7 @@ export interface StepInfo {
   label: string
   isValid: boolean
   isVisited: boolean
+  badge?: string
 }
 
 interface StepperProps {
@@ -62,6 +63,16 @@ export function Stepper({ steps, currentStep, onStepClick }: StepperProps) {
                 )}
               </span>
               <span className="hidden sm:inline">{step.label}</span>
+              {step.badge && (
+                <span className={cn(
+                  "hidden sm:inline text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded-md leading-none border",
+                  isCurrent
+                    ? "bg-white/20 text-white border-white/30"
+                    : "bg-primary/15 text-primary border-primary/30",
+                )}>
+                  {step.badge}
+                </span>
+              )}
             </button>
             {index < steps.length - 1 && (
               <div

@@ -9,6 +9,7 @@ import { StepSchema } from "./StepSchema"
 import { StepDcr } from "./StepDcr"
 import { StepApiConfig } from "./StepApiConfig"
 import { StepConnectorUI } from "./StepConnectorUI"
+import { StepContent } from "./StepContent"
 import { StepExport } from "./StepExport"
 import { ConnectorSidebar } from "./ConnectorSidebar"
 import { ArmTemplatePreview } from "@/components/preview/ArmTemplatePreview"
@@ -59,6 +60,7 @@ interface StepDef {
   isValid: (connectors: ConnectorData[], config: ReturnType<typeof useConnectorConfig>["config"]) => boolean
   showSidebar: boolean
   kinds?: ConnectorKind[]
+  badge?: string
 }
 
 const ALL_STEPS: StepDef[] = [
@@ -125,6 +127,14 @@ const ALL_STEPS: StepDef[] = [
     showSidebar: true,
   },
   {
+    id: "content",
+    label: "Content",
+    badge: "Preview",
+    component: StepContent,
+    isValid: () => true,
+    showSidebar: false,
+  },
+  {
     id: "export",
     label: "Export",
     component: StepExport,
@@ -157,6 +167,8 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
     removeConnector,
     setActiveConnector,
     importAppState,
+    analyticRules,
+    asimParsers,
   } = hookValue;
   const { theme, toggleTheme } = useTheme();
   const [currentStep, setCurrentStep] = React.useState(0);
@@ -259,8 +271,10 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
       solution: config.solution,
       connectors,
       activeConnectorIndex,
+      analyticRules,
+      asimParsers,
     });
-  }, [config.solution, connectors, activeConnectorIndex]);
+  }, [config.solution, connectors, activeConnectorIndex, analyticRules, asimParsers]);
 
   const handleLoadProject = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -335,6 +349,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
     label: step.label,
     isValid: step.isValid(connectors, config),
     isVisited: visitedSteps.has(i),
+    badge: step.badge,
   }));
 
   const handleNext = () => {

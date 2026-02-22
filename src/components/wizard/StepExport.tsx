@@ -41,7 +41,6 @@ import {
   Loader2,
   CheckCircle2,
   XCircle,
-  AlertTriangle,
   Terminal,
   Globe,
 } from "lucide-react";

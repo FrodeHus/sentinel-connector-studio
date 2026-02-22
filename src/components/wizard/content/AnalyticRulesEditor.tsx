@@ -1,17 +1,28 @@
+import * as React from "react"
 import { useConnectorConfig } from "@/hooks/useConnectorConfig"
 import { KqlEditor } from "@/components/kql-editor/KqlEditor"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Plus, Trash2 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Plus, Trash2, ClipboardPaste } from "lucide-react"
 import type { AnalyticRule, EntityMapping, EntityFieldMapping } from "@/lib/schemas"
+import { parseAnalyticRuleYaml } from "@/lib/yaml-import"
 
 const MITRE_TACTICS = [
   "InitialAccess",
@@ -60,6 +71,29 @@ const SEVERITY_COLORS: Record<string, "default" | "secondary" | "destructive" | 
 
 export function AnalyticRulesEditor() {
   const { analyticRules, updateAnalyticRules, connectors } = useConnectorConfig()
+  const [pasteDialogOpen, setPasteDialogOpen] = React.useState(false)
+  const [yamlText, setYamlText] = React.useState("")
+  const [parseError, setParseError] = React.useState("")
+
+  const handleImportYaml = () => {
+    setParseError("")
+    try {
+      const rule = parseAnalyticRuleYaml(yamlText)
+      updateAnalyticRules([...analyticRules, rule])
+      setYamlText("")
+      setPasteDialogOpen(false)
+    } catch (e) {
+      setParseError(e instanceof Error ? e.message : "Failed to parse YAML")
+    }
+  }
+
+  const handlePasteDialogClose = (open: boolean) => {
+    if (!open) {
+      setYamlText("")
+      setParseError("")
+    }
+    setPasteDialogOpen(open)
+  }
 
   const addRule = () => {
     const newRule: AnalyticRule = {
@@ -185,9 +219,14 @@ export function AnalyticRulesEditor() {
         <p className="text-sm text-muted-foreground">
           Define analytic rules for threat detection in your solution.
         </p>
-        <Button size="sm" onClick={addRule}>
-          <Plus className="w-4 h-4 mr-1" /> Add Rule
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => setPasteDialogOpen(true)}>
+            <ClipboardPaste className="w-4 h-4 mr-1" /> Paste YAML
+          </Button>
+          <Button size="sm" onClick={addRule}>
+            <Plus className="w-4 h-4 mr-1" /> Add Rule
+          </Button>
+        </div>
       </div>
 
       {analyticRules.length === 0 && (
@@ -534,6 +573,37 @@ export function AnalyticRulesEditor() {
           </AccordionItem>
         ))}
       </Accordion>
+
+      <Dialog open={pasteDialogOpen} onOpenChange={handlePasteDialogClose}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Import Analytic Rule from YAML</DialogTitle>
+            <DialogDescription>
+              Paste a Sentinel analytic rule YAML definition. Fields like name, severity, query, tactics, and entity mappings will be imported automatically.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Textarea
+              placeholder={"id: ...\nname: My Detection Rule\nseverity: Medium\nkind: Scheduled\nquery: |\n  MyTable_CL\n  | where ..."}
+              rows={12}
+              value={yamlText}
+              onChange={(e) => setYamlText(e.target.value)}
+              className="font-mono text-sm"
+            />
+            {parseError && (
+              <p className="text-sm text-destructive">{parseError}</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handlePasteDialogClose(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleImportYaml} disabled={!yamlText.trim()}>
+              Import
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

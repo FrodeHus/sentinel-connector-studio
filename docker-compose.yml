@@ -15,11 +15,14 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    networks:
+      - internal
+    depends_on:
+      packager:
+        condition: service_healthy
 
   packager:
     build: ./packager
-    ports:
-      - "8081:8081"
     restart: unless-stopped
     read_only: true
     security_opt:
@@ -31,8 +34,14 @@ services:
     tmpfs:
       - /tmp:size=512M
       - /home/packager:size=1M
+    networks:
+      - internal
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8081/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
+
+networks:
+  internal:
+    driver: bridge

@@ -42,47 +42,24 @@ export function ArmTemplatePreview() {
   const { config } = useConnectorConfig();
   const [copied, setCopied] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<FileTab>("table.json");
-  const [content, setContent] = React.useState<Record<FileTab, string>>({
-    "table.json": "",
-    "DCR.json": "",
-    "connectorDefinition.json": "",
-    "dataConnector.json": "",
-  });
-
-  React.useEffect(() => {
+  const content = React.useMemo<Record<FileTab, string>>(() => {
     try {
       const { meta, schema, dataFlow, connectorUI } = config;
       const dcrName = connectorIdToDcrName(meta.connectorId, meta.connectorKind);
-      setContent({
-        "table.json": JSON.stringify(
-          generateTableResource(schema, ""),
-          null,
-          2,
-        ),
-        "DCR.json": JSON.stringify(
-          generateDcrResource(schema, dataFlow, dcrName),
-          null,
-          2,
-        ),
-        "connectorDefinition.json": JSON.stringify(
-          generateConnectorDefinition(meta, schema, connectorUI),
-          null,
-          2,
-        ),
-        "dataConnector.json": JSON.stringify(
-          generateDataConnector(meta, dataFlow, config.pollerConfig),
-          null,
-          2,
-        ),
-      });
+      return {
+        "table.json": JSON.stringify(generateTableResource(schema, ""), null, 2),
+        "DCR.json": JSON.stringify(generateDcrResource(schema, dataFlow, dcrName), null, 2),
+        "connectorDefinition.json": JSON.stringify(generateConnectorDefinition(meta, schema, connectorUI), null, 2),
+        "dataConnector.json": JSON.stringify(generateDataConnector(meta, dataFlow, config.pollerConfig), null, 2),
+      };
     } catch (error) {
       const msg = `// Error generating template:\n// ${error instanceof Error ? error.message : String(error)}`;
-      setContent({
+      return {
         "table.json": msg,
         "DCR.json": msg,
         "connectorDefinition.json": msg,
         "dataConnector.json": msg,
-      });
+      };
     }
   }, [config]);
 

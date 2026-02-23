@@ -45,11 +45,13 @@ function normalizeEntityMappings(value: unknown): AnalyticRule["entityMappings"]
   return value
     .filter((m): m is Record<string, unknown> => m != null && typeof m === "object")
     .map((m) => ({
+      id: crypto.randomUUID(),
       entityType: typeof m.entityType === "string" ? m.entityType : "",
       fieldMappings: Array.isArray(m.fieldMappings)
         ? m.fieldMappings
             .filter((f): f is Record<string, unknown> => f != null && typeof f === "object")
             .map((f) => ({
+              id: crypto.randomUUID(),
               identifier: typeof f.identifier === "string" ? f.identifier : "",
               columnName: typeof f.columnName === "string" ? f.columnName : "",
             }))

@@ -1,4 +1,3 @@
-import * as React from "react"
 import { KqlEditor } from "@/components/kql-editor/KqlEditor"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"

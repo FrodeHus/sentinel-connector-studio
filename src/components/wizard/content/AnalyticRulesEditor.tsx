@@ -581,7 +581,6 @@ export function AnalyticRulesEditor() {
                           const projectCols = extractProjectColumns(rule.query)
                           return mapping.fieldMappings.map((fm, fieldIndex) => {
                             const isIdentifierCustom = identifierOptions.length > 0 && !identifierOptions.includes(fm.identifier) && fm.identifier !== ""
-                            const isColumnCustom = projectCols.length > 0 && !projectCols.includes(fm.columnName) && fm.columnName !== ""
                             return (
                           <div
                             key={fieldIndex}
@@ -631,50 +630,39 @@ export function AnalyticRulesEditor() {
                                 />
                               </div>
                             )}
-                            <div className="flex-1 min-w-0">
-                              {projectCols.length > 0 ? (
+                            {projectCols.length > 0 && (
+                              <div className="flex-1 min-w-0">
                                 <select
                                   className="flex h-8 w-full rounded-xl border border-border/50 bg-card px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                                  value={isColumnCustom ? "__custom__" : fm.columnName}
+                                  value={projectCols.includes(fm.columnName) ? fm.columnName : ""}
                                   onChange={(e) => {
-                                    const val = e.target.value
-                                    updateFieldMapping(
-                                      ruleIndex,
-                                      mappingIndex,
-                                      fieldIndex,
-                                      { columnName: val === "__custom__" ? "" : val },
-                                    )
+                                    if (e.target.value) {
+                                      updateFieldMapping(
+                                        ruleIndex,
+                                        mappingIndex,
+                                        fieldIndex,
+                                        { columnName: e.target.value },
+                                      )
+                                    }
                                   }}
                                 >
-                                  <option value="" disabled>Select column...</option>
+                                  <option value="">Pick from query...</option>
                                   {projectCols.map((col) => (
                                     <option key={col} value={col}>{col}</option>
                                   ))}
-                                  <option value="__custom__">Custom...</option>
                                 </select>
-                              ) : (
-                                <Input
-                                  className="h-8 text-xs"
-                                  value={fm.columnName}
-                                  onChange={(e) =>
-                                    updateFieldMapping(ruleIndex, mappingIndex, fieldIndex, { columnName: e.target.value })
-                                  }
-                                  placeholder="Column Name"
-                                />
-                              )}
-                            </div>
-                            {isColumnCustom && (
-                              <div className="flex-1 min-w-0">
-                                <Input
-                                  className="h-8 text-xs"
-                                  value={fm.columnName}
-                                  onChange={(e) =>
-                                    updateFieldMapping(ruleIndex, mappingIndex, fieldIndex, { columnName: e.target.value })
-                                  }
-                                  placeholder="Custom column name"
-                                />
                               </div>
                             )}
+                            <div className="flex-1 min-w-0">
+                              <Input
+                                className="h-8 text-xs"
+                                value={fm.columnName}
+                                onChange={(e) =>
+                                  updateFieldMapping(ruleIndex, mappingIndex, fieldIndex, { columnName: e.target.value })
+                                }
+                                placeholder="Column Name"
+                              />
+                            </div>
                             <Button
                               size="icon"
                               variant="ghost"

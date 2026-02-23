@@ -1,0 +1,423 @@
+{
+  "solution": {
+    "name": "Reothor Secure Solution",
+    "publisherId": "reothorlabs",
+    "offerId": "reothorlabs-secure-solution",
+    "version": "1.0.0",
+    "categories": {
+      "domains": [
+        "Security - Threat Protection"
+      ],
+      "verticals": []
+    },
+    "support": {
+      "name": "Reothor Support",
+      "email": "support@reothor.no",
+      "tier": "Community",
+      "link": "https://www.frodehus.dev"
+    },
+    "firstPublishDate": "2026-02-20"
+  },
+  "connectors": [
+    {
+      "meta": {
+        "connectorId": "ReothorSecureAppAudit",
+        "title": "Reothor Secure App Audit",
+        "publisher": "Reothor Labs",
+        "descriptionMarkdown": "This is a sample data connector using push CCF",
+        "logo": "",
+        "connectorKind": "Push"
+      },
+      "schema": {
+        "tableName": "ReothorSecureAppAudit_CL",
+        "columns": [
+          {
+            "name": "TimeGenerated",
+            "type": "datetime"
+          },
+          {
+            "name": "Timestamp",
+            "type": "datetime"
+          },
+          {
+            "name": "EventId",
+            "type": "string"
+          },
+          {
+            "name": "EventName",
+            "type": "string"
+          },
+          {
+            "name": "Status",
+            "type": "string"
+          },
+          {
+            "name": "Actor",
+            "type": "dynamic"
+          },
+          {
+            "name": "Target",
+            "type": "dynamic"
+          },
+          {
+            "name": "EventData",
+            "type": "dynamic"
+          },
+          {
+            "name": "Meta",
+            "type": "dynamic"
+          }
+        ]
+      },
+      "dataFlow": {
+        "streamName": "Custom-ReothorSecureAppAudit",
+        "transformKql": "source | extend TimeGenerated = now()",
+        "inputColumnsOverride": false,
+        "inputColumns": []
+      },
+      "connectorUI": {
+        "graphQueries": [
+          {
+            "metricName": "Total events received",
+            "legend": "Events",
+            "baseQuery": "{{graphQueriesTableName}}"
+          }
+        ],
+        "sampleQueries": [
+          {
+            "description": "All events",
+            "query": "ReothorSecureApp_CL\n| sort by TimeGenerated desc\n| take 10"
+          },
+          {
+            "description": "Events by Action",
+            "query": "ReothorSecureApp_CL\n| summarize count() by Action\n| sort by count_ desc"
+          }
+        ],
+        "connectivityCriteria": [
+          {
+            "type": "IsConnectedQuery",
+            "value": [
+              "ReothorSecureApp_CL\n| summarize LastLogReceived = max(TimeGenerated)\n| project IsConnected = LastLogReceived > ago(30d)"
+            ]
+          }
+        ],
+        "permissions": {
+          "resourceProvider": [
+            {
+              "provider": "Microsoft.OperationalInsights/workspaces",
+              "permissionsDisplayText": "Read and Write permissions on the Log Analytics workspace.",
+              "providerDisplayName": "Workspace",
+              "scope": "Workspace",
+              "requiredPermissions": {
+                "write": true,
+                "read": true,
+                "delete": false,
+                "action": false
+              }
+            },
+            {
+              "provider": "Microsoft.OperationalInsights/workspaces/sharedKeys",
+              "permissionsDisplayText": "Read permissions to shared keys for the workspace.",
+              "providerDisplayName": "Keys",
+              "scope": "Workspace",
+              "requiredPermissions": {
+                "write": false,
+                "read": true,
+                "delete": false,
+                "action": true
+              }
+            }
+          ],
+          "customs": [
+            {
+              "name": "Microsoft Entra application",
+              "description": "Permissions to create or use an existing Microsoft Entra application for data ingestion."
+            },
+            {
+              "name": "Azure RBAC",
+              "description": "Monitoring Metrics Publisher role assignment on the Data Collection Rule resource."
+            }
+          ]
+        },
+        "instructionSteps": [
+          {
+            "title": "Deploy the Push Connector",
+            "description": "Click the **Deploy to Azure** button below to deploy the required resources.",
+            "instructions": [
+              {
+                "type": "DeployPushConnectorButton",
+                "parameters": {
+                  "label": "Deploy ReothorSecureApp Push connector resources",
+                  "applicationDisplayName": "ReothorSecureApp Push Connector Application"
+                }
+              }
+            ]
+          },
+          {
+            "title": "Configure Your Application",
+            "description": "Use the following connection details to configure your application to send data to this connector.",
+            "instructions": [
+              {
+                "type": "CopyableLabel",
+                "parameters": {
+                  "label": "Tenant ID",
+                  "fillWith": [
+                    "TenantId"
+                  ],
+                  "isBlankValueEnabled": true
+                }
+              },
+              {
+                "type": "CopyableLabel",
+                "parameters": {
+                  "label": "Application (Client) ID",
+                  "fillWith": [
+                    "ApplicationId"
+                  ],
+                  "isBlankValueEnabled": true
+                }
+              },
+              {
+                "type": "CopyableLabel",
+                "parameters": {
+                  "label": "Application Client Secret",
+                  "fillWith": [
+                    "ApplicationSecret"
+                  ],
+                  "isBlankValueEnabled": true
+                }
+              },
+              {
+                "type": "CopyableLabel",
+                "parameters": {
+                  "label": "Data Collection Endpoint",
+                  "fillWith": [
+                    "DataCollectionEndpoint"
+                  ],
+                  "isBlankValueEnabled": true
+                }
+              },
+              {
+                "type": "CopyableLabel",
+                "parameters": {
+                  "label": "Data Collection Rule ID",
+                  "fillWith": [
+                    "DataCollectionRuleId"
+                  ],
+                  "isBlankValueEnabled": true
+                }
+              },
+              {
+                "type": "CopyableLabel",
+                "parameters": {
+                  "label": "Stream Name",
+                  "value": "Custom-ReothorSecureApp",
+                  "isBlankValueEnabled": true
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "meta": {
+        "connectorId": "ReothorSecureAppSampleData",
+        "title": "Reothor Secure App Sample Data",
+        "publisher": "Reothor Labs",
+        "descriptionMarkdown": "This is a sample pull data connector",
+        "logo": "",
+        "connectorKind": "RestApiPoller"
+      },
+      "schema": {
+        "tableName": "ReothorSecureAppSampleData_CL",
+        "columns": [
+          {
+            "name": "TimeGenerated",
+            "type": "datetime"
+          },
+          {
+            "name": "Title",
+            "type": "string"
+          },
+          {
+            "name": "Description",
+            "type": "string"
+          },
+          {
+            "name": "Count",
+            "type": "int"
+          }
+        ]
+      },
+      "dataFlow": {
+        "streamName": "Custom-ReothorSecureAppSampleData",
+        "transformKql": "source | extend TimeGenerated = now()",
+        "inputColumnsOverride": false,
+        "inputColumns": []
+      },
+      "connectorUI": {
+        "graphQueries": [
+          {
+            "metricName": "Total events received",
+            "legend": "Events",
+            "baseQuery": "{{graphQueriesTableName}}"
+          }
+        ],
+        "sampleQueries": [
+          {
+            "description": "All events",
+            "query": "ReothorSecureAppSampleData_CL\n| sort by TimeGenerated desc\n| take 10"
+          },
+          {
+            "description": "Events by Title",
+            "query": "ReothorSecureAppSampleData_CL\n| summarize count() by Title\n| sort by count_ desc"
+          }
+        ],
+        "connectivityCriteria": [
+          {
+            "type": "HasDataConnectors",
+            "value": []
+          }
+        ],
+        "permissions": {
+          "resourceProvider": [
+            {
+              "provider": "Microsoft.OperationalInsights/workspaces",
+              "permissionsDisplayText": "Read and Write permissions on the Log Analytics workspace.",
+              "providerDisplayName": "Workspace",
+              "scope": "Workspace",
+              "requiredPermissions": {
+                "write": true,
+                "read": true,
+                "delete": false,
+                "action": false
+              }
+            },
+            {
+              "provider": "Microsoft.OperationalInsights/workspaces/sharedKeys",
+              "permissionsDisplayText": "Read permissions to shared keys for the workspace.",
+              "providerDisplayName": "Keys",
+              "scope": "Workspace",
+              "requiredPermissions": {
+                "write": false,
+                "read": true,
+                "delete": false,
+                "action": true
+              }
+            }
+          ],
+          "customs": [
+            {
+              "name": "Microsoft Entra application",
+              "description": "Permissions to create or use an existing Microsoft Entra application for data ingestion."
+            },
+            {
+              "name": "Azure RBAC",
+              "description": "Monitoring Metrics Publisher role assignment on the Data Collection Rule resource."
+            }
+          ]
+        },
+        "instructionSteps": [
+          {
+            "title": "Connect",
+            "description": "Enable the connector to start polling the REST API.",
+            "instructions": [
+              {
+                "type": "ConnectionToggleButton",
+                "parameters": {}
+              }
+            ]
+          }
+        ]
+      },
+      "pollerConfig": {
+        "auth": {
+          "type": "APIKey",
+          "userName": "{{username}}",
+          "password": "{{password}}",
+          "apiKey": "{{apiKey}}",
+          "apiKeyName": "X-API-KEY",
+          "apiKeyIdentifier": "Bearer",
+          "isApiKeyInPostPayload": false,
+          "clientId": "{{clientId}}",
+          "clientSecret": "{{clientSecret}}",
+          "grantType": "client_credentials",
+          "tokenEndpointUrl": "",
+          "scope": "",
+          "tokenEndpointHeaders": {},
+          "tokenEndpointQueryParameters": {},
+          "authorizationEndpoint": "",
+          "authorizationEndpointQueryParameters": {},
+          "redirectUri": ""
+        },
+        "request": {
+          "apiEndpoint": "https://app.reothor.no/api/sample-data",
+          "httpMethod": "GET",
+          "startTimeAttributeName": "",
+          "endTimeAttributeName": "",
+          "queryWindowInMin": 5,
+          "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
+          "rateLimitQPS": 10,
+          "retryCount": 3,
+          "timeoutInSeconds": 60,
+          "headers": {},
+          "queryParameters": {},
+          "queryParametersTemplate": "",
+          "isPostPayloadJson": true
+        },
+        "response": {
+          "eventsJsonPaths": [
+            "$"
+          ],
+          "successStatusJsonPath": "",
+          "successStatusValue": "",
+          "isGzipCompressed": false,
+          "format": "json",
+          "convertChildPropertiesToArray": false
+        },
+        "paging": {
+          "pagingType": "None",
+          "nextPageParaName": "",
+          "nextPageTokenJsonPath": "",
+          "nextPageUrl": "",
+          "hasNextFlagJsonPath": "",
+          "nextPageRequestHeader": "",
+          "pageSizeParaName": "",
+          "pageSize": 0
+        }
+      }
+    }
+  ],
+  "activeConnectorIndex": 1,
+  "analyticRules": [
+    {
+      "id": "e1ce8fce-ddf3-4126-8b41-81de1f116ca8",
+      "name": "Sample Alert Rule",
+      "description": "This is a sample analytic rule to test bundling with connector studio",
+      "severity": "Medium",
+      "kind": "Scheduled",
+      "queryPeriod": "PT5H",
+      "queryFrequency": "PT5H",
+      "triggerOperator": "GreaterThan",
+      "triggerThreshold": 5,
+      "tactics": [
+        "PrivilegeEscalation"
+      ],
+      "relevantTechniques": [],
+      "query": "ReothorSecureAppAudit_CL\n| where Action == 'SomethingDangerous'",
+      "entityMappings": [],
+      "requiredDataConnectors": [
+        {
+          "connectorId": "ReothorSecureAppAudit",
+          "dataTypes": [
+            "ReothorSecureAppAudit_CL"
+          ]
+        }
+      ],
+      "version": "1.0.0",
+      "enabled": true
+    }
+  ],
+  "asimParsers": []
+}

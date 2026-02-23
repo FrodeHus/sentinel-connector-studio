@@ -151,7 +151,6 @@ interface ConnectorWizardProps {
 }
 
 export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
-  const hookValue = useConnectorConfig();
   const {
     config,
     updateSchema,
@@ -169,7 +168,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
     importAppState,
     analyticRules,
     asimParsers,
-  } = hookValue;
+  } = useConnectorConfig();
   const { theme, toggleTheme } = useTheme();
   const [currentStep, setCurrentStep] = React.useState(0);
   const [visitedSteps, setVisitedSteps] = React.useState(new Set([0]));
@@ -179,6 +178,15 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
   const [projectUrl, setProjectUrl] = React.useState("");
   const [isLoadingUrl, setIsLoadingUrl] = React.useState(false);
   const [deepLinkUrl, setDeepLinkUrl] = React.useState<string | null>(null);
+  const [confirmDialog, setConfirmDialog] = React.useState<{
+    title: string;
+    description: string;
+    onConfirm: () => void;
+  } | null>(null);
+  const [errorDialog, setErrorDialog] = React.useState<{
+    title: string;
+    description: string;
+  } | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Show consent dialog when a deep link ?project= param is present
@@ -193,6 +201,12 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
       // Invalid URL — silently ignore
     }
   }, [initialProjectUrl]);
+
+  const clearProjectParam = React.useCallback(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("project");
+    window.history.replaceState({}, "", url.toString());
+  }, []);
 
   const handleDeepLinkConfirm = React.useCallback(() => {
     if (!deepLinkUrl) return;
@@ -209,25 +223,19 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
           err instanceof Error
             ? err.message
             : "Failed to load project from URL.";
-        alert(msg);
+        setErrorDialog({ title: "Load Failed", description: msg });
       })
       .finally(() => {
         setIsLoadingUrl(false);
         setDeepLinkUrl(null);
-        // Clean the ?project param from the URL
-        const url = new URL(window.location.href);
-        url.searchParams.delete("project");
-        window.history.replaceState({}, "", url.toString());
+        clearProjectParam();
       });
-  }, [deepLinkUrl, importAppState]);
+  }, [deepLinkUrl, importAppState, clearProjectParam]);
 
   const handleDeepLinkDismiss = React.useCallback(() => {
     setDeepLinkUrl(null);
-    // Clean the ?project param from the URL
-    const url = new URL(window.location.href);
-    url.searchParams.delete("project");
-    window.history.replaceState({}, "", url.toString());
-  }, []);
+    clearProjectParam();
+  }, [clearProjectParam]);
 
   // Filter steps based on active connector's kind
   const activeKind = config.meta.connectorKind || "Push";
@@ -285,42 +293,43 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
 
     try {
       const state = await readProjectFile(file);
-      if (!confirm("This will replace your current configuration. Continue?")) {
-        return;
-      }
-      importAppState(state);
-      setCurrentStep(0);
-      setVisitedSteps(new Set([0]));
+      setConfirmDialog({
+        title: "Load Project",
+        description: "This will replace your current configuration. Continue?",
+        onConfirm: () => {
+          importAppState(state);
+          setCurrentStep(0);
+          setVisitedSteps(new Set([0]));
+        },
+      });
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to load project file.";
-      alert(errorMessage);
+      setErrorDialog({ title: "Load Failed", description: errorMessage });
     }
   };
 
   const handleLoadFromUrl = async () => {
-    if (!projectUrl.trim()) {
-      alert("Please enter a URL");
-      return;
-    }
+    if (!projectUrl.trim()) return;
 
     setIsLoadingUrl(true);
     try {
       const state = await readProjectFromUrl(projectUrl.trim());
       setUrlDialogOpen(false);
       setProjectUrl("");
-
-      if (!confirm("This will replace your current configuration. Continue?")) {
-        return;
-      }
-
-      importAppState(state);
-      setCurrentStep(0);
-      setVisitedSteps(new Set([0]));
+      setConfirmDialog({
+        title: "Load Project",
+        description: "This will replace your current configuration. Continue?",
+        onConfirm: () => {
+          importAppState(state);
+          setCurrentStep(0);
+          setVisitedSteps(new Set([0]));
+        },
+      });
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to load project from URL.";
-      alert(errorMessage);
+      setErrorDialog({ title: "Load Failed", description: errorMessage });
     } finally {
       setIsLoadingUrl(false);
     }
@@ -372,11 +381,15 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
   };
 
   const handleReset = () => {
-    if (confirm("Reset all configuration and start fresh?")) {
-      reset();
-      setCurrentStep(0);
-      setVisitedSteps(new Set([0]));
-    }
+    setConfirmDialog({
+      title: "Reset Configuration",
+      description: "Reset all configuration and start fresh?",
+      onConfirm: () => {
+        reset();
+        setCurrentStep(0);
+        setVisitedSteps(new Set([0]));
+      },
+    });
   };
 
   const currentStepIsValid = steps[currentStep]?.isValid ?? true;
@@ -647,6 +660,52 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
             >
               {isLoadingUrl ? "Loading..." : "Load Project"}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmDialog !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmDialog(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{confirmDialog?.title}</DialogTitle>
+            <DialogDescription>{confirmDialog?.description}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDialog(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                confirmDialog?.onConfirm();
+                setConfirmDialog(null);
+              }}
+            >
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Error Dialog */}
+      <Dialog
+        open={errorDialog !== null}
+        onOpenChange={(open) => {
+          if (!open) setErrorDialog(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{errorDialog?.title}</DialogTitle>
+            <DialogDescription>{errorDialog?.description}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setErrorDialog(null)}>OK</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

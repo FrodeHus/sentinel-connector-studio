@@ -1,0 +1,66 @@
+export const MITRE_TACTICS = [
+  "InitialAccess",
+  "Execution",
+  "Persistence",
+  "PrivilegeEscalation",
+  "DefenseEvasion",
+  "CredentialAccess",
+  "Discovery",
+  "LateralMovement",
+  "Collection",
+  "Exfiltration",
+  "CommandAndControl",
+  "Impact",
+  "Reconnaissance",
+  "ResourceDevelopment",
+]
+
+export const ENTITY_TYPES = [
+  "Account",
+  "AzureResource",
+  "CloudApplication",
+  "DNS",
+  "File",
+  "FileHash",
+  "Host",
+  "IP",
+  "MailCluster",
+  "MailMessage",
+  "Mailbox",
+  "Malware",
+  "Process",
+  "RegistryKey",
+  "RegistryValue",
+  "SecurityGroup",
+  "SubmissionMail",
+  "URL",
+]
+
+/** Valid identifiers per Sentinel entity type. */
+export const ENTITY_IDENTIFIERS: Record<string, string[]> = {
+  Account: ["FullName", "Sid", "AadUserId", "AadTenantId", "PUID", "IsDomainJoined", "DisplayName", "ObjectGuid", "Name", "UPNSuffix", "NTDomain", "DnsDomain"],
+  AzureResource: ["ResourceId"],
+  CloudApplication: ["AppId", "Name", "InstanceName"],
+  DNS: ["DomainName"],
+  File: ["Directory", "Name"],
+  FileHash: ["Algorithm", "Value"],
+  Host: ["HostName", "AzureID", "DnsDomain", "NTDomain", "NetBiosName", "OmsAgentID", "OSFamily", "OSVersion", "FQDN"],
+  IP: ["Address"],
+  MailCluster: ["NetworkMessageIds", "CountByDeliveryStatus", "CountByThreatType", "CountByProtectionStatus", "Threats", "Query", "QueryTime", "MailCount", "IsVolumeAnomaly", "Source", "ClusterSourceIdentifier", "ClusterSourceType", "ClusterQueryStartTime", "ClusterQueryEndTime", "ClusterGroup"],
+  MailMessage: ["Recipient", "Urls", "Threats", "Sender", "P1Sender", "P1SenderDisplayName", "P1SenderDomain", "SenderIP", "P2Sender", "P2SenderDisplayName", "P2SenderDomain", "ReceivedDate", "NetworkMessageId", "InternetMessageId", "Subject", "BodyFingerprintBin1", "BodyFingerprintBin2", "BodyFingerprintBin3", "BodyFingerprintBin4", "BodyFingerprintBin5", "AntispamDirection", "DeliveryAction", "DeliveryLocation", "Language", "ThreatDetectionMethods"],
+  Mailbox: ["MailboxPrimaryAddress", "DisplayName", "Upn", "ExternalDirectoryObjectId", "RiskLevel"],
+  Malware: ["Name", "Category"],
+  Process: ["ProcessId", "CommandLine", "ElevationToken", "CreationTimeUtc"],
+  RegistryKey: ["Hive", "Key"],
+  RegistryValue: ["Name", "Value", "ValueType"],
+  SecurityGroup: ["DistinguishedName", "SID", "ObjectGuid"],
+  SubmissionMail: ["NetworkMessageId", "Timestamp", "Recipient", "Sender", "SenderIp", "Subject", "ReportType", "SubmissionId", "SubmissionDate", "Submitter"],
+  URL: ["Url"],
+}
+
+export const SEVERITY_COLORS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  High: "destructive",
+  Medium: "default",
+  Low: "secondary",
+  Informational: "outline",
+}

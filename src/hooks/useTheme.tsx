@@ -8,10 +8,7 @@ interface ThemeContextValue {
   toggleTheme: () => void
 }
 
-const ThemeContext = React.createContext<ThemeContextValue>({
-  theme: "dark",
-  toggleTheme: () => {},
-})
+const ThemeContext = React.createContext<ThemeContextValue | null>(null)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = React.useState<Theme>("dark")

@@ -124,17 +124,19 @@ export const SolutionSchema = z.object({
       tier: "Partner",
       link: "",
     }),
-  firstPublishDate: z.string().default(new Date().toISOString().split("T")[0]),
+  firstPublishDate: z.string().default(() => new Date().toISOString().split("T")[0]),
 });
 
 // --- Analytic Rules & ASIM Parsers ---
 
 export const EntityFieldMappingSchema = z.object({
+  id: z.string().default(() => crypto.randomUUID()),
   identifier: z.string().default(""),
   columnName: z.string().default(""),
 })
 
 export const EntityMappingSchema = z.object({
+  id: z.string().default(() => crypto.randomUUID()),
   entityType: z.string().default(""),
   fieldMappings: z.array(EntityFieldMappingSchema).default([]),
 })
@@ -336,5 +338,6 @@ export type ConnectorData = z.infer<typeof ConnectorDataSchema>
 export type AppState = z.infer<typeof AppStateSchema>
 export type EntityFieldMapping = z.infer<typeof EntityFieldMappingSchema>
 export type EntityMapping = z.infer<typeof EntityMappingSchema>
+export type RequiredDataConnector = z.infer<typeof RequiredDataConnectorSchema>
 export type AnalyticRule = z.infer<typeof AnalyticRuleSchema>
 export type AsimParser = z.infer<typeof AsimParserSchema>

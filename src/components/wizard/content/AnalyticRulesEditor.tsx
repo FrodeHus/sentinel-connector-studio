@@ -62,6 +62,53 @@ const ENTITY_TYPES = [
   "URL",
 ]
 
+/** Valid identifiers per Sentinel entity type. */
+const ENTITY_IDENTIFIERS: Record<string, string[]> = {
+  Account: ["FullName", "Sid", "AadUserId", "AadTenantId", "PUID", "IsDomainJoined", "DisplayName", "ObjectGuid", "Name", "UPNSuffix", "NTDomain", "DnsDomain"],
+  AzureResource: ["ResourceId"],
+  CloudApplication: ["AppId", "Name", "InstanceName"],
+  DNS: ["DomainName"],
+  File: ["Directory", "Name"],
+  FileHash: ["Algorithm", "Value"],
+  Host: ["HostName", "AzureID", "DnsDomain", "NTDomain", "NetBiosName", "OmsAgentID", "OSFamily", "OSVersion", "FQDN"],
+  IP: ["Address"],
+  MailCluster: ["NetworkMessageIds", "CountByDeliveryStatus", "CountByThreatType", "CountByProtectionStatus", "Threats", "Query", "QueryTime", "MailCount", "IsVolumeAnomaly", "Source", "ClusterSourceIdentifier", "ClusterSourceType", "ClusterQueryStartTime", "ClusterQueryEndTime", "ClusterGroup"],
+  MailMessage: ["Recipient", "Urls", "Threats", "Sender", "P1Sender", "P1SenderDisplayName", "P1SenderDomain", "SenderIP", "P2Sender", "P2SenderDisplayName", "P2SenderDomain", "ReceivedDate", "NetworkMessageId", "InternetMessageId", "Subject", "BodyFingerprintBin1", "BodyFingerprintBin2", "BodyFingerprintBin3", "BodyFingerprintBin4", "BodyFingerprintBin5", "AntispamDirection", "DeliveryAction", "DeliveryLocation", "Language", "ThreatDetectionMethods"],
+  Mailbox: ["MailboxPrimaryAddress", "DisplayName", "Upn", "ExternalDirectoryObjectId", "RiskLevel"],
+  Malware: ["Name", "Category"],
+  Process: ["ProcessId", "CommandLine", "ElevationToken", "CreationTimeUtc"],
+  RegistryKey: ["Hive", "Key"],
+  RegistryValue: ["Name", "Value", "ValueType"],
+  SecurityGroup: ["DistinguishedName", "SID", "ObjectGuid"],
+  SubmissionMail: ["NetworkMessageId", "Timestamp", "Recipient", "Sender", "SenderIp", "Subject", "ReportType", "SubmissionId", "SubmissionDate", "Submitter"],
+  URL: ["Url"],
+}
+
+/**
+ * Extract column names from the last `| project` statement in a KQL query.
+ * Handles aliases (e.g. `Alias = expr`) and plain column references.
+ */
+function extractProjectColumns(query: string): string[] {
+  const projectRegex = /\|\s*project\s+(?!away\b|rename\b|keep\b|reorder\b)([\s\S]*?)(?=\||$)/gi
+  let lastMatch: RegExpExecArray | null = null
+  let match: RegExpExecArray | null
+  while ((match = projectRegex.exec(query)) !== null) {
+    lastMatch = match
+  }
+  if (!lastMatch) return []
+  const body = lastMatch[1]
+  return body
+    .split(",")
+    .map((part) => {
+      const trimmed = part.trim()
+      const assignMatch = trimmed.match(/^([A-Za-z_]\w*)\s*=/)
+      if (assignMatch) return assignMatch[1]
+      const identMatch = trimmed.match(/^([A-Za-z_]\w*)/)
+      return identMatch ? identMatch[1] : ""
+    })
+    .filter(Boolean)
+}
+
 const SEVERITY_COLORS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   High: "destructive",
   Medium: "default",
@@ -529,37 +576,93 @@ export function AnalyticRulesEditor() {
                             <Plus className="w-3 h-3 mr-1" /> Field
                           </Button>
                         </div>
-                        {mapping.fieldMappings.map((fm, fieldIndex) => (
+                        {(() => {
+                          const identifierOptions = ENTITY_IDENTIFIERS[mapping.entityType] ?? []
+                          const projectCols = extractProjectColumns(rule.query)
+                          return mapping.fieldMappings.map((fm, fieldIndex) => {
+                            const isIdentifierCustom = identifierOptions.length > 0 && !identifierOptions.includes(fm.identifier) && fm.identifier !== ""
+                            return (
                           <div
                             key={fieldIndex}
                             className="flex items-center gap-2 mb-1"
                           >
-                            <Input
-                              className="h-8 text-xs"
-                              value={fm.identifier}
-                              onChange={(e) =>
-                                updateFieldMapping(
-                                  ruleIndex,
-                                  mappingIndex,
-                                  fieldIndex,
-                                  { identifier: e.target.value },
-                                )
-                              }
-                              placeholder="Identifier"
-                            />
-                            <Input
-                              className="h-8 text-xs"
-                              value={fm.columnName}
-                              onChange={(e) =>
-                                updateFieldMapping(
-                                  ruleIndex,
-                                  mappingIndex,
-                                  fieldIndex,
-                                  { columnName: e.target.value },
-                                )
-                              }
-                              placeholder="Column Name"
-                            />
+                            <div className="flex-1 min-w-0">
+                              {identifierOptions.length > 0 ? (
+                                <select
+                                  className="flex h-8 w-full rounded-xl border border-border/50 bg-card px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                                  value={isIdentifierCustom ? "__custom__" : fm.identifier}
+                                  onChange={(e) => {
+                                    const val = e.target.value
+                                    updateFieldMapping(
+                                      ruleIndex,
+                                      mappingIndex,
+                                      fieldIndex,
+                                      { identifier: val === "__custom__" ? "" : val },
+                                    )
+                                  }}
+                                >
+                                  <option value="" disabled>Select identifier...</option>
+                                  {identifierOptions.map((id) => (
+                                    <option key={id} value={id}>{id}</option>
+                                  ))}
+                                  <option value="__custom__">Custom...</option>
+                                </select>
+                              ) : (
+                                <Input
+                                  className="h-8 text-xs"
+                                  value={fm.identifier}
+                                  onChange={(e) =>
+                                    updateFieldMapping(ruleIndex, mappingIndex, fieldIndex, { identifier: e.target.value })
+                                  }
+                                  placeholder="Identifier"
+                                />
+                              )}
+                            </div>
+                            {isIdentifierCustom && (
+                              <div className="flex-1 min-w-0">
+                                <Input
+                                  className="h-8 text-xs"
+                                  value={fm.identifier}
+                                  onChange={(e) =>
+                                    updateFieldMapping(ruleIndex, mappingIndex, fieldIndex, { identifier: e.target.value })
+                                  }
+                                  placeholder="Custom identifier"
+                                />
+                              </div>
+                            )}
+                            {projectCols.length > 0 && (
+                              <div className="flex-1 min-w-0">
+                                <select
+                                  className="flex h-8 w-full rounded-xl border border-border/50 bg-card px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                                  value={projectCols.includes(fm.columnName) ? fm.columnName : ""}
+                                  onChange={(e) => {
+                                    if (e.target.value) {
+                                      updateFieldMapping(
+                                        ruleIndex,
+                                        mappingIndex,
+                                        fieldIndex,
+                                        { columnName: e.target.value },
+                                      )
+                                    }
+                                  }}
+                                >
+                                  <option value="">Pick from query...</option>
+                                  {projectCols.map((col) => (
+                                    <option key={col} value={col}>{col}</option>
+                                  ))}
+                                </select>
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <Input
+                                className="h-8 text-xs"
+                                value={fm.columnName}
+                                onChange={(e) =>
+                                  updateFieldMapping(ruleIndex, mappingIndex, fieldIndex, { columnName: e.target.value })
+                                }
+                                placeholder="Column Name"
+                              />
+                            </div>
                             <Button
                               size="icon"
                               variant="ghost"
@@ -575,7 +678,9 @@ export function AnalyticRulesEditor() {
                               <Trash2 className="w-3 h-3 text-destructive" />
                             </Button>
                           </div>
-                        ))}
+                            )
+                          })
+                        })()}
                       </div>
                     </div>
                   ))}

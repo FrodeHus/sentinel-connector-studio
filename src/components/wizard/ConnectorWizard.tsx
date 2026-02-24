@@ -49,6 +49,7 @@ interface StepDef {
   component: React.ComponentType
   isValid: (connectors: ConnectorData[], config: ReturnType<typeof useConnectorConfig>["config"]) => boolean
   showSidebar: boolean
+  preview: "arm" | "content" | null
   kinds?: ConnectorKind[]
   badge?: string
 }
@@ -67,6 +68,7 @@ const ALL_STEPS: StepDef[] = [
           !!c.meta.descriptionMarkdown,
       ),
     showSidebar: true,
+    preview: "arm",
   },
   {
     id: "schema",
@@ -80,6 +82,7 @@ const ALL_STEPS: StepDef[] = [
           c.schema.columns.length >= 1,
       ),
     showSidebar: true,
+    preview: "arm",
   },
   {
     id: "dcr",
@@ -93,6 +96,7 @@ const ALL_STEPS: StepDef[] = [
           !!c.dataFlow.transformKql,
       ),
     showSidebar: true,
+    preview: "arm",
   },
   {
     id: "api-config",
@@ -107,6 +111,7 @@ const ALL_STEPS: StepDef[] = [
         )
       }),
     showSidebar: true,
+    preview: "arm",
     kinds: ["RestApiPoller"],
   },
   {
@@ -115,6 +120,7 @@ const ALL_STEPS: StepDef[] = [
     component: StepConnectorUI,
     isValid: () => true,
     showSidebar: true,
+    preview: "arm",
   },
   {
     id: "content",
@@ -122,6 +128,7 @@ const ALL_STEPS: StepDef[] = [
     component: StepContent,
     isValid: () => true,
     showSidebar: false,
+    preview: "content",
   },
   {
     id: "solution",
@@ -132,6 +139,7 @@ const ALL_STEPS: StepDef[] = [
       !!config.solution.offerId &&
       !!config.solution.support.name,
     showSidebar: false,
+    preview: null,
   },
   {
     id: "export",
@@ -139,6 +147,7 @@ const ALL_STEPS: StepDef[] = [
     component: StepExport,
     isValid: () => true,
     showSidebar: false,
+    preview: null,
   },
 ]
 
@@ -283,6 +292,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
   const currentStepIsValid = steps[currentStep]?.isValid ?? true;
   const ActiveStepComponent = visibleSteps[currentStep]?.component;
   const currentStepDef = visibleSteps[currentStep];
+  const activePreview = showPreview ? (currentStepDef?.preview ?? null) : null;
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
@@ -404,7 +414,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
 
           {/* Form panel */}
           <div
-            className={`${showPreview ? "w-full lg:w-3/5" : "w-full"} overflow-auto p-6 transition-all`}
+            className={`${activePreview ? "w-full lg:w-3/5" : "w-full"} overflow-auto p-6 transition-all`}
           >
             <div className="max-w-3xl mx-auto">
               {ActiveStepComponent && <ActiveStepComponent />}
@@ -413,19 +423,16 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
 
           {/* Preview panel */}
           <div
-            className={`${showPreview ? "w-2/5 border-l border-border/50" : "w-0"} hidden lg:block overflow-auto p-6 bg-card/30 backdrop-blur-sm transition-all`}
+            className={`${activePreview ? "w-2/5 border-l border-border/50" : "w-0"} hidden lg:block overflow-auto p-6 bg-card/30 backdrop-blur-sm transition-all`}
           >
-            {showPreview && (
-              currentStepDef?.id === "content"
-                ? <ContentPreview />
-                : <ArmTemplatePreview />
-            )}
+            {activePreview === "content" && <ContentPreview />}
+            {activePreview === "arm" && <ArmTemplatePreview />}
           </div>
         </div>
       </div>
 
       {/* Mobile preview drawer */}
-      {mobilePreview && (
+      {mobilePreview && currentStepDef?.preview && (
         <div className="lg:hidden fixed inset-0 z-50 flex flex-col">
           <div
             className="flex-1 bg-black/80 backdrop-blur-sm"
@@ -434,7 +441,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
           <div className="h-[60vh] glass-card bg-card border-t border-border/50 overflow-auto p-4 rounded-t-3xl">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-lg">
-                {currentStepDef?.id === "content" ? "YAML Preview" : "ARM Template Preview"}
+                {currentStepDef.preview === "content" ? "YAML Preview" : "ARM Template Preview"}
               </h3>
               <Button
                 variant="ghost"
@@ -444,21 +451,23 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
                 Close
               </Button>
             </div>
-            {currentStepDef?.id === "content" ? <ContentPreview /> : <ArmTemplatePreview />}
+            {currentStepDef.preview === "content" ? <ContentPreview /> : <ArmTemplatePreview />}
           </div>
         </div>
       )}
 
-      {/* Mobile floating preview button */}
-      <div className="lg:hidden fixed bottom-20 right-4 z-40">
-        <Button
-          size="icon"
-          className="gradient-primary rounded-full h-14 w-14 shadow-xl shadow-primary/30"
-          onClick={() => setMobilePreview(true)}
-        >
-          <Eye className="w-6 h-6" />
-        </Button>
-      </div>
+      {/* Mobile floating preview button — only on steps that have a preview */}
+      {currentStepDef?.preview && (
+        <div className="lg:hidden fixed bottom-20 right-4 z-40">
+          <Button
+            size="icon"
+            className="gradient-primary rounded-full h-14 w-14 shadow-xl shadow-primary/30"
+            onClick={() => setMobilePreview(true)}
+          >
+            <Eye className="w-6 h-6" />
+          </Button>
+        </div>
+      )}
 
       {/* Footer with navigation */}
       <footer className="shrink-0 border-t border-border/50 glass-card">
@@ -472,18 +481,20 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
           </Button>
 
           <div className="hidden lg:flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowPreview(!showPreview)}
-            >
-              {showPreview ? (
-                <EyeOff className="w-4 h-4 mr-1.5" />
-              ) : (
-                <Eye className="w-4 h-4 mr-1.5" />
-              )}
-              {showPreview ? "Hide" : "Show"} Preview
-            </Button>
+            {currentStepDef?.preview && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPreview(!showPreview)}
+              >
+                {showPreview ? (
+                  <EyeOff className="w-4 h-4 mr-1.5" />
+                ) : (
+                  <Eye className="w-4 h-4 mr-1.5" />
+                )}
+                {showPreview ? "Hide" : "Show"} Preview
+              </Button>
+            )}
           </div>
 
           {currentStep < steps.length - 1 ? (

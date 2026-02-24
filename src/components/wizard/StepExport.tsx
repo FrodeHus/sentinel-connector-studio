@@ -11,8 +11,6 @@ import {
 } from "@/lib/download";
 import { saveAs } from "file-saver";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -266,11 +264,9 @@ export function StepExport() {
     config,
     connectors,
     activeConnectorIndex,
-    updateSolution,
     analyticRules,
     asimParsers,
   } = useConnectorConfig();
-  const { solution } = config;
   const [expanded, setExpanded] = React.useState(false);
 
   // Packager availability
@@ -352,171 +348,6 @@ export function StepExport() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-        <p className="text-sm text-muted-foreground">
-          <strong>Tip:</strong> Use the <strong>File menu</strong> (
-          <span className="inline-flex items-center gap-1">
-            <svg
-              className="inline w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-          </span>
-          ) in the header to save or load your project configuration at any
-          time. Keyboard shortcuts:{" "}
-          <kbd className="px-1.5 py-0.5 text-xs bg-muted rounded">⌘S</kbd> to
-          save, <kbd className="px-1.5 py-0.5 text-xs bg-muted rounded">⌘O</kbd>{" "}
-          to open.
-        </p>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Solution Metadata</CardTitle>
-          <CardDescription>
-            Finalize packaging metadata for Sentinel Content Hub.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="solutionName">Solution Name</Label>
-            <Input
-              id="solutionName"
-              placeholder="e.g., ContosoSecuritySolution"
-              value={solution.name}
-              onChange={(e) => updateSolution({ name: e.target.value })}
-            />
-            <p className="text-xs text-muted-foreground">
-              Name used for the solution package folder. Defaults to the first
-              connector ID if empty.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="publisherId">Publisher ID *</Label>
-              <Input
-                id="publisherId"
-                placeholder="contoso"
-                value={solution.publisherId}
-                onChange={(e) =>
-                  updateSolution({ publisherId: e.target.value.toLowerCase() })
-                }
-              />
-              <p className="text-xs text-muted-foreground">
-                Lowercase, no spaces. Used in Content Hub.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="offerId">Offer ID *</Label>
-              <Input
-                id="offerId"
-                placeholder="contoso-security-alerts"
-                value={solution.offerId}
-                onChange={(e) =>
-                  updateSolution({ offerId: e.target.value.toLowerCase() })
-                }
-              />
-              <p className="text-xs text-muted-foreground">
-                Lowercase with hyphens. Globally unique.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="version">Version *</Label>
-              <Input
-                id="version"
-                placeholder="1.0.0"
-                value={solution.version}
-                onChange={(e) => updateSolution({ version: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="supportTier">Support Tier *</Label>
-              <select
-                id="supportTier"
-                title="Select support tier"
-                value={solution.support.tier}
-                onChange={(e) =>
-                  updateSolution({
-                    support: {
-                      ...solution.support,
-                      tier: e.target.value as
-                        | "Microsoft"
-                        | "Partner"
-                        | "Community",
-                    },
-                  })
-                }
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
-                <option value="Microsoft">Microsoft</option>
-                <option value="Partner">Partner</option>
-                <option value="Community">Community</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="supportName">Support Name *</Label>
-            <Input
-              id="supportName"
-              placeholder="Contoso Support"
-              value={solution.support.name}
-              onChange={(e) =>
-                updateSolution({
-                  support: { ...solution.support, name: e.target.value },
-                })
-              }
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="supportEmail">Support Email *</Label>
-            <Input
-              id="supportEmail"
-              type="email"
-              placeholder="support@contoso.com"
-              value={solution.support.email}
-              onChange={(e) =>
-                updateSolution({
-                  support: { ...solution.support, email: e.target.value },
-                })
-              }
-            />
-            <p className="text-xs text-muted-foreground">
-              Used in the solution Author field for Content Hub.
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="supportLink">Support Link</Label>
-            <Input
-              id="supportLink"
-              placeholder="https://support.contoso.com"
-              value={solution.support.link}
-              onChange={(e) =>
-                updateSolution({
-                  support: { ...solution.support, link: e.target.value },
-                })
-              }
-            />
-          </div>
-        </CardContent>
-      </Card>
-
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

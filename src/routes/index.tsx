@@ -2,6 +2,7 @@ import * as React from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { ConnectorConfigProvider } from '@/hooks/useConnectorConfig'
 import { ThemeProvider } from '@/hooks/useTheme'
+import { TooltipProvider } from '@/components/ui/tooltip'
 
 interface ProjectSearchParams {
   project?: string;
@@ -45,15 +46,17 @@ function ClientWizard({ projectUrl }: { projectUrl?: string }) {
   return (
     <ThemeProvider>
       <ConnectorConfigProvider>
-        <React.Suspense
-          fallback={
-            <div className="h-screen flex items-center justify-center">
-              <p className="text-muted-foreground">Loading wizard...</p>
-            </div>
-          }
-        >
-          <LazyConnectorWizard initialProjectUrl={projectUrl} />
-        </React.Suspense>
+        <TooltipProvider>
+          <React.Suspense
+            fallback={
+              <div className="h-screen flex items-center justify-center">
+                <p className="text-muted-foreground">Loading wizard...</p>
+              </div>
+            }
+          >
+            <LazyConnectorWizard initialProjectUrl={projectUrl} />
+          </React.Suspense>
+        </TooltipProvider>
       </ConnectorConfigProvider>
     </ThemeProvider>
   );

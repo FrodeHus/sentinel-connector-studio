@@ -29,6 +29,7 @@ export const Route = createRootRoute({
     ],
   }),
   component: RootComponent,
+  notFoundComponent: NotFoundComponent,
   shellComponent: RootDocument,
 });
 
@@ -48,4 +49,15 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   return <Outlet />
+}
+
+function NotFoundComponent() {
+  return (
+    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="text-center space-y-3">
+        <p className="text-muted-foreground text-sm">Page not found.</p>
+        <a href="/" className="text-sm text-primary hover:underline">Go home</a>
+      </div>
+    </div>
+  )
 }

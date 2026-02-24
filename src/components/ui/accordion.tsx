@@ -69,6 +69,9 @@ const AccordionTrigger = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAtt
       <h3 className="flex">
         <button
           ref={ref}
+          id={`accordion-trigger-${value}`}
+          aria-expanded={isOpen}
+          aria-controls={`accordion-content-${value}`}
           className={cn(
             "flex flex-1 items-center justify-between py-4 text-sm font-semibold transition-all hover:text-primary cursor-pointer [&[data-state=open]>svg]:rotate-180",
             className
@@ -95,7 +98,14 @@ const AccordionContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<H
     if (!isOpen) return null
 
     return (
-      <div ref={ref} className={cn("overflow-hidden text-sm", className)} {...props}>
+      <div
+        ref={ref}
+        role="region"
+        id={`accordion-content-${value}`}
+        aria-labelledby={`accordion-trigger-${value}`}
+        className={cn("overflow-hidden text-sm", className)}
+        {...props}
+      >
         <div className="pb-4 pt-0">{children}</div>
       </div>
     )

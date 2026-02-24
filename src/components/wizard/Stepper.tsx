@@ -26,6 +26,8 @@ export function Stepper({ steps, currentStep, onStepClick }: StepperProps) {
           <div key={index} className="flex items-center gap-2 md:gap-4">
             <button
               onClick={() => onStepClick(index)}
+              aria-current={isCurrent ? "step" : undefined}
+              aria-label={`${step.label}: ${isCompleted ? "completed" : hasError ? "has errors" : isCurrent ? "current step" : "not started"}`}
               className={cn(
                 "flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer whitespace-nowrap border",
                 isCurrent &&

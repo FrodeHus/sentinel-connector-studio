@@ -9,6 +9,7 @@ import { generateDataConnector } from "@/lib/arm-resources/data-connector";
 import { connectorIdToDcrName } from "@/lib/naming";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, Check } from "lucide-react";
 
 function highlightJson(json: string): string {
@@ -74,15 +75,8 @@ export function ArmTemplatePreview() {
     }
   };
 
-  const handleTabClick = React.useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      const tab = e.currentTarget.dataset.tab as FileTab
-      setActiveTab(tab)
-    },
-    []
-  )
-
   return (
+    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FileTab)} className="h-full flex flex-col">
     <Card className="h-full flex flex-col border-t-2 border-t-primary/50 shadow-lg">
       <CardHeader className="pb-3 shrink-0 border-b border-border/30">
         <div className="flex items-center justify-between">
@@ -94,7 +88,7 @@ export function ArmTemplatePreview() {
             size="icon"
             className="h-8 w-8"
             onClick={handleCopy}
-            title="Copy to clipboard"
+            aria-label="Copy to clipboard"
           >
             {copied ? (
               <Check className="w-4 h-4 text-primary" />
@@ -103,22 +97,17 @@ export function ArmTemplatePreview() {
             )}
           </Button>
         </div>
-        <div className="flex gap-1 flex-wrap mt-2">
+        <TabsList className="mt-2 h-auto flex-wrap justify-start gap-1 bg-transparent border-0 p-0">
           {FILE_TABS.map((tab) => (
-            <button
+            <TabsTrigger
               key={tab}
-              data-tab={tab}
-              onClick={handleTabClick}
-              className={`px-2 py-1 text-xs rounded font-mono transition-colors ${
-                activeTab === tab
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
+              value={tab}
+              className="px-2 py-1 text-xs font-mono rounded data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground data-[state=inactive]:shadow-none"
             >
               {tab}
-            </button>
+            </TabsTrigger>
           ))}
-        </div>
+        </TabsList>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden p-0 pb-5 px-5 pt-4">
         <div className="h-full rounded-lg border border-border/50 bg-card/30 overflow-auto">
@@ -133,5 +122,6 @@ export function ArmTemplatePreview() {
         </div>
       </CardContent>
     </Card>
+    </Tabs>
   );
 }

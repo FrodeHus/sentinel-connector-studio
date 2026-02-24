@@ -3,6 +3,13 @@ import type { Column } from "@/lib/schemas"
 import { columnTypes } from "@/lib/schemas"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Trash2, Plus, ArrowUp, ArrowDown } from "lucide-react"
 
 interface SchemaEditorProps {
@@ -89,16 +96,20 @@ export function SchemaEditor({ columns, onChange }: SchemaEditorProps) {
               )}
             </div>
 
-            <select
+            <Select
               value={col.type}
-              onChange={e => updateColumn(index, "type", e.target.value)}
+              onValueChange={v => updateColumn(index, "type", v)}
               disabled={isLocked}
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {columnTypes.map(t => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+              <SelectTrigger aria-label={`Column type for ${col.name || "new column"}`}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {columnTypes.map(t => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
             <div className="flex items-center gap-1">
               {!isLocked && (
@@ -109,6 +120,7 @@ export function SchemaEditor({ columns, onChange }: SchemaEditorProps) {
                     className="h-8 w-8"
                     onClick={() => moveColumn(index, "up")}
                     disabled={index <= 1}
+                    aria-label={`Move ${col.name || "column"} up`}
                   >
                     <ArrowUp className="w-3.5 h-3.5" />
                   </Button>
@@ -118,6 +130,7 @@ export function SchemaEditor({ columns, onChange }: SchemaEditorProps) {
                     className="h-8 w-8"
                     onClick={() => moveColumn(index, "down")}
                     disabled={index >= columns.length - 1}
+                    aria-label={`Move ${col.name || "column"} down`}
                   >
                     <ArrowDown className="w-3.5 h-3.5" />
                   </Button>
@@ -126,6 +139,7 @@ export function SchemaEditor({ columns, onChange }: SchemaEditorProps) {
                     size="icon"
                     className="h-8 w-8 text-destructive hover:text-destructive"
                     onClick={() => removeColumn(index)}
+                    aria-label={`Remove ${col.name || "column"} column`}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </Button>

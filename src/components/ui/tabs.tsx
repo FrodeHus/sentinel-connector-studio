@@ -26,6 +26,7 @@ const TabsList = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEl
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
+      role="tablist"
       className={cn(
         "inline-flex h-10 items-center justify-center rounded-xl bg-muted/50 border border-border/30 p-1 text-muted-foreground",
         className
@@ -46,6 +47,9 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
     return (
       <button
         ref={ref}
+        role="tab"
+        aria-selected={context.value === value}
+        aria-controls={`tabpanel-${value}`}
         className={cn(
           "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-1.5 text-sm font-semibold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer",
           context.value === value && "bg-background/80 text-foreground shadow-sm border border-border/50",
@@ -70,6 +74,9 @@ const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
     return (
       <div
         ref={ref}
+        role="tabpanel"
+        id={`tabpanel-${value}`}
+        tabIndex={0}
         className={cn(
           "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
           className

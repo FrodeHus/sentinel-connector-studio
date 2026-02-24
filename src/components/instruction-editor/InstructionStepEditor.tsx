@@ -4,6 +4,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Trash2, Plus, ArrowUp, ArrowDown, GripVertical } from "lucide-react"
 
 interface InstructionStepEditorProps {
@@ -79,6 +86,7 @@ export function InstructionStepEditor({ steps, onChange }: InstructionStepEditor
                   className="h-8 w-8"
                   onClick={() => moveStep(stepIndex, "up")}
                   disabled={stepIndex === 0}
+                  aria-label={`Move step ${stepIndex + 1} up`}
                 >
                   <ArrowUp className="w-3.5 h-3.5" />
                 </Button>
@@ -88,6 +96,7 @@ export function InstructionStepEditor({ steps, onChange }: InstructionStepEditor
                   className="h-8 w-8"
                   onClick={() => moveStep(stepIndex, "down")}
                   disabled={stepIndex === steps.length - 1}
+                  aria-label={`Move step ${stepIndex + 1} down`}
                 >
                   <ArrowDown className="w-3.5 h-3.5" />
                 </Button>
@@ -96,6 +105,7 @@ export function InstructionStepEditor({ steps, onChange }: InstructionStepEditor
                   size="icon"
                   className="h-8 w-8 text-destructive hover:text-destructive"
                   onClick={() => removeStep(stepIndex)}
+                  aria-label={`Remove step ${stepIndex + 1}`}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </Button>
@@ -137,30 +147,34 @@ export function InstructionStepEditor({ steps, onChange }: InstructionStepEditor
                   <GripVertical className="w-4 h-4 mt-2.5 text-muted-foreground shrink-0" />
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
-                      <select
+                      <Select
                         value={instr.type}
-                        onChange={(e) =>
+                        onValueChange={(v) =>
                           updateInstruction(stepIndex, instrIndex, {
                             ...instr,
-                            type: e.target.value as Instruction["type"],
+                            type: v as Instruction["type"],
                           })
                         }
-                        className="flex h-8 rounded-md border border-input bg-transparent px-2 py-1 text-xs shadow-sm"
                       >
-                        <option value="Markdown">Markdown</option>
-                        <option value="CopyableLabel">Copyable Label</option>
-                        <option value="DeployPushConnectorButton">
-                          Deploy Button
-                        </option>
-                        <option value="ConnectionToggleButton">
-                          Connection Toggle
-                        </option>
-                      </select>
+                        <SelectTrigger
+                          className="h-8 text-xs"
+                          aria-label="Instruction type"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Markdown">Markdown</SelectItem>
+                          <SelectItem value="CopyableLabel">Copyable Label</SelectItem>
+                          <SelectItem value="DeployPushConnectorButton">Deploy Button</SelectItem>
+                          <SelectItem value="ConnectionToggleButton">Connection Toggle</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-destructive hover:text-destructive ml-auto"
+                        className="h-7 w-7 text-destructive hover:text-destructive ml-auto shrink-0"
                         onClick={() => removeInstruction(stepIndex, instrIndex)}
+                        aria-label="Remove instruction"
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>

@@ -5,6 +5,7 @@ import { CONFIG } from "@/config"
 import { generateAnalyticRuleYaml, generateAsimParserYaml } from "@/lib/content-export"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Copy, Check } from "lucide-react"
 
 function highlightYaml(line: string): string {
@@ -122,13 +123,6 @@ export function ContentPreview() {
     }
   }
 
-  const handleTabClick = React.useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      setActiveTabId(e.currentTarget.dataset.tab ?? null)
-    },
-    [],
-  )
-
   if (tabs.length === 0) {
     return (
       <Card className="h-full flex flex-col border-t-2 border-t-primary/50 shadow-lg">
@@ -155,6 +149,7 @@ export function ContentPreview() {
   })
 
   return (
+    <Tabs value={activeTabId ?? ""} onValueChange={setActiveTabId}>
     <Card className="h-full flex flex-col border-t-2 border-t-primary/50 shadow-lg">
       <CardHeader className="pb-3 shrink-0 border-b border-border/30">
         <div className="flex items-center justify-between">
@@ -166,7 +161,7 @@ export function ContentPreview() {
             size="icon"
             className="h-8 w-8"
             onClick={handleCopy}
-            title="Copy to clipboard"
+            aria-label="Copy to clipboard"
           >
             {copied ? (
               <Check className="w-4 h-4 text-primary" />
@@ -175,23 +170,18 @@ export function ContentPreview() {
             )}
           </Button>
         </div>
-        <div className="flex gap-1 flex-wrap mt-2">
+        <TabsList className="mt-2 h-auto flex-wrap justify-start gap-1 bg-transparent border-0 p-0">
           {tabs.map((tab) => (
-            <button
+            <TabsTrigger
               key={tab.id}
-              data-tab={tab.id}
-              onClick={handleTabClick}
-              className={`px-2 py-1 text-xs rounded font-mono transition-colors truncate max-w-[180px] ${
-                activeTabId === tab.id
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
+              value={tab.id}
               title={tab.label}
+              className="px-2 py-1 text-xs font-mono rounded truncate max-w-[180px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground data-[state=inactive]:shadow-none"
             >
               {tab.label}
-            </button>
+            </TabsTrigger>
           ))}
-        </div>
+        </TabsList>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden p-0 pb-5 px-5 pt-4">
         <div className="h-full rounded-lg border border-border/50 bg-card/30 overflow-auto">
@@ -210,5 +200,6 @@ export function ContentPreview() {
         </div>
       </CardContent>
     </Card>
+    </Tabs>
   )
 }

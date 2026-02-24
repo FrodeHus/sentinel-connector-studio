@@ -1,6 +1,8 @@
 import asyncio
+import hashlib
 import json
 import os
+import re
 import secrets
 import shutil
 import stat
@@ -14,19 +16,22 @@ from pathlib import Path
 
 from fastapi import FastAPI, File, Header, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse
+from starlette.background import BackgroundTask
 
 # ---------------------------------------------------------------------------
-# Configuration
+# Configuration — all values can be overridden via environment variables
 # ---------------------------------------------------------------------------
 
-SENTINEL_TOOLS_PATH = Path("/opt/azure-sentinel/Tools/Create-Azure-Sentinel-Solution")
-MAX_ZIP_SIZE = 50 * 1024 * 1024  # 50 MB
-MAX_UNCOMPRESSED_SIZE = 200 * 1024 * 1024  # 200 MB — decompression bomb guard
-MAX_ZIP_ENTRIES = 500  # sanity cap on number of files inside the ZIP
-JOB_TTL_SECONDS = 30 * 60  # 30 minutes
-PROCESS_TIMEOUT_SECONDS = 120
-MAX_QUEUED_JOBS = 20  # reject new jobs when the queue is this deep
+SENTINEL_TOOLS_PATH = Path(os.getenv("SENTINEL_TOOLS_PATH", "/opt/azure-sentinel/Tools/Create-Azure-Sentinel-Solution"))
+MAX_ZIP_SIZE = int(os.getenv("MAX_ZIP_SIZE_MB", "50")) * 1024 * 1024
+MAX_UNCOMPRESSED_SIZE = int(os.getenv("MAX_UNCOMPRESSED_SIZE_MB", "200")) * 1024 * 1024
+MAX_ZIP_ENTRIES = int(os.getenv("MAX_ZIP_ENTRIES", "500"))
+JOB_TTL_SECONDS = int(os.getenv("JOB_TTL_SECONDS", str(30 * 60)))
+PROCESS_TIMEOUT_SECONDS = int(os.getenv("PROCESS_TIMEOUT_SECONDS", "120"))
+MAX_QUEUED_JOBS = int(os.getenv("MAX_QUEUED_JOBS", "20"))
 UUID_RE_PATTERN = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+
+_UUID_RE = re.compile(UUID_RE_PATTERN)
 
 # ---------------------------------------------------------------------------
 # Job model
@@ -68,8 +73,6 @@ job_queue: asyncio.Queue[str] = asyncio.Queue()
 # Token hashing — we never store the raw token in memory
 # ---------------------------------------------------------------------------
 
-import hashlib
-
 
 def _hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
@@ -78,10 +81,6 @@ def _hash_token(token: str) -> str:
 # ---------------------------------------------------------------------------
 # Auth helpers
 # ---------------------------------------------------------------------------
-
-import re
-
-_UUID_RE = re.compile(UUID_RE_PATTERN)
 
 
 def _validate_job_id(job_id: str) -> None:
@@ -493,11 +492,6 @@ async def get_job_result(
 
     if not job.result_path or not os.path.exists(job.result_path):
         raise HTTPException(status_code=404, detail="Result file not found")
-
-    # Schedule cleanup after the response has been sent.
-    # FastAPI/Starlette streams the file; we use a background task to
-    # delete once the response is complete.
-    from starlette.background import BackgroundTask
 
     return FileResponse(
         path=job.result_path,

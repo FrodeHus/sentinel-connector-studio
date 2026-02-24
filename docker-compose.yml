@@ -1,5 +1,6 @@
 services:
   app:
+    image: ${STUDIO_IMAGE:-frodehus/sentinel-connector-studio:latest}
     build:
       context: .
       dockerfile: Dockerfile
@@ -22,7 +23,13 @@ services:
         condition: service_healthy
 
   packager:
-    build: ./packager
+    image: ${PACKAGER_IMAGE:-frodehus/sentinel-connector-studio-packager:latest}
+    build:
+      context: ./packager
+      dockerfile: ./packager/Dockerfile
+    env_file:
+      - path: .env
+        required: false
     restart: unless-stopped
     read_only: true
     security_opt:

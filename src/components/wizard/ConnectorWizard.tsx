@@ -23,15 +23,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import {
   ChevronLeft,
   ChevronRight,
   Eye,
@@ -48,11 +39,8 @@ import {
   connectorIdToTableName,
   tableNameToStreamName,
 } from "@/lib/naming"
-import {
-  downloadProjectFile,
-  readProjectFile,
-  readProjectFromUrl,
-} from "@/lib/persistence";
+import { downloadProjectFile } from "@/lib/persistence";
+import { useWizardDialogs } from "./useWizardDialogs";
 
 interface StepDef {
   id: string
@@ -174,68 +162,11 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
   const [visitedSteps, setVisitedSteps] = React.useState(new Set([0]));
   const [showPreview, setShowPreview] = React.useState(true);
   const [mobilePreview, setMobilePreview] = React.useState(false);
-  const [urlDialogOpen, setUrlDialogOpen] = React.useState(false);
-  const [projectUrl, setProjectUrl] = React.useState("");
-  const [isLoadingUrl, setIsLoadingUrl] = React.useState(false);
-  const [deepLinkUrl, setDeepLinkUrl] = React.useState<string | null>(null);
-  const [confirmDialog, setConfirmDialog] = React.useState<{
-    title: string;
-    description: string;
-    onConfirm: () => void;
-  } | null>(null);
-  const [errorDialog, setErrorDialog] = React.useState<{
-    title: string;
-    description: string;
-  } | null>(null);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  // Show consent dialog when a deep link ?project= param is present
-  React.useEffect(() => {
-    if (!initialProjectUrl) return;
-    try {
-      // Validate before showing the dialog so we don't prompt for clearly invalid URLs
-      const parsed = new URL(initialProjectUrl);
-      if (!["http:", "https:"].includes(parsed.protocol)) return;
-      setDeepLinkUrl(initialProjectUrl);
-    } catch {
-      // Invalid URL — silently ignore
-    }
-  }, [initialProjectUrl]);
-
-  const clearProjectParam = React.useCallback(() => {
-    const url = new URL(window.location.href);
-    url.searchParams.delete("project");
-    window.history.replaceState({}, "", url.toString());
-  }, []);
-
-  const handleDeepLinkConfirm = React.useCallback(() => {
-    if (!deepLinkUrl) return;
-
-    setIsLoadingUrl(true);
-    readProjectFromUrl(deepLinkUrl)
-      .then((state) => {
-        importAppState(state);
-        setCurrentStep(0);
-        setVisitedSteps(new Set([0]));
-      })
-      .catch((err) => {
-        const msg =
-          err instanceof Error
-            ? err.message
-            : "Failed to load project from URL.";
-        setErrorDialog({ title: "Load Failed", description: msg });
-      })
-      .finally(() => {
-        setIsLoadingUrl(false);
-        setDeepLinkUrl(null);
-        clearProjectParam();
-      });
-  }, [deepLinkUrl, importAppState, clearProjectParam]);
-
-  const handleDeepLinkDismiss = React.useCallback(() => {
-    setDeepLinkUrl(null);
-    clearProjectParam();
-  }, [clearProjectParam]);
+  const { setConfirmDialog, openUrlDialog, fileInputRef, dialogs } = useWizardDialogs({
+    initialProjectUrl,
+    importAppState,
+    onProjectLoaded: () => { setCurrentStep(0); setVisitedSteps(new Set([0])); },
+  });
 
   // Filter steps based on active connector's kind
   const activeKind = config.meta.connectorKind || "Push";
@@ -284,57 +215,6 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
     });
   }, [config.solution, connectors, activeConnectorIndex, analyticRules, asimParsers]);
 
-  const handleLoadProject = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Reset the input so the same file can be re-selected
-    e.target.value = "";
-
-    try {
-      const state = await readProjectFile(file);
-      setConfirmDialog({
-        title: "Load Project",
-        description: "This will replace your current configuration. Continue?",
-        onConfirm: () => {
-          importAppState(state);
-          setCurrentStep(0);
-          setVisitedSteps(new Set([0]));
-        },
-      });
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to load project file.";
-      setErrorDialog({ title: "Load Failed", description: errorMessage });
-    }
-  };
-
-  const handleLoadFromUrl = async () => {
-    if (!projectUrl.trim()) return;
-
-    setIsLoadingUrl(true);
-    try {
-      const state = await readProjectFromUrl(projectUrl.trim());
-      setUrlDialogOpen(false);
-      setProjectUrl("");
-      setConfirmDialog({
-        title: "Load Project",
-        description: "This will replace your current configuration. Continue?",
-        onConfirm: () => {
-          importAppState(state);
-          setCurrentStep(0);
-          setVisitedSteps(new Set([0]));
-        },
-      });
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to load project from URL.";
-      setErrorDialog({ title: "Load Failed", description: errorMessage });
-    } finally {
-      setIsLoadingUrl(false);
-    }
-  };
-
   // Keyboard shortcuts
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -352,7 +232,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [handleSaveProject]);
+  }, [handleSaveProject, fileInputRef]);
 
   const steps: StepInfo[] = visibleSteps.map((step, i) => ({
     label: step.label,
@@ -477,20 +357,12 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
                   Load Project
                   <DropdownMenuShortcut>⌘O</DropdownMenuShortcut>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setUrlDialogOpen(true)}>
+                <DropdownMenuItem onClick={openUrlDialog}>
                   <Link className="w-4 h-4 mr-2" />
                   Load from URL
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".json"
-              className="hidden"
-              onChange={handleLoadProject}
-              aria-label="Load project file"
-            />
             <Button
               variant="ghost"
               size="icon"
@@ -618,138 +490,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
         </div>
       </footer>
 
-      {/* Load from URL Dialog */}
-      <Dialog open={urlDialogOpen} onOpenChange={setUrlDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Load Project from URL</DialogTitle>
-            <DialogDescription>
-              Enter the URL of a project JSON file to load. Only HTTP and HTTPS
-              URLs are supported.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <Input
-              type="url"
-              placeholder="https://example.com/project.json"
-              value={projectUrl}
-              onChange={(e) => setProjectUrl(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !isLoadingUrl) {
-                  handleLoadFromUrl();
-                }
-              }}
-              disabled={isLoadingUrl}
-              autoFocus
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setUrlDialogOpen(false);
-                setProjectUrl("");
-              }}
-              disabled={isLoadingUrl}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleLoadFromUrl}
-              disabled={isLoadingUrl || !projectUrl.trim()}
-            >
-              {isLoadingUrl ? "Loading..." : "Load Project"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Confirmation Dialog */}
-      <Dialog
-        open={confirmDialog !== null}
-        onOpenChange={(open) => {
-          if (!open) setConfirmDialog(null);
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{confirmDialog?.title}</DialogTitle>
-            <DialogDescription>{confirmDialog?.description}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmDialog(null)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                confirmDialog?.onConfirm();
-                setConfirmDialog(null);
-              }}
-            >
-              Continue
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Error Dialog */}
-      <Dialog
-        open={errorDialog !== null}
-        onOpenChange={(open) => {
-          if (!open) setErrorDialog(null);
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{errorDialog?.title}</DialogTitle>
-            <DialogDescription>{errorDialog?.description}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button onClick={() => setErrorDialog(null)}>OK</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Deep Link Consent Dialog */}
-      <Dialog
-        open={deepLinkUrl !== null}
-        onOpenChange={(open) => {
-          if (!open) handleDeepLinkDismiss();
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Load External Project</DialogTitle>
-            <DialogDescription>
-              A link is requesting to load a project from an external URL. This
-              will replace any current configuration.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4 space-y-3">
-            <div>
-              <p className="text-sm font-medium text-foreground mb-1">Source</p>
-              <code className="text-xs bg-muted px-2 py-1.5 rounded block break-all select-all">
-                {deepLinkUrl}
-              </code>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Only load projects from sources you trust.
-            </p>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={handleDeepLinkDismiss}
-              disabled={isLoadingUrl}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleDeepLinkConfirm} disabled={isLoadingUrl}>
-              {isLoadingUrl ? "Loading..." : "Load Project"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {dialogs}
     </div>
   );
 }

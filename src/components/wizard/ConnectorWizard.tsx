@@ -35,6 +35,8 @@ import {
   Save,
   Upload,
   Link,
+  Layers,
+  Package,
 } from "lucide-react";
 import {
   connectorIdToTableName,
@@ -50,6 +52,7 @@ interface StepDef {
   isValid: (connectors: ConnectorData[], config: ReturnType<typeof useConnectorConfig>["config"]) => boolean
   showSidebar: boolean
   preview: "arm" | "content" | null
+  scope: "connector" | "solution"
   kinds?: ConnectorKind[]
   badge?: string
 }
@@ -69,6 +72,7 @@ const ALL_STEPS: StepDef[] = [
       ),
     showSidebar: true,
     preview: "arm",
+    scope: "connector",
   },
   {
     id: "schema",
@@ -83,6 +87,7 @@ const ALL_STEPS: StepDef[] = [
       ),
     showSidebar: true,
     preview: "arm",
+    scope: "connector",
   },
   {
     id: "dcr",
@@ -97,6 +102,7 @@ const ALL_STEPS: StepDef[] = [
       ),
     showSidebar: true,
     preview: "arm",
+    scope: "connector",
   },
   {
     id: "api-config",
@@ -112,6 +118,7 @@ const ALL_STEPS: StepDef[] = [
       }),
     showSidebar: true,
     preview: "arm",
+    scope: "connector",
     kinds: ["RestApiPoller"],
   },
   {
@@ -121,6 +128,7 @@ const ALL_STEPS: StepDef[] = [
     isValid: () => true,
     showSidebar: true,
     preview: "arm",
+    scope: "connector",
   },
   {
     id: "content",
@@ -129,6 +137,7 @@ const ALL_STEPS: StepDef[] = [
     isValid: () => true,
     showSidebar: false,
     preview: "content",
+    scope: "solution",
   },
   {
     id: "solution",
@@ -140,6 +149,7 @@ const ALL_STEPS: StepDef[] = [
       !!config.solution.support.name,
     showSidebar: false,
     preview: null,
+    scope: "solution",
   },
   {
     id: "export",
@@ -148,6 +158,7 @@ const ALL_STEPS: StepDef[] = [
     isValid: () => true,
     showSidebar: false,
     preview: null,
+    scope: "solution",
   },
 ]
 
@@ -256,6 +267,8 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
     isValid: step.isValid(connectors, config),
     isVisited: visitedSteps.has(i),
     badge: step.badge,
+    scope: step.scope,
+    groupStart: i > 0 && step.scope !== visibleSteps[i - 1].scope,
   }));
 
   const handleNext = () => {
@@ -417,6 +430,21 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
             className={`${activePreview ? "w-full lg:w-3/5" : "w-full"} overflow-auto p-6 transition-all`}
           >
             <div className="max-w-3xl mx-auto">
+              {currentStepDef && (
+                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground/55 mb-5 pb-4 border-b border-border/25">
+                  {currentStepDef.scope === "connector" ? (
+                    <>
+                      <Layers className="w-3.5 h-3.5 shrink-0" />
+                      Per connector — configured individually for each connector
+                    </>
+                  ) : (
+                    <>
+                      <Package className="w-3.5 h-3.5 shrink-0" />
+                      Solution-wide — shared across all connectors
+                    </>
+                  )}
+                </div>
+              )}
               {ActiveStepComponent && <ActiveStepComponent />}
             </div>
           </div>

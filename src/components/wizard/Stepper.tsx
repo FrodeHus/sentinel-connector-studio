@@ -6,6 +6,8 @@ export interface StepInfo {
   isValid: boolean
   isVisited: boolean
   badge?: string
+  scope: "connector" | "solution"
+  groupStart?: boolean
 }
 
 interface StepperProps {
@@ -77,14 +79,24 @@ export function Stepper({ steps, currentStep, onStepClick }: StepperProps) {
               )}
             </button>
             {index < steps.length - 1 && (
-              <div
-                className={cn(
-                  "w-8 h-0.5 rounded-full transition-all",
-                  isCompleted
-                    ? "bg-gradient-to-r from-primary to-secondary"
-                    : "bg-border/30",
-                )}
-              />
+              steps[index + 1].groupStart ? (
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="w-3 h-0.5 bg-border/25 rounded-full" />
+                  <span className="hidden sm:inline text-[9px] uppercase tracking-widest text-muted-foreground/40 font-medium whitespace-nowrap">
+                    Solution
+                  </span>
+                  <div className="w-3 h-0.5 bg-border/25 rounded-full" />
+                </div>
+              ) : (
+                <div
+                  className={cn(
+                    "w-8 h-0.5 rounded-full transition-all",
+                    isCompleted
+                      ? "bg-gradient-to-r from-primary to-secondary"
+                      : "bg-border/30",
+                  )}
+                />
+              )
             )}
           </div>
         );

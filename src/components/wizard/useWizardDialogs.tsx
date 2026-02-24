@@ -33,7 +33,7 @@ interface UseWizardDialogsReturn {
   setConfirmDialog: React.Dispatch<React.SetStateAction<ConfirmDialogState | null>>
   setErrorDialog: React.Dispatch<React.SetStateAction<ErrorDialogState | null>>
   openUrlDialog: () => void
-  fileInputRef: React.RefObject<HTMLInputElement>
+  fileInputRef: React.RefObject<HTMLInputElement | null>
   handleLoadProject: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>
   dialogs: React.ReactNode
 }

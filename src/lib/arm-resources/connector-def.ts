@@ -35,6 +35,9 @@ export function generateConnectorDefinition(
           type: c.type,
           value: c.value,
         })),
+        ...(connectorUI.isConnectivityCriteriasMatchSome
+          ? { isConnectivityCriteriasMatchSome: true }
+          : {}),
         dataTypes: [
           {
             name: `{{graphQueriesTableName}}`,

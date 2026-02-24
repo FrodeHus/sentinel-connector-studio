@@ -8,6 +8,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { HelpCircle, Plus, Trash2 } from "lucide-react"
 import type { InstructionStep } from "@/lib/schemas";
 import {
@@ -24,7 +31,8 @@ export function StepConnectorUI() {
   const [customizePermissions, setCustomizePermissions] = React.useState(false);
 
   const handleAutoGenerate = () => {
-    const { meta, schema, dataFlow } = config;
+    const { meta, schema, dataFlow, pollerConfig } = config;
+    const pollerAuthType = pollerConfig?.auth.type ?? "Basic";
     updateConnectorUI({
       graphQueries: generateDefaultGraphQueries(schema.tableName),
       sampleQueries: generateDefaultSampleQueries(
@@ -35,12 +43,14 @@ export function StepConnectorUI() {
         schema.tableName,
         meta.connectorKind,
       ),
+      isConnectivityCriteriasMatchSome: false,
       permissions: generateDefaultPermissions(),
       instructionSteps: generateDefaultInstructionSteps(
         meta.connectorId,
         schema.tableName,
         dataFlow.streamName,
         meta.connectorKind,
+        pollerAuthType,
       ),
     });
   };
@@ -233,20 +243,100 @@ export function StepConnectorUI() {
                   Connectivity Criteria
                 </Label>
                 {connectorUI.connectivityCriteria.map((cc, i) => (
-                  <KqlEditor
-                    key={i}
-                    value={cc.value.join("\n")}
-                    onChange={(val) => {
-                      const updated = [...connectorUI.connectivityCriteria];
-                      updated[i] = { ...cc, value: [val] };
-                      updateConnectorUI({ connectivityCriteria: updated });
-                    }}
-                    height="80px"
-                    showSnippets={false}
-                    mode="full"
-                  />
+                  <Card key={i} className="mb-2">
+                    <CardContent className="pt-3 pb-3 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Select
+                          value={cc.type}
+                          onValueChange={(v) => {
+                            const updated = [...connectorUI.connectivityCriteria];
+                            updated[i] = {
+                              type: v,
+                              value: v === "HasDataConnectors" ? [] : cc.value,
+                            };
+                            updateConnectorUI({ connectivityCriteria: updated });
+                          }}
+                        >
+                          <SelectTrigger className="h-8 text-xs flex-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="HasDataConnectors">HasDataConnectors</SelectItem>
+                            <SelectItem value="IsConnectedQuery">IsConnectedQuery</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-destructive shrink-0"
+                          onClick={() =>
+                            updateConnectorUI({
+                              connectivityCriteria: connectorUI.connectivityCriteria.filter(
+                                (_, j) => j !== i,
+                              ),
+                            })
+                          }
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                      {cc.type === "HasDataConnectors" && (
+                        <p className="text-xs text-muted-foreground">
+                          Connected when at least one active data connector exists (recommended for CCF/API polling connectors).
+                        </p>
+                      )}
+                      {cc.type === "IsConnectedQuery" && (
+                        <KqlEditor
+                          value={cc.value.join("\n")}
+                          onChange={(val) => {
+                            const updated = [...connectorUI.connectivityCriteria];
+                            updated[i] = { ...cc, value: [val] };
+                            updateConnectorUI({ connectivityCriteria: updated });
+                          }}
+                          height="80px"
+                          showSnippets={false}
+                          mode="full"
+                        />
+                      )}
+                    </CardContent>
+                  </Card>
                 ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() =>
+                    updateConnectorUI({
+                      connectivityCriteria: [
+                        ...connectorUI.connectivityCriteria,
+                        { type: "HasDataConnectors", value: [] },
+                      ],
+                    })
+                  }
+                >
+                  <Plus className="w-3 h-3 mr-1" /> Add criterion
+                </Button>
               </div>
+
+              {connectorUI.connectivityCriteria.length > 1 && (
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="matchSome"
+                    aria-label="Connected when any criterion matches (OR logic)"
+                    checked={connectorUI.isConnectivityCriteriasMatchSome}
+                    onChange={(e) =>
+                      updateConnectorUI({
+                        isConnectivityCriteriasMatchSome: e.target.checked,
+                      })
+                    }
+                    className="rounded border-input"
+                  />
+                  <Label htmlFor="matchSome" className="cursor-pointer text-sm">
+                    Connected when <strong>any</strong> criterion matches (OR logic)
+                  </Label>
+                </div>
+              )}
 
               <div className="flex items-center gap-3">
                 <input

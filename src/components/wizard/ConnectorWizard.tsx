@@ -10,6 +10,7 @@ import { StepDcr } from "./StepDcr"
 import { StepApiConfig } from "./StepApiConfig"
 import { StepConnectorUI } from "./StepConnectorUI"
 import { StepContent } from "./StepContent"
+import { StepSolution } from "./StepSolution"
 import { StepExport } from "./StepExport"
 import { ConnectorSidebar } from "./ConnectorSidebar"
 import { ArmTemplatePreview } from "@/components/preview/ArmTemplatePreview"
@@ -123,13 +124,20 @@ const ALL_STEPS: StepDef[] = [
     showSidebar: false,
   },
   {
-    id: "export",
-    label: "Export",
-    component: StepExport,
+    id: "solution",
+    label: "Solution",
+    component: StepSolution,
     isValid: (_cs, config) =>
       !!config.solution.publisherId &&
       !!config.solution.offerId &&
       !!config.solution.support.name,
+    showSidebar: false,
+  },
+  {
+    id: "export",
+    label: "Export",
+    component: StepExport,
+    isValid: () => true,
     showSidebar: false,
   },
 ]

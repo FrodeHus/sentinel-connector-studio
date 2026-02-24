@@ -76,7 +76,18 @@ export const PermissionsSchema = z.object({
 })
 
 export const InstructionSchema = z.object({
-  type: z.enum(["Markdown", "CopyableLabel", "DeployPushConnectorButton", "ConnectionToggleButton"]),
+  type: z.enum([
+    "Markdown",
+    "CopyableLabel",
+    "DeployPushConnectorButton",
+    "ConnectionToggleButton",
+    "Textbox",
+    "OAuthForm",
+    "Dropdown",
+    "InfoMessage",
+    "InstructionStepsGroup",
+    "InstallAgent",
+  ]),
   parameters: z.record(z.unknown()).default({}),
 })
 
@@ -90,6 +101,7 @@ export const ConnectorUISchema = z.object({
   graphQueries: z.array(GraphQuerySchema).default([]),
   sampleQueries: z.array(SampleQuerySchema).default([]),
   connectivityCriteria: z.array(ConnectivityCriteriaSchema).default([]),
+  isConnectivityCriteriasMatchSome: z.boolean().default(false),
   permissions: PermissionsSchema.default({
     resourceProvider: [],
     customs: [],

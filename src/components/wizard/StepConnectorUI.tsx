@@ -8,6 +8,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { HelpCircle, Plus, Trash2 } from "lucide-react"
 import type { InstructionStep } from "@/lib/schemas";
 import {
@@ -24,7 +31,8 @@ export function StepConnectorUI() {
   const [customizePermissions, setCustomizePermissions] = React.useState(false);
 
   const handleAutoGenerate = () => {
-    const { meta, schema, dataFlow } = config;
+    const { meta, schema, dataFlow, pollerConfig } = config;
+    const pollerAuthType = pollerConfig?.auth.type ?? "Basic";
     updateConnectorUI({
       graphQueries: generateDefaultGraphQueries(schema.tableName),
       sampleQueries: generateDefaultSampleQueries(
@@ -35,12 +43,14 @@ export function StepConnectorUI() {
         schema.tableName,
         meta.connectorKind,
       ),
+      isConnectivityCriteriasMatchSome: false,
       permissions: generateDefaultPermissions(),
       instructionSteps: generateDefaultInstructionSteps(
         meta.connectorId,
         schema.tableName,
         dataFlow.streamName,
         meta.connectorKind,
+        pollerAuthType,
       ),
     });
   };
@@ -233,20 +243,100 @@ export function StepConnectorUI() {
                   Connectivity Criteria
                 </Label>
                 {connectorUI.connectivityCriteria.map((cc, i) => (
-                  <KqlEditor
-                    key={i}
-                    value={cc.value.join("\n")}
-                    onChange={(val) => {
-                      const updated = [...connectorUI.connectivityCriteria];
-                      updated[i] = { ...cc, value: [val] };
-                      updateConnectorUI({ connectivityCriteria: updated });
-                    }}
-                    height="80px"
-                    showSnippets={false}
-                    mode="full"
-                  />
+                  <Card key={i} className="mb-2">
+                    <CardContent className="pt-3 pb-3 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Select
+                          value={cc.type}
+                          onValueChange={(v) => {
+                            const updated = [...connectorUI.connectivityCriteria];
+                            updated[i] = {
+                              type: v,
+                              value: v === "HasDataConnectors" ? [] : cc.value,
+                            };
+                            updateConnectorUI({ connectivityCriteria: updated });
+                          }}
+                        >
+                          <SelectTrigger className="h-8 text-xs flex-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="HasDataConnectors">HasDataConnectors</SelectItem>
+                            <SelectItem value="IsConnectedQuery">IsConnectedQuery</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-destructive shrink-0"
+                          onClick={() =>
+                            updateConnectorUI({
+                              connectivityCriteria: connectorUI.connectivityCriteria.filter(
+                                (_, j) => j !== i,
+                              ),
+                            })
+                          }
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                      {cc.type === "HasDataConnectors" && (
+                        <p className="text-xs text-muted-foreground">
+                          Connected when at least one active data connector exists (recommended for CCF/API polling connectors).
+                        </p>
+                      )}
+                      {cc.type === "IsConnectedQuery" && (
+                        <KqlEditor
+                          value={cc.value.join("\n")}
+                          onChange={(val) => {
+                            const updated = [...connectorUI.connectivityCriteria];
+                            updated[i] = { ...cc, value: [val] };
+                            updateConnectorUI({ connectivityCriteria: updated });
+                          }}
+                          height="80px"
+                          showSnippets={false}
+                          mode="full"
+                        />
+                      )}
+                    </CardContent>
+                  </Card>
                 ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() =>
+                    updateConnectorUI({
+                      connectivityCriteria: [
+                        ...connectorUI.connectivityCriteria,
+                        { type: "HasDataConnectors", value: [] },
+                      ],
+                    })
+                  }
+                >
+                  <Plus className="w-3 h-3 mr-1" /> Add criterion
+                </Button>
               </div>
+
+              {connectorUI.connectivityCriteria.length > 1 && (
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="matchSome"
+                    aria-label="Connected when any criterion matches (OR logic)"
+                    checked={connectorUI.isConnectivityCriteriasMatchSome}
+                    onChange={(e) =>
+                      updateConnectorUI({
+                        isConnectivityCriteriasMatchSome: e.target.checked,
+                      })
+                    }
+                    className="rounded border-input"
+                  />
+                  <Label htmlFor="matchSome" className="cursor-pointer text-sm">
+                    Connected when <strong>any</strong> criterion matches (OR logic)
+                  </Label>
+                </div>
+              )}
 
               <div className="flex items-center gap-3">
                 <input
@@ -265,96 +355,211 @@ export function StepConnectorUI() {
               </div>
 
               {customizePermissions ? (
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">
-                    Resource Providers
-                  </Label>
-                  {connectorUI.permissions.resourceProvider.map((rp, i) => (
-                    <Card key={i} className="mb-2">
-                      <CardContent className="pt-3 pb-3 space-y-2">
-                        <Input
-                          placeholder="Provider"
-                          value={rp.provider}
-                          onChange={(e) => {
-                            const updated = [
-                              ...connectorUI.permissions.resourceProvider,
-                            ];
-                            updated[i] = { ...rp, provider: e.target.value };
-                            updateConnectorUI({
-                              permissions: {
-                                ...connectorUI.permissions,
-                                resourceProvider: updated,
-                              },
-                            });
-                          }}
-                          className="text-xs font-mono"
-                        />
-                        <Input
-                          placeholder="Display text"
-                          value={rp.permissionsDisplayText}
-                          onChange={(e) => {
-                            const updated = [
-                              ...connectorUI.permissions.resourceProvider,
-                            ];
-                            updated[i] = {
-                              ...rp,
-                              permissionsDisplayText: e.target.value,
-                            };
-                            updateConnectorUI({
-                              permissions: {
-                                ...connectorUI.permissions,
-                                resourceProvider: updated,
-                              },
-                            });
-                          }}
-                          className="text-xs"
-                        />
-                      </CardContent>
-                    </Card>
-                  ))}
-                  <Label className="text-xs text-muted-foreground mt-4 block">
-                    Custom Permissions
-                  </Label>
-                  {connectorUI.permissions.customs.map((cp, i) => (
-                    <Card key={i} className="mb-2">
-                      <CardContent className="pt-3 pb-3 space-y-2">
-                        <Input
-                          placeholder="Name"
-                          value={cp.name}
-                          onChange={(e) => {
-                            const updated = [
-                              ...connectorUI.permissions.customs,
-                            ];
-                            updated[i] = { ...cp, name: e.target.value };
-                            updateConnectorUI({
-                              permissions: {
-                                ...connectorUI.permissions,
-                                customs: updated,
-                              },
-                            });
-                          }}
-                          className="text-xs"
-                        />
-                        <Input
-                          placeholder="Description"
-                          value={cp.description}
-                          onChange={(e) => {
-                            const updated = [
-                              ...connectorUI.permissions.customs,
-                            ];
-                            updated[i] = { ...cp, description: e.target.value };
-                            updateConnectorUI({
-                              permissions: {
-                                ...connectorUI.permissions,
-                                customs: updated,
-                              },
-                            });
-                          }}
-                          className="text-xs"
-                        />
-                      </CardContent>
-                    </Card>
-                  ))}
+                <div className="space-y-4">
+                  {/* Resource Providers */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="text-xs text-muted-foreground">Resource Providers</Label>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs"
+                        onClick={() =>
+                          updateConnectorUI({
+                            permissions: {
+                              ...connectorUI.permissions,
+                              resourceProvider: [
+                                ...connectorUI.permissions.resourceProvider,
+                                {
+                                  provider: "Microsoft.OperationalInsights/workspaces",
+                                  permissionsDisplayText: "",
+                                  providerDisplayName: "Workspace",
+                                  scope: "Workspace",
+                                  requiredPermissions: { write: true, read: true, delete: false, action: false },
+                                },
+                              ],
+                            },
+                          })
+                        }
+                      >
+                        <Plus className="w-3 h-3 mr-1" /> Add
+                      </Button>
+                    </div>
+                    {connectorUI.permissions.resourceProvider.map((rp, i) => {
+                      const updateRp = (patch: Partial<typeof rp>) => {
+                        const updated = [...connectorUI.permissions.resourceProvider];
+                        updated[i] = { ...rp, ...patch };
+                        updateConnectorUI({ permissions: { ...connectorUI.permissions, resourceProvider: updated } });
+                      };
+                      return (
+                        <Card key={i} className="mb-2">
+                          <CardContent className="pt-3 pb-3 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs text-muted-foreground">Provider {i + 1}</span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-destructive"
+                                onClick={() =>
+                                  updateConnectorUI({
+                                    permissions: {
+                                      ...connectorUI.permissions,
+                                      resourceProvider: connectorUI.permissions.resourceProvider.filter((_, j) => j !== i),
+                                    },
+                                  })
+                                }
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+
+                            {/* Provider + Scope row */}
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="space-y-1">
+                                <Label className="text-xs text-muted-foreground">Provider</Label>
+                                <Select value={rp.provider} onValueChange={(v) => updateRp({ provider: v })}>
+                                  <SelectTrigger className="h-8 text-xs font-mono" aria-label="Provider">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="Microsoft.OperationalInsights/workspaces">workspaces</SelectItem>
+                                    <SelectItem value="Microsoft.OperationalInsights/solutions">solutions</SelectItem>
+                                    <SelectItem value="Microsoft.OperationalInsights/workspaces/datasources">datasources</SelectItem>
+                                    <SelectItem value="microsoft.aadiam/diagnosticSettings">diagnosticSettings</SelectItem>
+                                    <SelectItem value="Microsoft.OperationalInsights/workspaces/sharedKeys">sharedKeys</SelectItem>
+                                    <SelectItem value="Microsoft.Authorization/policyAssignments">policyAssignments</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs text-muted-foreground">Scope</Label>
+                                <Select value={rp.scope} onValueChange={(v) => updateRp({ scope: v })}>
+                                  <SelectTrigger className="h-8 text-xs" aria-label="Scope">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="Workspace">Workspace</SelectItem>
+                                    <SelectItem value="ResourceGroup">ResourceGroup</SelectItem>
+                                    <SelectItem value="Subscription">Subscription</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+
+                            {/* Display name + Display text row */}
+                            <div className="grid grid-cols-2 gap-2">
+                              <Input
+                                placeholder="Display name (e.g. Workspace)"
+                                value={rp.providerDisplayName}
+                                onChange={(e) => updateRp({ providerDisplayName: e.target.value })}
+                                className="text-xs"
+                              />
+                              <Input
+                                placeholder="Permissions display text"
+                                value={rp.permissionsDisplayText}
+                                onChange={(e) => updateRp({ permissionsDisplayText: e.target.value })}
+                                className="text-xs"
+                              />
+                            </div>
+
+                            {/* Required permissions */}
+                            <div>
+                              <Label className="text-xs text-muted-foreground mb-1.5 block">Required Permissions</Label>
+                              <div className="flex flex-wrap gap-4 text-xs">
+                                {(["read", "write", "delete", "action"] as const).map((perm) => (
+                                  <label key={perm} className="flex items-center gap-1.5 cursor-pointer capitalize">
+                                    <input
+                                      type="checkbox"
+                                      checked={rp.requiredPermissions[perm]}
+                                      onChange={(e) =>
+                                        updateRp({
+                                          requiredPermissions: {
+                                            ...rp.requiredPermissions,
+                                            [perm]: e.target.checked,
+                                          },
+                                        })
+                                      }
+                                      aria-label={perm}
+                                    />
+                                    {perm}
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+
+                  {/* Custom Permissions */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="text-xs text-muted-foreground">Custom Permissions</Label>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs"
+                        onClick={() =>
+                          updateConnectorUI({
+                            permissions: {
+                              ...connectorUI.permissions,
+                              customs: [
+                                ...connectorUI.permissions.customs,
+                                { name: "", description: "" },
+                              ],
+                            },
+                          })
+                        }
+                      >
+                        <Plus className="w-3 h-3 mr-1" /> Add
+                      </Button>
+                    </div>
+                    {connectorUI.permissions.customs.map((cp, i) => (
+                      <Card key={i} className="mb-2">
+                        <CardContent className="pt-3 pb-3 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Custom {i + 1}</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-destructive"
+                              onClick={() =>
+                                updateConnectorUI({
+                                  permissions: {
+                                    ...connectorUI.permissions,
+                                    customs: connectorUI.permissions.customs.filter((_, j) => j !== i),
+                                  },
+                                })
+                              }
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                          <Input
+                            placeholder="Name (e.g. Microsoft Entra application)"
+                            value={cp.name}
+                            onChange={(e) => {
+                              const updated = [...connectorUI.permissions.customs];
+                              updated[i] = { ...cp, name: e.target.value };
+                              updateConnectorUI({ permissions: { ...connectorUI.permissions, customs: updated } });
+                            }}
+                            className="text-xs"
+                          />
+                          <Input
+                            placeholder="Description"
+                            value={cp.description}
+                            onChange={(e) => {
+                              const updated = [...connectorUI.permissions.customs];
+                              updated[i] = { ...cp, description: e.target.value };
+                              updateConnectorUI({ permissions: { ...connectorUI.permissions, customs: updated } });
+                            }}
+                            className="text-xs"
+                          />
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <div className="p-3 rounded-md bg-muted text-sm text-muted-foreground">

@@ -80,18 +80,84 @@ export function generateDefaultInstructionSteps(
   _tableName: string,
   streamName: string,
   kind: ConnectorKind = "Push",
+  pollerAuthType: "Basic" | "APIKey" | "OAuth2" = "Basic",
 ): InstructionStep[] {
   if (kind === "RestApiPoller") {
+    const toggleButton = {
+      type: "ConnectionToggleButton" as const,
+      parameters: {
+        connectLabel: "Connect",
+        disconnectLabel: "Disconnect",
+        name: "toggle",
+      },
+    }
+
+    if (pollerAuthType === "OAuth2") {
+      return [
+        {
+          title: "Connect",
+          description: "Authenticate with OAuth 2.0 and enable the connector.",
+          instructions: [
+            {
+              type: "OAuthForm" as const,
+              parameters: {
+                clientIdLabel: "Client ID",
+                clientSecretLabel: "Client Secret",
+                connectButtonLabel: "Connect",
+                disconnectButtonLabel: "Disconnect",
+              },
+            },
+          ],
+        },
+      ]
+    }
+
+    if (pollerAuthType === "APIKey") {
+      return [
+        {
+          title: "Connect",
+          description: "Provide your API key and enable the connector.",
+          instructions: [
+            {
+              type: "Textbox" as const,
+              parameters: {
+                label: "API Key",
+                placeholder: "Enter your API key",
+                type: "password",
+                name: "apiKey",
+              },
+            },
+            toggleButton,
+          ],
+        },
+      ]
+    }
+
+    // Basic (default)
     return [
       {
         title: "Connect",
-        description:
-          "Enable the connector to start polling the REST API.",
+        description: "Provide your credentials and enable the connector.",
         instructions: [
           {
-            type: "ConnectionToggleButton" as const,
-            parameters: {},
+            type: "Textbox" as const,
+            parameters: {
+              label: "User name",
+              placeholder: "User name",
+              type: "text",
+              name: "username",
+            },
           },
+          {
+            type: "Textbox" as const,
+            parameters: {
+              label: "Password",
+              placeholder: "Password",
+              type: "password",
+              name: "password",
+            },
+          },
+          toggleButton,
         ],
       },
     ]
@@ -175,12 +241,14 @@ export function generateDefaultConnectorUI(
   streamName: string,
   columns: Column[],
   kind: ConnectorKind = "Push",
+  pollerAuthType: "Basic" | "APIKey" | "OAuth2" = "Basic",
 ): ConnectorUI {
   return {
     graphQueries: generateDefaultGraphQueries(tableName),
     sampleQueries: generateDefaultSampleQueries(tableName, columns),
     connectivityCriteria: generateDefaultConnectivityCriteria(tableName, kind),
+    isConnectivityCriteriasMatchSome: false,
     permissions: generateDefaultPermissions(),
-    instructionSteps: generateDefaultInstructionSteps(connectorId, tableName, streamName, kind),
+    instructionSteps: generateDefaultInstructionSteps(connectorId, tableName, streamName, kind, pollerAuthType),
   }
 }

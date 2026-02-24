@@ -73,6 +73,7 @@ export const testConnectorUI: ConnectorUI = {
       value: ["TestConnector_CL | summarize max(TimeGenerated)"],
     },
   ],
+  isConnectivityCriteriasMatchSome: false,
   permissions: {
     resourceProvider: [
       {

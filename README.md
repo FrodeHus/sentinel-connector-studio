@@ -1,4 +1,5 @@
 # Sentinel Connector Studio
+
 [![CI](https://github.com/FrodeHus/sentinel-connector-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/FrodeHus/sentinel-connector-studio/actions/workflows/ci.yml)
 [![Docker Publish](https://github.com/FrodeHus/sentinel-connector-studio/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/FrodeHus/sentinel-connector-studio/actions/workflows/docker-publish.yml)
 
@@ -102,6 +103,7 @@ The Export step shows a **Packager Online** / **Packager Offline** badge so you 
 After building or packaging your template, the Next Steps section provides both a **Portal** and **CLI** deployment guide.
 
 **Azure Portal:**
+
 1. Navigate to [Deploy a custom template](https://portal.azure.com/#create/Microsoft.Template)
 2. Click "Build your own template in the editor"
 3. Upload `Package/mainTemplate.json`
@@ -141,10 +143,43 @@ Open `http://localhost:8080` in your browser.
 To pin a specific version:
 
 ```bash
-docker run -p 8080:8080 frodehus/sentinel-connector-studio:1.0.0
+docker run -p 8080:8080 frodehus/sentinel-connector-studio:1.3.0
 ```
 
 > See all available tags at [hub.docker.com/r/frodehus/sentinel-connector-studio](https://hub.docker.com/r/frodehus/sentinel-connector-studio).
+
+#### Running with the packager sidecar (Docker Hub images)
+
+To run both the studio and the packager using pre-built images from Docker Hub, copy the example env file and start the stack:
+
+```bash
+cp .env.example .env
+docker compose up
+```
+
+The `.env` file pins the image versions. To upgrade to a newer release, update the version tags in `.env` and pull:
+
+```bash
+docker compose pull
+docker compose up
+```
+
+You can also run only the packager alongside a local dev server:
+
+```bash
+docker compose up packager
+pnpm dev
+```
+
+> See all available packager tags at [hub.docker.com/r/frodehus/sentinel-connector-studio-packager](https://hub.docker.com/r/frodehus/sentinel-connector-studio-packager).
+
+#### Building from source
+
+If you prefer to build the images locally (e.g. for development), remove or omit the `.env` file and pass `--build`:
+
+```bash
+docker compose up --build
+```
 
 ### Prerequisites
 
@@ -191,7 +226,7 @@ pnpm run lint
 
 ## Project Structure
 
-```
+```text
 src/
 ├── components/
 │   ├── wizard/           # Wizard steps and navigation

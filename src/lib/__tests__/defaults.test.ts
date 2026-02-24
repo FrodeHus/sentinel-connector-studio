@@ -115,14 +115,43 @@ describe("generateDefaultInstructionSteps", () => {
       expect(result).toHaveLength(1)
     })
 
-    it("step has a ConnectionToggleButton instruction", () => {
+    it("step has Textbox instructions followed by ConnectionToggleButton (Basic auth default)", () => {
       const result = generateDefaultInstructionSteps(
         "TestConnector",
         "TestConnector_CL",
         "Custom-TestConnector",
         "RestApiPoller",
+        "Basic",
       )
-      expect(result[0].instructions[0].type).toBe("ConnectionToggleButton")
+      expect(result[0].instructions).toHaveLength(3)
+      expect(result[0].instructions[0].type).toBe("Textbox")
+      expect(result[0].instructions[1].type).toBe("Textbox")
+      expect(result[0].instructions[2].type).toBe("ConnectionToggleButton")
+    })
+
+    it("step has OAuthForm instruction for OAuth2 auth", () => {
+      const result = generateDefaultInstructionSteps(
+        "TestConnector",
+        "TestConnector_CL",
+        "Custom-TestConnector",
+        "RestApiPoller",
+        "OAuth2",
+      )
+      expect(result[0].instructions).toHaveLength(1)
+      expect(result[0].instructions[0].type).toBe("OAuthForm")
+    })
+
+    it("step has Textbox + ConnectionToggleButton for APIKey auth", () => {
+      const result = generateDefaultInstructionSteps(
+        "TestConnector",
+        "TestConnector_CL",
+        "Custom-TestConnector",
+        "RestApiPoller",
+        "APIKey",
+      )
+      expect(result[0].instructions).toHaveLength(2)
+      expect(result[0].instructions[0].type).toBe("Textbox")
+      expect(result[0].instructions[1].type).toBe("ConnectionToggleButton")
     })
   })
 })

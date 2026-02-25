@@ -404,16 +404,18 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
             </Button>
           </div>
         </div>
-        <Stepper
-          steps={steps}
-          currentStep={currentStep}
-          onStepClick={handleStepClick}
-        />
       </header>
 
       {/* Main content */}
       <div className="flex-1 overflow-hidden">
         <div className="h-full flex">
+          {/* Vertical nav rail */}
+          <Stepper
+            steps={steps}
+            currentStep={currentStep}
+            onStepClick={handleStepClick}
+          />
+
           {/* Connector sidebar — visible when step has showSidebar */}
           {currentStepDef?.showSidebar && (
             <ConnectorSidebar
@@ -426,9 +428,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
           )}
 
           {/* Form panel */}
-          <div
-            className={`${activePreview ? "w-full lg:w-3/5" : "w-full"} overflow-auto p-6 transition-all`}
-          >
+          <div className="flex-1 overflow-auto p-6 min-w-0 transition-all">
             <div className="max-w-3xl mx-auto">
               {currentStepDef && (
                 <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground/55 mb-5 pb-4 border-b border-border/25">

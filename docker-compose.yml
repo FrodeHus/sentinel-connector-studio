@@ -26,7 +26,7 @@ services:
     image: ${PACKAGER_IMAGE:-frodehus/sentinel-connector-studio-packager:latest}
     build:
       context: ./packager
-      dockerfile: ./packager/Dockerfile
+      dockerfile: Dockerfile
     env_file:
       - path: .env
         required: false

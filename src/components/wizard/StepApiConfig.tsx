@@ -75,7 +75,7 @@ function KeyValueEditor({
 }
 
 export function StepApiConfig() {
-  const { config, updatePollerConfig, updateDataFlow } = useConnectorConfig()
+  const { config, updatePollerConfig, updateDataFlow, updateSchema } = useConnectorConfig()
   const pc = config.pollerConfig ?? PollerConfigSchema.parse({})
   const [showAdvancedRequest, setShowAdvancedRequest] = React.useState(false)
   const [showAdvancedResponse, setShowAdvancedResponse] = React.useState(false)
@@ -96,13 +96,22 @@ export function StepApiConfig() {
         },
       }))
       if (result.inputColumns.length > 0) {
-        updateDataFlow({
-          inputColumnsOverride: true,
-          inputColumns: result.inputColumns,
-        })
+        if (result.applyTo.tableSchema) {
+          const withTimeGenerated = [
+            { name: "TimeGenerated", type: "datetime" as const },
+            ...result.inputColumns.filter((c) => c.name !== "TimeGenerated"),
+          ]
+          updateSchema({ columns: withTimeGenerated })
+        }
+        if (result.applyTo.dcrInputStream) {
+          updateDataFlow({
+            inputColumnsOverride: true,
+            inputColumns: result.inputColumns,
+          })
+        }
       }
     },
-    [updatePollerConfig, updateDataFlow],
+    [updatePollerConfig, updateDataFlow, updateSchema],
   )
 
   const selectClass =

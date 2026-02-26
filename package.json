@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "proxy": "node scripts/cors-proxy.mjs"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

@@ -15,7 +15,46 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Play, Loader2 } from "lucide-react"
+import { Play, Loader2, Shield, ShieldOff, LockKeyholeOpen, LockKeyhole } from "lucide-react"
+import { Tooltip, TooltipProvider } from "@/components/ui/tooltip"
+
+const PROXY_BASE = "http://localhost:3100"
+const PROXY_URL = `${PROXY_BASE}/proxy`
+
+async function checkProxyAvailable(): Promise<boolean> {
+  try {
+    const res = await fetch(`${PROXY_BASE}/health`, {
+      signal: AbortSignal.timeout(1000),
+    })
+    if (!res.ok) return false
+    const data = await res.json()
+    return data.status === "ok"
+  } catch {
+    return false
+  }
+}
+
+async function fetchViaProxy(
+  url: string,
+  method: string,
+  headers: Record<string, string>,
+  body?: string,
+  allowInsecure?: boolean,
+): Promise<Response> {
+  return fetch(PROXY_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url, method, headers, body, allowInsecure }),
+  })
+}
+
+function parseErrorText(text: string): string {
+  try {
+    const json = JSON.parse(text)
+    if (json.error) return json.error
+  } catch { /* not JSON */ }
+  return text.slice(0, 300)
+}
 
 export interface ApiTestResult {
   eventsJsonPaths: string[]
@@ -78,8 +117,11 @@ export function ApiTestDialog({
   const [jsonPaths, setJsonPaths] = React.useState(
     pollerConfig?.response.eventsJsonPaths.join(", ") ?? "$",
   )
+  const [useProxy, setUseProxy] = React.useState(false)
+  const [proxyAvailable, setProxyAvailable] = React.useState(false)
+  const [allowInsecure, setAllowInsecure] = React.useState(false)
 
-  // Reset state when dialog opens
+  // Reset state and detect proxy when dialog opens
   React.useEffect(() => {
     if (open) {
       setCredentials({})
@@ -90,6 +132,10 @@ export function ApiTestDialog({
       setJsonPaths(
         pollerConfig?.response.eventsJsonPaths.join(", ") ?? "$",
       )
+      checkProxyAvailable().then((available) => {
+        setProxyAvailable(available)
+        setUseProxy(available)
+      })
     }
   }, [open, pollerConfig?.response.eventsJsonPaths])
 
@@ -164,16 +210,18 @@ export function ApiTestDialog({
           ...auth.tokenEndpointHeaders,
         }
 
-        const tokenRes = await fetch(tokenUrl, {
-          method: "POST",
-          headers: tokenHeaders,
-          body: tokenBody.toString(),
-        })
+        const tokenRes = useProxy
+          ? await fetchViaProxy(tokenUrl, "POST", tokenHeaders, tokenBody.toString(), allowInsecure)
+          : await fetch(tokenUrl, {
+              method: "POST",
+              headers: tokenHeaders,
+              body: tokenBody.toString(),
+            })
 
         if (!tokenRes.ok) {
           const text = await tokenRes.text()
           setError(
-            `Token exchange failed (${tokenRes.status}): ${text.slice(0, 200)}`,
+            `Token exchange failed (${tokenRes.status}): ${parseErrorText(text)}`,
           )
           setLoading(false)
           return
@@ -197,16 +245,13 @@ export function ApiTestDialog({
         return
       }
 
-      const fetchOptions: RequestInit = {
-        method: request.httpMethod,
-        headers,
-      }
-
-      const res = await fetch(endpoint, fetchOptions)
+      const res = useProxy
+        ? await fetchViaProxy(endpoint, request.httpMethod, headers, undefined, allowInsecure)
+        : await fetch(endpoint, { method: request.httpMethod, headers })
       const text = await res.text()
 
       if (!res.ok) {
-        setError(`Request failed (${res.status}): ${text.slice(0, 300)}`)
+        setError(`Request failed (${res.status}): ${parseErrorText(text)}`)
         setRawResponse(text)
         setLoading(false)
         return
@@ -224,9 +269,8 @@ export function ApiTestDialog({
       const msg = e instanceof Error ? e.message : String(e)
       if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("CORS")) {
         setError(
-          "Request blocked by CORS policy. The API server does not allow requests from the browser. " +
-          "You can work around this by using a browser extension that disables CORS (e.g., \"CORS Unblock\") " +
-          "or by running a local CORS proxy.",
+          "Request blocked by CORS policy. " +
+          "Run \"pnpm proxy\" in a separate terminal to start the local CORS proxy, then retry.",
         )
       } else {
         setError(msg)
@@ -382,6 +426,62 @@ export function ApiTestDialog({
                 )}
                 {loading ? "Sending..." : "Send Request"}
               </Button>
+              <TooltipProvider>
+                <Tooltip
+                  content={
+                    proxyAvailable
+                      ? useProxy
+                        ? "Requests are routed through the local CORS proxy"
+                        : "Click to enable the CORS proxy"
+                      : "CORS proxy not running. Start it with: pnpm proxy"
+                  }
+                >
+                  <button
+                    type="button"
+                    onClick={() => setUseProxy((p) => !p)}
+                    disabled={!proxyAvailable}
+                    className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors cursor-pointer ${
+                      useProxy
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:text-foreground"
+                    } ${!proxyAvailable ? "opacity-40 cursor-not-allowed" : ""}`}
+                  >
+                    {useProxy ? (
+                      <Shield className="w-3.5 h-3.5" />
+                    ) : (
+                      <ShieldOff className="w-3.5 h-3.5" />
+                    )}
+                    Proxy {useProxy ? "on" : "off"}
+                  </button>
+                </Tooltip>
+                <Tooltip
+                  content={
+                    useProxy
+                      ? allowInsecure
+                        ? "Self-signed certificates are allowed (via proxy)"
+                        : "Click to allow self-signed certificates"
+                      : "Requires the CORS proxy to bypass certificate validation"
+                  }
+                >
+                  <button
+                    type="button"
+                    onClick={() => setAllowInsecure((p) => !p)}
+                    disabled={!useProxy}
+                    className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors cursor-pointer ${
+                      allowInsecure && useProxy
+                        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                        : "text-muted-foreground hover:text-foreground"
+                    } ${!useProxy ? "opacity-40 cursor-not-allowed" : ""}`}
+                  >
+                    {allowInsecure && useProxy ? (
+                      <LockKeyholeOpen className="w-3.5 h-3.5" />
+                    ) : (
+                      <LockKeyhole className="w-3.5 h-3.5" />
+                    )}
+                    TLS {allowInsecure && useProxy ? "insecure" : "strict"}
+                  </button>
+                </Tooltip>
+              </TooltipProvider>
               <span className="text-xs text-muted-foreground font-mono truncate">
                 {pollerConfig?.request.httpMethod ?? "GET"}{" "}
                 {pollerConfig?.request.apiEndpoint || "(no endpoint configured)"}

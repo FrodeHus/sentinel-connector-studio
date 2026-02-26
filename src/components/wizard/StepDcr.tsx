@@ -23,7 +23,7 @@ import { ClipboardPaste, FlaskConical, HelpCircle } from "lucide-react";
 import type { Column } from "@/lib/schemas";
 
 export function StepDcr() {
-  const { config, updateDataFlow, updatePollerConfig } = useConnectorConfig();
+  const { config, updateDataFlow, updatePollerConfig, updateSchema } = useConnectorConfig();
   const { dataFlow } = config;
   const isPoller = config.meta.connectorKind === "RestApiPoller";
   const [pasteDialogOpen, setPasteDialogOpen] = React.useState(false);
@@ -55,13 +55,22 @@ export function StepDcr() {
         },
       }));
       if (result.inputColumns.length > 0) {
-        updateDataFlow({
-          inputColumnsOverride: true,
-          inputColumns: result.inputColumns,
-        });
+        if (result.applyTo.tableSchema) {
+          const withTimeGenerated = [
+            { name: "TimeGenerated", type: "datetime" as const },
+            ...result.inputColumns.filter((c) => c.name !== "TimeGenerated"),
+          ];
+          updateSchema({ columns: withTimeGenerated });
+        }
+        if (result.applyTo.dcrInputStream) {
+          updateDataFlow({
+            inputColumnsOverride: true,
+            inputColumns: result.inputColumns,
+          });
+        }
       }
     },
-    [updatePollerConfig, updateDataFlow],
+    [updatePollerConfig, updateDataFlow, updateSchema],
   );
 
   return (

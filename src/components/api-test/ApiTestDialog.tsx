@@ -61,6 +61,10 @@ export interface ApiTestResult {
   eventsJsonPaths: string[]
   format: "json" | "csv" | "xml"
   inputColumns: Column[]
+  applyTo: {
+    tableSchema: boolean
+    dcrInputStream: boolean
+  }
 }
 
 interface ApiTestDialogProps {
@@ -121,6 +125,8 @@ export function ApiTestDialog({
   const [useProxy, setUseProxy] = React.useState(false)
   const [proxyAvailable, setProxyAvailable] = React.useState(false)
   const [allowInsecure, setAllowInsecure] = React.useState(false)
+  const [applyToTableSchema, setApplyToTableSchema] = React.useState(true)
+  const [applyToDcrInputStream, setApplyToDcrInputStream] = React.useState(true)
 
   // Reset state and detect proxy when dialog opens
   React.useEffect(() => {
@@ -298,6 +304,10 @@ export function ApiTestDialog({
       eventsJsonPaths: paths.length > 0 ? paths : ["$"],
       format,
       inputColumns: inferredColumns ?? [],
+      applyTo: {
+        tableSchema: applyToTableSchema,
+        dcrInputStream: applyToDcrInputStream,
+      },
     })
     onOpenChange(false)
   }
@@ -564,13 +574,43 @@ export function ApiTestDialog({
           )}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={handleClose}>
-            Cancel
-          </Button>
-          {extractedEvents && extractedEvents.length > 0 && (
-            <Button onClick={handleApply}>Apply Results</Button>
+        <DialogFooter className="flex-col sm:flex-row gap-3">
+          {extractedEvents && extractedEvents.length > 0 && inferredColumns && inferredColumns.length > 0 && (
+            <div className="flex items-center gap-4 mr-auto text-sm">
+              <span className="text-muted-foreground text-xs font-medium">Apply columns to:</span>
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={applyToTableSchema}
+                  onChange={(e) => setApplyToTableSchema(e.target.checked)}
+                  className="accent-primary"
+                />
+                <span className="text-xs">Table Schema</span>
+              </label>
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={applyToDcrInputStream}
+                  onChange={(e) => setApplyToDcrInputStream(e.target.checked)}
+                  className="accent-primary"
+                />
+                <span className="text-xs">DCR Input Stream</span>
+              </label>
+            </div>
           )}
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleClose}>
+              Cancel
+            </Button>
+            {extractedEvents && extractedEvents.length > 0 && (
+              <Button
+                onClick={handleApply}
+                disabled={!applyToTableSchema && !applyToDcrInputStream}
+              >
+                Apply Results
+              </Button>
+            )}
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

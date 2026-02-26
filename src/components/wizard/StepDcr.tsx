@@ -2,8 +2,10 @@ import * as React from "react";
 import { useConnectorConfig } from "@/hooks/useConnectorConfig";
 import { KqlEditor } from "@/components/kql-editor/KqlEditor";
 import { SchemaEditor } from "@/components/schema-editor/SchemaEditor";
+import { PasteJsonDialog } from "@/components/schema-editor/PasteJsonDialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -16,12 +18,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { HelpCircle } from "lucide-react";
+import { ClipboardPaste, HelpCircle } from "lucide-react";
 import type { Column } from "@/lib/schemas";
 
 export function StepDcr() {
   const { config, updateDataFlow } = useConnectorConfig();
   const { dataFlow } = config;
+  const [pasteDialogOpen, setPasteDialogOpen] = React.useState(false);
 
   const handleTransformKqlChange = React.useCallback(
     (transformKql: string) => updateDataFlow({ transformKql }),
@@ -30,6 +33,11 @@ export function StepDcr() {
 
   const handleInputColumnsChange = React.useCallback(
     (inputColumns: Column[]) => updateDataFlow({ inputColumns }),
+    [updateDataFlow],
+  );
+
+  const handleApplyInferred = React.useCallback(
+    (columns: Column[]) => updateDataFlow({ inputColumns: columns }),
     [updateDataFlow],
   );
 
@@ -90,7 +98,12 @@ export function StepDcr() {
 
             {dataFlow.inputColumnsOverride && (
               <div className="pl-4 border-l-2 border-muted">
-                <Label className="mb-2 block">Input Stream Columns</Label>
+                <div className="flex items-center justify-between mb-2">
+                  <Label>Input Stream Columns</Label>
+                  <Button variant="outline" size="sm" onClick={() => setPasteDialogOpen(true)}>
+                    <ClipboardPaste className="w-4 h-4 mr-1" /> Paste sample event
+                  </Button>
+                </div>
                 <SchemaEditor
                   columns={dataFlow.inputColumns}
                   onChange={handleInputColumnsChange}
@@ -126,6 +139,11 @@ export function StepDcr() {
           </Card>
         </CollapsibleContent>
       </Collapsible>
+      <PasteJsonDialog
+        open={pasteDialogOpen}
+        onOpenChange={setPasteDialogOpen}
+        onApply={handleApplyInferred}
+      />
     </div>
   );
 }

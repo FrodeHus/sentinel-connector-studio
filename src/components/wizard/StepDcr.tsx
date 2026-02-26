@@ -3,6 +3,7 @@ import { useConnectorConfig } from "@/hooks/useConnectorConfig";
 import { KqlEditor } from "@/components/kql-editor/KqlEditor";
 import { SchemaEditor } from "@/components/schema-editor/SchemaEditor";
 import { PasteJsonDialog } from "@/components/schema-editor/PasteJsonDialog";
+import { ApiTestDialog, type ApiTestResult } from "@/components/api-test/ApiTestDialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -18,13 +19,15 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ClipboardPaste, HelpCircle } from "lucide-react";
+import { ClipboardPaste, FlaskConical, HelpCircle } from "lucide-react";
 import type { Column } from "@/lib/schemas";
 
 export function StepDcr() {
-  const { config, updateDataFlow } = useConnectorConfig();
+  const { config, updateDataFlow, updatePollerConfig } = useConnectorConfig();
   const { dataFlow } = config;
+  const isPoller = config.meta.connectorKind === "RestApiPoller";
   const [pasteDialogOpen, setPasteDialogOpen] = React.useState(false);
+  const [testDialogOpen, setTestDialogOpen] = React.useState(false);
 
   const handleTransformKqlChange = React.useCallback(
     (transformKql: string) => updateDataFlow({ transformKql }),
@@ -41,11 +44,38 @@ export function StepDcr() {
     [updateDataFlow],
   );
 
+  const handleApplyTestResults = React.useCallback(
+    (result: ApiTestResult) => {
+      updatePollerConfig((prev) => ({
+        ...prev,
+        response: {
+          ...prev.response,
+          eventsJsonPaths: result.eventsJsonPaths,
+          format: result.format,
+        },
+      }));
+      if (result.inputColumns.length > 0) {
+        updateDataFlow({
+          inputColumnsOverride: true,
+          inputColumns: result.inputColumns,
+        });
+      }
+    },
+    [updatePollerConfig, updateDataFlow],
+  );
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Data Collection Rule</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Data Collection Rule</CardTitle>
+            {isPoller && (
+              <Button variant="outline" size="sm" onClick={() => setTestDialogOpen(true)}>
+                <FlaskConical className="w-4 h-4 mr-1" /> Test API
+              </Button>
+            )}
+          </div>
           <CardDescription>
             Configure how data flows from the push endpoint to your table.
           </CardDescription>
@@ -144,6 +174,13 @@ export function StepDcr() {
         onOpenChange={setPasteDialogOpen}
         onApply={handleApplyInferred}
       />
+      {isPoller && (
+        <ApiTestDialog
+          open={testDialogOpen}
+          onOpenChange={setTestDialogOpen}
+          onApply={handleApplyTestResults}
+        />
+      )}
     </div>
   );
 }

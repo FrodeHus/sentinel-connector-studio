@@ -2,13 +2,14 @@ import * as React from "react"
 import { useConnectorConfig } from "@/hooks/useConnectorConfig"
 import { PollerConfigSchema } from "@/lib/schemas"
 import type { PollerConfig } from "@/lib/schemas"
+import { ApiTestDialog, type ApiTestResult } from "@/components/api-test/ApiTestDialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { HelpCircle, ChevronDown, Plus, Trash2 } from "lucide-react"
+import { HelpCircle, ChevronDown, Plus, Trash2, FlaskConical } from "lucide-react"
 
 function KeyValueEditor({
   value,
@@ -74,14 +75,35 @@ function KeyValueEditor({
 }
 
 export function StepApiConfig() {
-  const { config, updatePollerConfig } = useConnectorConfig()
+  const { config, updatePollerConfig, updateDataFlow } = useConnectorConfig()
   const pc = config.pollerConfig ?? PollerConfigSchema.parse({})
   const [showAdvancedRequest, setShowAdvancedRequest] = React.useState(false)
   const [showAdvancedResponse, setShowAdvancedResponse] = React.useState(false)
+  const [testDialogOpen, setTestDialogOpen] = React.useState(false)
 
   const update = (updater: (prev: PollerConfig) => PollerConfig) => {
     updatePollerConfig(updater)
   }
+
+  const handleApplyTestResults = React.useCallback(
+    (result: ApiTestResult) => {
+      updatePollerConfig((prev) => ({
+        ...prev,
+        response: {
+          ...prev.response,
+          eventsJsonPaths: result.eventsJsonPaths,
+          format: result.format,
+        },
+      }))
+      if (result.inputColumns.length > 0) {
+        updateDataFlow({
+          inputColumnsOverride: true,
+          inputColumns: result.inputColumns,
+        })
+      }
+    },
+    [updatePollerConfig, updateDataFlow],
+  )
 
   const selectClass =
     "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -90,7 +112,12 @@ export function StepApiConfig() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>API Configuration</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>API Configuration</CardTitle>
+            <Button variant="outline" size="sm" onClick={() => setTestDialogOpen(true)}>
+              <FlaskConical className="w-4 h-4 mr-1" /> Test API
+            </Button>
+          </div>
           <CardDescription>
             Configure how Sentinel polls the REST API to ingest data.
           </CardDescription>
@@ -1059,6 +1086,12 @@ export function StepApiConfig() {
           </Card>
         </CollapsibleContent>
       </Collapsible>
+
+      <ApiTestDialog
+        open={testDialogOpen}
+        onOpenChange={setTestDialogOpen}
+        onApply={handleApplyTestResults}
+      />
     </div>
   )
 }

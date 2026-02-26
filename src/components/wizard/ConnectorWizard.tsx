@@ -46,6 +46,7 @@ import { useWizardDialogs } from "./useWizardDialogs";
 interface StepDef {
   id: string
   label: string
+  group: string
   component: React.ComponentType
   isValid: (connectors: ConnectorData[], config: ReturnType<typeof useConnectorConfig>["config"]) => boolean
   showSidebar: boolean
@@ -58,6 +59,7 @@ const ALL_STEPS: StepDef[] = [
   {
     id: "basics",
     label: "Basics",
+    group: "Connectors",
     component: StepBasics,
     isValid: (cs) =>
       cs.every(
@@ -73,6 +75,7 @@ const ALL_STEPS: StepDef[] = [
   {
     id: "schema",
     label: "Schema",
+    group: "Connectors",
     component: StepSchema,
     isValid: (cs) =>
       cs.every(
@@ -87,6 +90,7 @@ const ALL_STEPS: StepDef[] = [
   {
     id: "dcr",
     label: "DCR",
+    group: "Connectors",
     component: StepDcr,
     isValid: (cs) =>
       cs.every(
@@ -101,6 +105,7 @@ const ALL_STEPS: StepDef[] = [
   {
     id: "api-config",
     label: "API Config",
+    group: "Connectors",
     component: StepApiConfig,
     isValid: (cs) =>
       cs.every((c) => {
@@ -117,6 +122,7 @@ const ALL_STEPS: StepDef[] = [
   {
     id: "connector-ui",
     label: "Connector UI",
+    group: "Connectors",
     component: StepConnectorUI,
     isValid: () => true,
     showSidebar: true,
@@ -125,6 +131,7 @@ const ALL_STEPS: StepDef[] = [
   {
     id: "content",
     label: "Content",
+    group: "Solution",
     component: StepContent,
     isValid: () => true,
     showSidebar: false,
@@ -133,6 +140,7 @@ const ALL_STEPS: StepDef[] = [
   {
     id: "solution",
     label: "Solution",
+    group: "Solution",
     component: StepSolution,
     isValid: (_cs, config) =>
       !!config.solution.publisherId &&
@@ -144,6 +152,7 @@ const ALL_STEPS: StepDef[] = [
   {
     id: "export",
     label: "Export",
+    group: "Solution",
     component: StepExport,
     isValid: () => true,
     showSidebar: false,
@@ -253,6 +262,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
 
   const steps: StepInfo[] = visibleSteps.map((step, i) => ({
     label: step.label,
+    group: step.group,
     isValid: step.isValid(connectors, config),
     isVisited: visitedSteps.has(i),
     badge: step.badge,

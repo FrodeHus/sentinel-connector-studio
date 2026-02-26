@@ -1,5 +1,4 @@
 import * as React from "react"
-import DOMPurify from "dompurify";
 import { useConnectorConfig } from "@/hooks/useConnectorConfig"
 import { CONFIG } from "@/config";
 import { generateTableResource } from "@/lib/arm-resources/table";
@@ -7,29 +6,11 @@ import { generateDcrResource } from "@/lib/arm-resources/dcr";
 import { generateConnectorDefinition } from "@/lib/arm-resources/connector-def";
 import { generateDataConnector } from "@/lib/arm-resources/data-connector";
 import { connectorIdToDcrName } from "@/lib/naming";
+import { highlightJson } from "@/lib/highlight";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, Check } from "lucide-react";
-
-function highlightJson(json: string): string {
-  const highlighted = json.replace(
-    /("(?:\\.|[^"\\])*")\s*:|("(?:\\.|[^"\\])*")|(\b(?:true|false)\b)|(\bnull\b)|(-?\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b)/g,
-    (match, key, str, bool, nil, num) => {
-      if (key) return `<span class="json-key">${key}</span>:`;
-      if (str) return `<span class="json-string">${str}</span>`;
-      if (bool) return `<span class="json-bool">${bool}</span>`;
-      if (nil) return `<span class="json-null">${nil}</span>`;
-      if (num) return `<span class="json-number">${num}</span>`;
-      return match;
-    },
-  );
-  // Sanitize the highlighted output to prevent XSS
-  return DOMPurify.sanitize(highlighted, {
-    ALLOWED_TAGS: ["span"],
-    ALLOWED_ATTR: ["class"],
-  });
-}
 
 const FILE_TABS = [
   "table.json",

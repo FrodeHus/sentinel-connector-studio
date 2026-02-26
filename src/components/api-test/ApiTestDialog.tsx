@@ -18,6 +18,7 @@ import {
 import { Play, Loader2, Shield, ShieldOff, LockKeyholeOpen, LockKeyhole } from "lucide-react"
 import { Tooltip, TooltipProvider } from "@/components/ui/tooltip"
 
+const isDev = import.meta.env.DEV
 const PROXY_BASE = "http://localhost:3100"
 const PROXY_URL = `${PROXY_BASE}/proxy`
 
@@ -132,10 +133,12 @@ export function ApiTestDialog({
       setJsonPaths(
         pollerConfig?.response.eventsJsonPaths.join(", ") ?? "$",
       )
-      checkProxyAvailable().then((available) => {
-        setProxyAvailable(available)
-        setUseProxy(available)
-      })
+      if (isDev) {
+        checkProxyAvailable().then((available) => {
+          setProxyAvailable(available)
+          setUseProxy(available)
+        })
+      }
     }
   }, [open, pollerConfig?.response.eventsJsonPaths])
 
@@ -269,8 +272,13 @@ export function ApiTestDialog({
       const msg = e instanceof Error ? e.message : String(e)
       if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("CORS")) {
         setError(
-          "Request blocked by CORS policy. " +
-          "Run \"pnpm proxy\" in a separate terminal to start the local CORS proxy, then retry.",
+          isDev
+            ? "Request blocked by CORS policy. Run \"pnpm proxy\" in a separate terminal to start the local CORS proxy, then retry."
+            : "Request blocked by the browser's CORS policy. " +
+              "The API server does not include Access-Control-Allow-Origin headers, " +
+              "so the browser prevents the request for security reasons. " +
+              "You can work around this by using a browser extension like \"CORS Unblock\" or \"Allow CORS\", " +
+              "or by testing the API with a tool like curl or Postman.",
         )
       } else {
         setError(msg)
@@ -426,62 +434,64 @@ export function ApiTestDialog({
                 )}
                 {loading ? "Sending..." : "Send Request"}
               </Button>
-              <TooltipProvider>
-                <Tooltip
-                  content={
-                    proxyAvailable
-                      ? useProxy
-                        ? "Requests are routed through the local CORS proxy"
-                        : "Click to enable the CORS proxy"
-                      : "CORS proxy not running. Start it with: pnpm proxy"
-                  }
-                >
-                  <button
-                    type="button"
-                    onClick={() => setUseProxy((p) => !p)}
-                    disabled={!proxyAvailable}
-                    className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors cursor-pointer ${
+              {isDev && (
+                <TooltipProvider>
+                  <Tooltip
+                    content={
+                      proxyAvailable
+                        ? useProxy
+                          ? "Requests are routed through the local CORS proxy"
+                          : "Click to enable the CORS proxy"
+                        : "CORS proxy not running. Start it with: pnpm proxy"
+                    }
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setUseProxy((p) => !p)}
+                      disabled={!proxyAvailable}
+                      className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors cursor-pointer ${
+                        useProxy
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:text-foreground"
+                      } ${!proxyAvailable ? "opacity-40 cursor-not-allowed" : ""}`}
+                    >
+                      {useProxy ? (
+                        <Shield className="w-3.5 h-3.5" />
+                      ) : (
+                        <ShieldOff className="w-3.5 h-3.5" />
+                      )}
+                      Proxy {useProxy ? "on" : "off"}
+                    </button>
+                  </Tooltip>
+                  <Tooltip
+                    content={
                       useProxy
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted-foreground hover:text-foreground"
-                    } ${!proxyAvailable ? "opacity-40 cursor-not-allowed" : ""}`}
+                        ? allowInsecure
+                          ? "Self-signed certificates are allowed (via proxy)"
+                          : "Click to allow self-signed certificates"
+                        : "Requires the CORS proxy to bypass certificate validation"
+                    }
                   >
-                    {useProxy ? (
-                      <Shield className="w-3.5 h-3.5" />
-                    ) : (
-                      <ShieldOff className="w-3.5 h-3.5" />
-                    )}
-                    Proxy {useProxy ? "on" : "off"}
-                  </button>
-                </Tooltip>
-                <Tooltip
-                  content={
-                    useProxy
-                      ? allowInsecure
-                        ? "Self-signed certificates are allowed (via proxy)"
-                        : "Click to allow self-signed certificates"
-                      : "Requires the CORS proxy to bypass certificate validation"
-                  }
-                >
-                  <button
-                    type="button"
-                    onClick={() => setAllowInsecure((p) => !p)}
-                    disabled={!useProxy}
-                    className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors cursor-pointer ${
-                      allowInsecure && useProxy
-                        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                        : "text-muted-foreground hover:text-foreground"
-                    } ${!useProxy ? "opacity-40 cursor-not-allowed" : ""}`}
-                  >
-                    {allowInsecure && useProxy ? (
-                      <LockKeyholeOpen className="w-3.5 h-3.5" />
-                    ) : (
-                      <LockKeyhole className="w-3.5 h-3.5" />
-                    )}
-                    TLS {allowInsecure && useProxy ? "insecure" : "strict"}
-                  </button>
-                </Tooltip>
-              </TooltipProvider>
+                    <button
+                      type="button"
+                      onClick={() => setAllowInsecure((p) => !p)}
+                      disabled={!useProxy}
+                      className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors cursor-pointer ${
+                        allowInsecure && useProxy
+                          ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                          : "text-muted-foreground hover:text-foreground"
+                      } ${!useProxy ? "opacity-40 cursor-not-allowed" : ""}`}
+                    >
+                      {allowInsecure && useProxy ? (
+                        <LockKeyholeOpen className="w-3.5 h-3.5" />
+                      ) : (
+                        <LockKeyhole className="w-3.5 h-3.5" />
+                      )}
+                      TLS {allowInsecure && useProxy ? "insecure" : "strict"}
+                    </button>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
               <span className="text-xs text-muted-foreground font-mono truncate">
                 {pollerConfig?.request.httpMethod ?? "GET"}{" "}
                 {pollerConfig?.request.apiEndpoint || "(no endpoint configured)"}

@@ -73,6 +73,23 @@ const ALL_STEPS: StepDef[] = [
     preview: "arm",
   },
   {
+    id: "api-config",
+    label: "API Config",
+    group: "Connectors",
+    component: StepApiConfig,
+    isValid: (cs) =>
+      cs.every((c) => {
+        if (c.meta.connectorKind !== "RestApiPoller") return true;
+        return (
+          !!c.pollerConfig?.request.apiEndpoint &&
+          (c.pollerConfig?.response.eventsJsonPaths?.length ?? 0) > 0
+        );
+      }),
+    showSidebar: true,
+    preview: "arm",
+    kinds: ["RestApiPoller"],
+  },
+  {
     id: "schema",
     label: "Schema",
     group: "Connectors",
@@ -101,23 +118,6 @@ const ALL_STEPS: StepDef[] = [
       ),
     showSidebar: true,
     preview: "arm",
-  },
-  {
-    id: "api-config",
-    label: "API Config",
-    group: "Connectors",
-    component: StepApiConfig,
-    isValid: (cs) =>
-      cs.every((c) => {
-        if (c.meta.connectorKind !== "RestApiPoller") return true
-        return (
-          !!c.pollerConfig?.request.apiEndpoint &&
-          (c.pollerConfig?.response.eventsJsonPaths?.length ?? 0) > 0
-        )
-      }),
-    showSidebar: true,
-    preview: "arm",
-    kinds: ["RestApiPoller"],
   },
   {
     id: "connector-ui",
@@ -158,7 +158,7 @@ const ALL_STEPS: StepDef[] = [
     showSidebar: false,
     preview: null,
   },
-]
+];
 
 interface ConnectorWizardProps {
   initialProjectUrl?: string;

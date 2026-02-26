@@ -114,7 +114,7 @@ export function StepApiConfig() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>API Configuration</CardTitle>
-            <Button variant="outline" size="sm" onClick={() => setTestDialogOpen(true)}>
+            <Button size="sm" onClick={() => setTestDialogOpen(true)}>
               <FlaskConical className="w-4 h-4 mr-1" /> Test API
             </Button>
           </div>

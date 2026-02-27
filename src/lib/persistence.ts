@@ -128,18 +128,17 @@ export async function readProjectFromUrl(url: string): Promise<AppState> {
   }
 
   let response: Response;
+  const controller = new AbortController();
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
   try {
     // Fetch with timeout and no credentials for security
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
     response = await fetch(url, {
       method: 'GET',
       credentials: 'omit', // Don't send credentials for security
       signal: controller.signal,
     });
-
-    clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch URL: ${response.status} ${response.statusText}`);
@@ -152,6 +151,10 @@ export async function readProjectFromUrl(url: string): Promise<AppState> {
       throw new Error(`Failed to fetch URL: ${error.message}`);
     }
     throw new Error('Failed to fetch URL: Unknown error');
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
   }
 
   // Verify content type

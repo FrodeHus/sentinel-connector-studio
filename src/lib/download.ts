@@ -10,6 +10,35 @@ import { generateAnalyticRuleYaml, generateAsimParserYaml, generateWorkbookJson 
 
 const PACKAGER_URL = import.meta.env.VITE_PACKAGER_URL || "/api/packager";
 
+function toSafeBaseName(value: string, fallback: string): string {
+  const sanitized = value.replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_").replace(/^_+|_+$/g, "")
+  return sanitized || fallback
+}
+
+function getUniqueName(baseName: string, usedNames: Set<string>): string {
+  let suffix = 0
+  while (true) {
+    const name = suffix === 0 ? baseName : `${baseName}_${suffix}`
+    if (!usedNames.has(name)) {
+      usedNames.add(name)
+      return name
+    }
+    suffix += 1
+  }
+}
+
+function getUniqueFileName(baseName: string, extension: string, usedNames: Set<string>): string {
+  let suffix = 0
+  while (true) {
+    const name = suffix === 0 ? `${baseName}.${extension}` : `${baseName}_${suffix}.${extension}`
+    if (!usedNames.has(name)) {
+      usedNames.add(name)
+      return name
+    }
+    suffix += 1
+  }
+}
+
 function downloadJson(data: unknown, filename: string) {
   const blob = new Blob([JSON.stringify(data, null, 2)], {
     type: "application/json",
@@ -47,21 +76,25 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
   const { solution, connectors, analyticRules, asimParsers, workbooks } = appState;
   const solutionName =
     solution.name || connectors[0]?.meta.connectorId || "MySolution";
+  const safeSolutionName = toSafeBaseName(solutionName, "MySolution")
   const zip = new JSZip();
 
-  const root = zip.folder(solutionName)!;
+  const root = zip.folder(safeSolutionName)!;
   const dataConnectorsFolder = root.folder("Data Connectors")!;
   const connectorPaths: string[] = [];
   const analyticRulePaths: string[] = [];
   const parserPaths: string[] = [];
   const workbookPaths: string[] = [];
+  const usedConnectorFolderNames = new Set<string>();
 
   // Generate files for each connector
   for (const connector of connectors) {
     const { meta, schema, dataFlow, connectorUI } = connector;
     const dcrName = connectorIdToDcrName(meta.connectorId, meta.connectorKind);
+    const connectorBaseName = `${toSafeBaseName(meta.connectorId, "connector")}_ccf`
+    const connectorFolderName = getUniqueName(connectorBaseName, usedConnectorFolderNames)
     const connectorFolder = dataConnectorsFolder.folder(
-      `${meta.connectorId}_ccf`,
+      connectorFolderName,
     )!;
 
     connectorFolder.file(
@@ -86,37 +119,43 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
     );
 
     connectorPaths.push(
-      `Data Connectors/${meta.connectorId}_ccf/connectorDefinition.json`,
+      `Data Connectors/${connectorFolderName}/connectorDefinition.json`,
     );
   }
 
   // Generate analytic rules
   if (analyticRules.length > 0) {
     const rulesFolder = root.folder("Analytic Rules")!;
+    const usedRuleNames = new Set<string>();
     for (const rule of analyticRules) {
-      const safeName = (rule.name || rule.id).replace(/[^a-zA-Z0-9_-]/g, "_");
-      rulesFolder.file(`${safeName}.yaml`, generateAnalyticRuleYaml(rule));
-      analyticRulePaths.push(`Analytic Rules/${safeName}.yaml`);
+      const baseName = toSafeBaseName(rule.name || rule.id, "analytic_rule");
+      const fileName = getUniqueFileName(baseName, "yaml", usedRuleNames);
+      rulesFolder.file(fileName, generateAnalyticRuleYaml(rule));
+      analyticRulePaths.push(`Analytic Rules/${fileName}`);
     }
   }
 
   // Generate ASIM parsers
   if (asimParsers.length > 0) {
     const parsersFolder = root.folder("Parsers")!;
+    const usedParserNames = new Set<string>();
     for (const parser of asimParsers) {
-      const safeName = (parser.name || parser.id).replace(/[^a-zA-Z0-9_-]/g, "_");
-      parsersFolder.file(`${safeName}.yaml`, generateAsimParserYaml(parser));
-      parserPaths.push(`Parsers/${safeName}.yaml`);
+      const baseName = toSafeBaseName(parser.name || parser.id, "parser");
+      const fileName = getUniqueFileName(baseName, "yaml", usedParserNames);
+      parsersFolder.file(fileName, generateAsimParserYaml(parser));
+      parserPaths.push(`Parsers/${fileName}`);
     }
   }
 
   // Generate workbooks
   if (workbooks.length > 0) {
     const workbooksFolder = root.folder("Workbooks")!;
+    const usedWorkbookNames = new Set<string>();
     for (const workbook of workbooks) {
-      const safeName = (workbook.name || workbook.id).replace(/[^a-zA-Z0-9_-]/g, "_");
-      workbooksFolder.file(`${safeName}.json`, generateWorkbookJson(workbook));
-      workbookPaths.push(`Workbooks/${safeName}.json`);
+      const baseName = toSafeBaseName(workbook.name || workbook.id, "workbook");
+      const fileName = getUniqueFileName(baseName, "json", usedWorkbookNames);
+      workbooksFolder.file(fileName, generateWorkbookJson(workbook));
+      workbookPaths.push(`Workbooks/${fileName}`);
     }
   }
 
@@ -132,14 +171,14 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
     ...(analyticRulePaths.length > 0 && { "Analytic Rules": analyticRulePaths }),
     ...(parserPaths.length > 0 && { Parsers: parserPaths }),
     ...(workbookPaths.length > 0 && { Workbooks: workbookPaths }),
-    BasePath: `C:\\GitHub\\Azure-Sentinel\\Solutions\\${solutionName}`,
+    BasePath: `C:\\GitHub\\Azure-Sentinel\\Solutions\\${safeSolutionName}`,
     Version: solution.version,
     Metadata: "SolutionMetadata.json",
     TemplateSpec: true,
     Is1PConnector: false,
   };
   dataFolder.file(
-    `Solution_${solutionName}.json`,
+    `Solution_${safeSolutionName}.json`,
     JSON.stringify(solutionDataFile, null, 2),
   );
 
@@ -173,8 +212,9 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
 export async function downloadSolutionZip(appState: AppState) {
   const solutionName =
     appState.solution.name || appState.connectors[0]?.meta.connectorId || "MySolution";
+  const safeSolutionName = toSafeBaseName(solutionName, "MySolution")
   const blob = await buildSolutionZip(appState);
-  saveAs(blob, `${solutionName}.zip`);
+  saveAs(blob, `${safeSolutionName}.zip`);
 }
 
 export interface PackagingJob {

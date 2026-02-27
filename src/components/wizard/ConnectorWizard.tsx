@@ -235,7 +235,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
   const activePreview = showPreview ? (currentStepDef?.preview ?? null) : null;
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="wizard-shell-bg h-screen flex flex-col">
       {/* Resume banner */}
       {hasSavedConfig && (
         <div className="shrink-0 bg-primary/10 border-b border-primary/30 px-6 py-3 flex items-center justify-between backdrop-blur-sm">
@@ -397,7 +397,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
 
           {/* Preview panel */}
           <div
-            className={`${activePreview ? "w-2/5 border-l border-border/50" : "w-0"} hidden lg:block overflow-auto p-6 bg-card/30 backdrop-blur-sm transition-all`}
+            className={`${activePreview ? "w-2/5 border-l border-border/50" : "w-0"} hidden lg:block overflow-auto p-6 bg-transparent transition-all`}
           >
             {activePreview === "content" && <ContentPreview />}
             {activePreview === "arm" && <ArmTemplatePreview />}

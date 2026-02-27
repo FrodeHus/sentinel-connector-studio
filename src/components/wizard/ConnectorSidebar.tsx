@@ -18,25 +18,25 @@ export function ConnectorSidebar({
   onRemove,
 }: ConnectorSidebarProps) {
   return (
-    <div className="w-56 shrink-0 border-r border-border/50 bg-card/30 flex flex-col">
-      <div className="px-3 py-3 border-b border-border/50">
+    <div className="w-60 shrink-0 bg-transparent flex flex-col px-3 py-4">
+      <div className="px-1 py-2">
         <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           Connectors
         </h3>
       </div>
 
-      <div className="flex-1 overflow-auto p-2 space-y-1">
+      <div className="flex-1 overflow-auto p-2.5 space-y-2">
         {connectors.map((connector, index) => (
           <div key={index} className="relative group flex items-stretch">
             <button
               onClick={() => onSelect(index)}
               className={`
-                flex-1 min-w-0 px-3 py-2 rounded-md text-left text-sm
+                flex-1 min-w-0 px-3 py-2.5 rounded-xl text-left text-sm border shadow-sm
                 transition-colors cursor-pointer
                 ${
                   index === activeIndex
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted text-foreground"
+                    ? "bg-primary text-primary-foreground border-primary/60"
+                    : "bg-card/80 text-foreground border-border/50 hover:bg-muted/60"
                 }
               `}
             >
@@ -80,7 +80,7 @@ export function ConnectorSidebar({
                 title="Remove connector"
                 className={`
                   opacity-0 group-hover:opacity-100
-                  p-1 rounded-sm transition-opacity shrink-0 self-center
+                  p-1 rounded-md transition-opacity shrink-0 self-center
                   ${
                     index === activeIndex
                       ? "hover:bg-primary-foreground/20 text-primary-foreground"
@@ -95,12 +95,12 @@ export function ConnectorSidebar({
         ))}
       </div>
 
-      <div className="p-2 border-t border-border/50">
+      <div className="pt-2.5">
         <Button
           variant="outline"
           size="sm"
           onClick={onAdd}
-          className="w-full"
+          className="w-full bg-card/80"
         >
           <Plus className="w-4 h-4 mr-2" />
           New Connector

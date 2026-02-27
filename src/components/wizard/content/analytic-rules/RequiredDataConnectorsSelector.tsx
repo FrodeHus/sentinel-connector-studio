@@ -1,4 +1,5 @@
 import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
 import type { RequiredDataConnector } from "@/lib/schemas"
 import type { AvailableConnector } from "./types"
 
@@ -36,24 +37,20 @@ export function RequiredDataConnectorsSelector({
       <Label>Required Data Connectors</Label>
       <div className="flex flex-wrap gap-2 mt-2">
         {availableConnectors.map((c) => (
-          <label key={c.connectorId} className="flex items-center gap-1.5 text-xs cursor-pointer">
-            <input
-              type="checkbox"
-              checked={selectedConnectors.some((r) => r.connectorId === c.connectorId)}
-              onChange={() => toggleConnector(c.connectorId)}
-              className="rounded"
-            />
-            <span>{c.label}</span>
-            {c.dataTypes.length > 0 && (
-              <span className="text-muted-foreground">
-                ({c.dataTypes.join(", ")})
-              </span>
-            )}
-          </label>
+          <button
+            key={c.connectorId}
+            type="button"
+            onClick={() => toggleConnector(c.connectorId)}
+            title={c.dataTypes.length > 0 ? c.dataTypes.join(", ") : undefined}
+          >
+            <Badge variant={selectedConnectors.some((r) => r.connectorId === c.connectorId) ? "default" : "outline"}>
+              {c.label}
+            </Badge>
+          </button>
         ))}
       </div>
       <p className="text-xs text-muted-foreground mt-1">
-        Select which data connectors this item depends on.
+        Click badges to select which data connectors this item depends on.
       </p>
     </div>
   )

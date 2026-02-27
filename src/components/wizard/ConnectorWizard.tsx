@@ -397,7 +397,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
 
           {/* Preview panel */}
           <div
-            className={`${activePreview ? "w-2/5 border-l border-border/50" : "w-0"} hidden lg:block overflow-auto p-6 bg-card/30 backdrop-blur-sm transition-all`}
+            className={`${activePreview ? "w-2/5 border-l border-border/50" : "w-0"} hidden lg:block overflow-auto p-6 bg-transparent transition-all`}
           >
             {activePreview === "content" && <ContentPreview />}
             {activePreview === "arm" && <ArmTemplatePreview />}

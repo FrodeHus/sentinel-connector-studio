@@ -332,14 +332,14 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
           </div>
         </div>
         <div className="px-6 pb-3 flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
-          <div className="inline-flex rounded-lg border border-border/60 bg-muted/20 p-1 self-center md:self-auto shrink-0">
+          <div className="inline-flex rounded-xl border border-border/80 bg-card/80 p-1.5 self-center md:self-auto shrink-0 shadow-sm">
             <button
               type="button"
               onClick={() => setMode("connector")}
-              className={`px-3 py-1.5 text-sm rounded-md transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
+              className={`px-4 py-2 text-sm rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1.5 border ${
                 mode === "connector"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "bg-primary text-primary-foreground border-primary/80 shadow-sm"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50"
               }`}
             >
               <Plug className="w-3.5 h-3.5" />
@@ -348,10 +348,10 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
             <button
               type="button"
               onClick={() => setMode("solution")}
-              className={`px-3 py-1.5 text-sm rounded-md transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
+              className={`px-4 py-2 text-sm rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1.5 border ${
                 mode === "solution"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "bg-primary text-primary-foreground border-primary/80 shadow-sm"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50"
               }`}
             >
               <Package className="w-3.5 h-3.5" />

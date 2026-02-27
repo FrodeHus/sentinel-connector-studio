@@ -1,5 +1,5 @@
 import yaml from "js-yaml"
-import type { AnalyticRule, AsimParser } from "./schemas"
+import type { AnalyticRule, AsimParser, Workbook } from "./schemas"
 
 const TRIGGER_OPERATOR_SHORTHAND: Record<AnalyticRule["triggerOperator"], string> = {
   GreaterThan: "gt",
@@ -90,4 +90,27 @@ export function generateAsimParserYaml(parser: AsimParser): string {
   }
 
   return yaml.dump(doc, { lineWidth: -1, quotingType: '"', forceQuotes: false })
+}
+
+export function generateWorkbookJson(workbook: Workbook): string {
+  let parsed: Record<string, unknown> = {}
+  if (workbook.serializedData) {
+    try {
+      parsed = JSON.parse(workbook.serializedData)
+    } catch {
+      parsed = {}
+    }
+  }
+
+  if (workbook.fromTemplateId && !parsed.fromTemplateId) {
+    parsed.fromTemplateId = workbook.fromTemplateId
+  }
+  if (!parsed.$schema) {
+    parsed.$schema = "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+  }
+  if (workbook.version && !parsed.version) {
+    parsed.version = workbook.version
+  }
+
+  return JSON.stringify(parsed, null, 2)
 }

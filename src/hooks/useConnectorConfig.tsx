@@ -1,5 +1,5 @@
 import * as React from "react"
-import type { ConnectorConfig, ConnectorData, AppState, PollerConfig, AnalyticRule, AsimParser } from "@/lib/schemas"
+import type { ConnectorConfig, ConnectorData, AppState, PollerConfig, AnalyticRule, AsimParser, Workbook } from "@/lib/schemas"
 import { ConnectorDataSchema, AppStateSchema, PollerConfigSchema } from "@/lib/schemas"
 import { saveConfig, loadConfig, clearConfig } from "@/lib/persistence"
 
@@ -26,11 +26,13 @@ interface ConnectorConfigContextValue {
   removeConnector: (index: number) => void
   setActiveConnector: (index: number) => void
 
-  // Content: analytic rules & ASIM parsers
+  // Content: analytic rules, ASIM parsers & workbooks
   analyticRules: AnalyticRule[]
   asimParsers: AsimParser[]
+  workbooks: Workbook[]
   updateAnalyticRules: (rules: AnalyticRule[]) => void
   updateAsimParsers: (parsers: AsimParser[]) => void
+  updateWorkbooks: (workbooks: Workbook[]) => void
 }
 
 const ConnectorConfigContext = React.createContext<ConnectorConfigContextValue | null>(null)
@@ -195,6 +197,10 @@ export function ConnectorConfigProvider({ children }: { children: React.ReactNod
     setAppState((prev) => ({ ...prev, asimParsers: parsers }))
   }, [])
 
+  const updateWorkbooks = React.useCallback((workbooks: Workbook[]) => {
+    setAppState((prev) => ({ ...prev, workbooks }))
+  }, [])
+
   const reset = React.useCallback(() => {
     clearConfig()
     setAppState(createDefaultAppState())
@@ -240,8 +246,10 @@ export function ConnectorConfigProvider({ children }: { children: React.ReactNod
       setActiveConnector,
       analyticRules: appState.analyticRules,
       asimParsers: appState.asimParsers,
+      workbooks: appState.workbooks,
       updateAnalyticRules,
       updateAsimParsers,
+      updateWorkbooks,
     }),
     [
       config,
@@ -264,8 +272,10 @@ export function ConnectorConfigProvider({ children }: { children: React.ReactNod
       setActiveConnector,
       appState.analyticRules,
       appState.asimParsers,
+      appState.workbooks,
       updateAnalyticRules,
       updateAsimParsers,
+      updateWorkbooks,
     ],
   )
 

@@ -6,7 +6,7 @@ import { generateDcrResource } from "./arm-resources/dcr";
 import { generateConnectorDefinition } from "./arm-resources/connector-def";
 import { generateDataConnector } from "./arm-resources/data-connector";
 import { connectorIdToDcrName } from "./naming";
-import { generateAnalyticRuleYaml, generateAsimParserYaml } from "./content-export";
+import { generateAnalyticRuleYaml, generateAsimParserYaml, generateWorkbookJson } from "./content-export";
 
 const PACKAGER_URL = import.meta.env.VITE_PACKAGER_URL || "/api/packager";
 
@@ -44,7 +44,7 @@ export function downloadIndividualFile(
 }
 
 export async function buildSolutionZip(appState: AppState): Promise<Blob> {
-  const { solution, connectors, analyticRules, asimParsers } = appState;
+  const { solution, connectors, analyticRules, asimParsers, workbooks } = appState;
   const solutionName =
     solution.name || connectors[0]?.meta.connectorId || "MySolution";
   const zip = new JSZip();
@@ -54,6 +54,7 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
   const connectorPaths: string[] = [];
   const analyticRulePaths: string[] = [];
   const parserPaths: string[] = [];
+  const workbookPaths: string[] = [];
 
   // Generate files for each connector
   for (const connector of connectors) {
@@ -109,6 +110,16 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
     }
   }
 
+  // Generate workbooks
+  if (workbooks.length > 0) {
+    const workbooksFolder = root.folder("Workbooks")!;
+    for (const workbook of workbooks) {
+      const safeName = (workbook.name || workbook.id).replace(/[^a-zA-Z0-9_-]/g, "_");
+      workbooksFolder.file(`${safeName}.json`, generateWorkbookJson(workbook));
+      workbookPaths.push(`Workbooks/${safeName}.json`);
+    }
+  }
+
   // Data folder with solution metadata
   const dataFolder = root.folder("Data")!;
   const firstConnector = connectors[0];
@@ -120,6 +131,7 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
     "Data Connectors": connectorPaths,
     ...(analyticRulePaths.length > 0 && { "Analytic Rules": analyticRulePaths }),
     ...(parserPaths.length > 0 && { Parsers: parserPaths }),
+    ...(workbookPaths.length > 0 && { Workbooks: workbookPaths }),
     BasePath: `C:\\GitHub\\Azure-Sentinel\\Solutions\\${solutionName}`,
     Version: solution.version,
     Metadata: "SolutionMetadata.json",

@@ -2,7 +2,7 @@ import * as React from "react"
 import DOMPurify from "dompurify"
 import { useConnectorConfig } from "@/hooks/useConnectorConfig"
 import { CONFIG } from "@/config"
-import { generateAnalyticRuleYaml, generateAsimParserYaml } from "@/lib/content-export"
+import { generateAnalyticRuleYaml, generateAsimParserYaml, generateWorkbookJson } from "@/lib/content-export"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -63,11 +63,11 @@ function escapeHtml(str: string): string {
 interface TabItem {
   id: string
   label: string
-  kind: "rule" | "parser"
+  kind: "rule" | "parser" | "workbook"
 }
 
 export function ContentPreview() {
-  const { analyticRules, asimParsers } = useConnectorConfig()
+  const { analyticRules, asimParsers, workbooks } = useConnectorConfig()
   const [copied, setCopied] = React.useState(false)
   const [activeTabId, setActiveTabId] = React.useState<string | null>(null)
 
@@ -87,8 +87,15 @@ export function ContentPreview() {
         kind: "parser",
       })
     }
+    for (const wb of workbooks) {
+      items.push({
+        id: wb.id,
+        label: wb.name || "Untitled Workbook",
+        kind: "workbook",
+      })
+    }
     return items
-  }, [analyticRules, asimParsers])
+  }, [analyticRules, asimParsers, workbooks])
 
   // Auto-select first tab or keep current if still valid
   React.useEffect(() => {
@@ -103,19 +110,26 @@ export function ContentPreview() {
 
   const activeTab = tabs.find((t) => t.id === activeTabId)
 
-  const yamlContent = React.useMemo(() => {
+  const previewContent = React.useMemo(() => {
     if (!activeTab) return ""
     if (activeTab.kind === "rule") {
       const rule = analyticRules.find((r) => r.id === activeTab.id)
       return rule ? generateAnalyticRuleYaml(rule) : ""
     }
-    const parser = asimParsers.find((p) => p.id === activeTab.id)
-    return parser ? generateAsimParserYaml(parser) : ""
-  }, [activeTab, analyticRules, asimParsers])
+    if (activeTab.kind === "parser") {
+      const parser = asimParsers.find((p) => p.id === activeTab.id)
+      return parser ? generateAsimParserYaml(parser) : ""
+    }
+    const wb = workbooks.find((w) => w.id === activeTab.id)
+    return wb ? generateWorkbookJson(wb) : ""
+  }, [activeTab, analyticRules, asimParsers, workbooks])
+
+  const isJsonPreview = activeTab?.kind === "workbook"
+  const previewTitle = isJsonPreview ? "JSON Preview" : "YAML Preview"
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(yamlContent)
+      await navigator.clipboard.writeText(previewContent)
       setCopied(true)
       setTimeout(() => setCopied(false), CONFIG.COPY_FEEDBACK_DURATION_MS)
     } catch (error) {
@@ -128,20 +142,20 @@ export function ContentPreview() {
       <Card className="h-full flex flex-col border-t-2 border-t-primary/50 shadow-lg">
         <CardHeader className="pb-3 shrink-0 border-b border-border/30">
           <CardTitle className="text-base font-semibold">
-            YAML Preview
+            {previewTitle}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex-1 flex items-center justify-center">
           <p className="text-sm text-muted-foreground">
-            Add an analytic rule or ASIM parser to see a YAML preview.
+            Add an analytic rule, ASIM parser, or workbook to see a preview.
           </p>
         </CardContent>
       </Card>
     )
   }
 
-  const highlightedLines = yamlContent.split("\n").map((line) => {
-    const html = highlightYaml(line)
+  const highlightedLines = previewContent.split("\n").map((line) => {
+    const html = isJsonPreview ? escapeHtml(line) : highlightYaml(line)
     return DOMPurify.sanitize(html, {
       ALLOWED_TAGS: ["span"],
       ALLOWED_ATTR: ["class"],
@@ -154,7 +168,7 @@ export function ContentPreview() {
       <CardHeader className="pb-3 shrink-0 border-b border-border/30">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base font-semibold">
-            YAML Preview
+            {previewTitle}
           </CardTitle>
           <Button
             variant="ghost"

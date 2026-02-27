@@ -10,9 +10,10 @@ import {
 import { HelpCircle } from "lucide-react"
 import { AnalyticRulesEditor } from "./content/AnalyticRulesEditor"
 import { AsimParsersEditor } from "./content/AsimParsersEditor"
+import { WorkbooksEditor } from "./content/WorkbooksEditor"
 
 export function StepContent() {
-  const { analyticRules, asimParsers } = useConnectorConfig()
+  const { analyticRules, asimParsers, workbooks } = useConnectorConfig()
   const [activeTab, setActiveTab] = React.useState("rules")
 
   return (
@@ -20,7 +21,7 @@ export function StepContent() {
       <Collapsible>
         <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
           <HelpCircle className="w-4 h-4" />
-          What are analytic rules and ASIM parsers?
+          What are analytic rules, ASIM parsers, and workbooks?
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-3 text-sm text-muted-foreground space-y-2 pl-6">
           <p>
@@ -35,7 +36,12 @@ export function StepContent() {
             enabling cross-source analytics and built-in Sentinel workbooks.
           </p>
           <p>
-            Both are optional solution-level content — not tied to individual
+            <strong>Workbooks</strong> are interactive dashboards built in Azure
+            Monitor. Export the gallery template JSON from the Azure portal and
+            paste it here to include it in your solution package.
+          </p>
+          <p>
+            All three are optional solution-level content — not tied to individual
             connectors.
           </p>
         </CollapsibleContent>
@@ -59,6 +65,14 @@ export function StepContent() {
               </Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="workbooks">
+            Workbooks
+            {workbooks.length > 0 && (
+              <Badge variant="secondary" className="ml-2 text-[10px] px-1.5 py-0">
+                {workbooks.length}
+              </Badge>
+            )}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="rules">
@@ -67,6 +81,10 @@ export function StepContent() {
 
         <TabsContent value="parsers">
           <AsimParsersEditor />
+        </TabsContent>
+
+        <TabsContent value="workbooks">
+          <WorkbooksEditor />
         </TabsContent>
       </Tabs>
     </div>

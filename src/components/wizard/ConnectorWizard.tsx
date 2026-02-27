@@ -182,6 +182,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
     importAppState,
     analyticRules,
     asimParsers,
+    workbooks,
   } = useConnectorConfig();
   const { theme, toggleTheme } = useTheme();
   const [currentStep, setCurrentStep] = React.useState(0);
@@ -238,8 +239,9 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
       activeConnectorIndex,
       analyticRules,
       asimParsers,
+      workbooks,
     });
-  }, [config.solution, connectors, activeConnectorIndex, analyticRules, asimParsers]);
+  }, [config.solution, connectors, activeConnectorIndex, analyticRules, asimParsers, workbooks]);
 
   // Keyboard shortcuts
   React.useEffect(() => {

@@ -92,7 +92,7 @@ export const ALL_STEPS: StepDef[] = [
   },
   {
     id: "solution",
-    label: "Solution",
+    label: "Solution Metadata",
     group: "Solution",
     component: StepSolution,
     isValid: (_cs, config) => SolutionValidation.safeParse(config.solution).success,

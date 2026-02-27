@@ -117,11 +117,6 @@ export function Stepper({ steps, currentStep, onStepClick }: StepperProps) {
             <div className="w-px self-stretch bg-border shrink-0" />
           )}
           <div className="flex flex-col items-center gap-2">
-            {group.label && (
-              <span className="hidden sm:block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 border border-border/50 rounded-full px-3 py-0.5">
-                {group.label}
-              </span>
-            )}
             <div className="flex items-center gap-2 md:gap-4">
               {group.steps.map(({ step, globalIndex }, si) => (
                 <div key={globalIndex} className="flex items-center gap-2 md:gap-4">

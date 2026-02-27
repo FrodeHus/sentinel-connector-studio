@@ -39,6 +39,8 @@ interface ConnectorWizardProps {
   initialProjectUrl?: string;
 }
 
+type WizardMode = "connector" | "solution"
+
 export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
   const {
     config,
@@ -61,29 +63,62 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
     workbooks,
   } = useConnectorConfig();
   const { theme, toggleTheme } = useTheme();
-  const [currentStep, setCurrentStep] = React.useState(0);
-  const [visitedSteps, setVisitedSteps] = React.useState(new Set([0]));
+  const [mode, setMode] = React.useState<WizardMode>("connector");
+  const [currentStepByMode, setCurrentStepByMode] = React.useState<Record<WizardMode, number>>({
+    connector: 0,
+    solution: 0,
+  });
+  const [visitedStepIds, setVisitedStepIds] = React.useState<Set<string>>(new Set());
   const [showPreview, setShowPreview] = React.useState(true);
   const [mobilePreview, setMobilePreview] = React.useState(false);
   const { setConfirmDialog, openUrlDialog, fileInputRef, dialogs } = useWizardDialogs({
     initialProjectUrl,
     importAppState,
-    onProjectLoaded: () => { setCurrentStep(0); setVisitedSteps(new Set([0])); },
+    onProjectLoaded: () => {
+      setMode("connector");
+      setCurrentStepByMode({ connector: 0, solution: 0 });
+      setVisitedStepIds(new Set());
+    },
   });
 
-  // Filter steps based on active connector's kind
+  // Filter steps based on active connector's kind and mode
   const activeKind = config.meta.connectorKind || "Push";
-  const visibleSteps = React.useMemo(
+  const kindFilteredSteps = React.useMemo(
     () => ALL_STEPS.filter((s) => !s.kinds || s.kinds.includes(activeKind)),
     [activeKind],
   );
+  const connectorSteps = React.useMemo(
+    () => kindFilteredSteps.filter((s) => s.group === "Connectors"),
+    [kindFilteredSteps],
+  );
+  const solutionSteps = React.useMemo(
+    () => kindFilteredSteps.filter((s) => s.group === "Solution"),
+    [kindFilteredSteps],
+  );
+  const visibleSteps = mode === "connector" ? connectorSteps : solutionSteps;
+  const currentStep = currentStepByMode[mode];
 
   // Clamp currentStep if it exceeds visible steps after kind change
   React.useEffect(() => {
     if (currentStep >= visibleSteps.length) {
-      setCurrentStep(visibleSteps.length - 1);
+      setCurrentStepByMode((prev) => ({
+        ...prev,
+        [mode]: Math.max(0, visibleSteps.length - 1),
+      }));
     }
-  }, [visibleSteps.length, currentStep]);
+  }, [visibleSteps.length, currentStep, mode]);
+
+  // Ensure current step is tracked as visited by step id
+  React.useEffect(() => {
+    const current = visibleSteps[currentStep]
+    if (!current) return
+    setVisitedStepIds((prev) => {
+      if (prev.has(current.id)) return prev
+      const next = new Set(prev)
+      next.add(current.id)
+      return next
+    })
+  }, [visibleSteps, currentStep]);
 
   // Auto-init pollerConfig when kind switches to RestApiPoller
   React.useEffect(() => {
@@ -106,6 +141,17 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
       updateDataFlow({ streamName });
     }
   }, [config.schema.tableName, config.dataFlow.streamName, updateDataFlow]);
+
+  const connectorTrackValid = React.useMemo(
+    () => connectorSteps.every((s) => s.isValid(connectors, config)),
+    [connectorSteps, connectors, config],
+  );
+  const solutionTrackValid = React.useMemo(
+    () => solutionSteps
+      .filter((s) => s.id !== "export")
+      .every((s) => s.isValid(connectors, config)),
+    [solutionSteps, connectors, config],
+  );
 
   // File operations handlers
   const handleSaveProject = React.useCallback(() => {
@@ -139,31 +185,32 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleSaveProject, fileInputRef]);
 
-  const steps: StepInfo[] = visibleSteps.map((step, i) => ({
+  const steps: StepInfo[] = visibleSteps.map((step) => ({
     label: step.label,
     group: step.group,
-    isValid: step.isValid(connectors, config),
-    isVisited: visitedSteps.has(i),
+    isValid:
+      step.id === "export"
+        ? connectorTrackValid && solutionTrackValid
+        : step.isValid(connectors, config),
+    isVisited: visitedStepIds.has(step.id),
     badge: step.badge,
   }));
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       const nextStep = currentStep + 1;
-      setCurrentStep(nextStep);
-      setVisitedSteps((prev) => new Set(prev).add(nextStep));
+      setCurrentStepByMode((prev) => ({ ...prev, [mode]: nextStep }));
     }
   };
 
   const handleBack = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+      setCurrentStepByMode((prev) => ({ ...prev, [mode]: currentStep - 1 }));
     }
   };
 
   const handleStepClick = (index: number) => {
-    setCurrentStep(index);
-    setVisitedSteps((prev) => new Set(prev).add(index));
+    setCurrentStepByMode((prev) => ({ ...prev, [mode]: index }));
   };
 
   const handleReset = () => {
@@ -172,8 +219,9 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
       description: "Reset all configuration and start fresh?",
       onConfirm: () => {
         reset();
-        setCurrentStep(0);
-        setVisitedSteps(new Set([0]));
+        setMode("connector");
+        setCurrentStepByMode({ connector: 0, solution: 0 });
+        setVisitedStepIds(new Set());
       },
     });
   };
@@ -280,11 +328,43 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
             </Button>
           </div>
         </div>
-        <Stepper
-          steps={steps}
-          currentStep={currentStep}
-          onStepClick={handleStepClick}
-        />
+        <div className="px-6 pb-3 flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
+          <div className="inline-flex rounded-lg border border-border/60 bg-muted/20 p-1 self-center md:self-auto shrink-0">
+            <button
+              type="button"
+              onClick={() => setMode("connector")}
+              className={`px-3 py-1.5 text-sm rounded-md transition-colors cursor-pointer ${
+                mode === "connector"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Connector
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("solution")}
+              className={`px-3 py-1.5 text-sm rounded-md transition-colors cursor-pointer ${
+                mode === "solution"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Solution
+            </button>
+          </div>
+          <div className="hidden md:flex items-center text-muted-foreground/50 shrink-0">
+            <div className="h-px w-5 bg-border/70" />
+            <ChevronRight className="w-4 h-4" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <Stepper
+              steps={steps}
+              currentStep={currentStep}
+              onStepClick={handleStepClick}
+            />
+          </div>
+        </div>
       </header>
 
       {/* Main content */}
@@ -370,6 +450,11 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
           </Button>
 
           <div className="hidden lg:flex items-center gap-2">
+            <span className="text-xs text-muted-foreground mr-2">
+              {mode === "connector"
+                ? `Connector ${Math.min(currentStep + 1, steps.length)}/${steps.length}`
+                : `Solution ${Math.min(currentStep + 1, steps.length)}/${steps.length}`}
+            </span>
             {currentStepDef?.preview && (
               <Button
                 variant="ghost"
@@ -389,6 +474,13 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
           {currentStep < steps.length - 1 ? (
             <Button onClick={handleNext} disabled={!currentStepIsValid}>
               Next <ChevronRight className="w-4 h-4 ml-1.5" />
+            </Button>
+          ) : mode === "connector" ? (
+            <Button
+              onClick={() => setMode("solution")}
+              disabled={!currentStepIsValid}
+            >
+              Continue to Solution <ChevronRight className="w-4 h-4 ml-1.5" />
             </Button>
           ) : (
             <Button variant="secondary" disabled>

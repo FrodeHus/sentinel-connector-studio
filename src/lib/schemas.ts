@@ -139,7 +139,7 @@ export const SolutionSchema = z.object({
   firstPublishDate: z.string().default(() => new Date().toISOString().split("T")[0]),
 });
 
-// --- Analytic Rules & ASIM Parsers ---
+// --- Analytic Rules, Hunting Queries & ASIM Parsers ---
 
 export const EntityFieldMappingSchema = z.object({
   id: z.string().default(() => crypto.randomUUID()),
@@ -175,6 +175,18 @@ export const AnalyticRuleSchema = z.object({
   requiredDataConnectors: z.array(RequiredDataConnectorSchema).default([]),
   version: z.string().default("1.0.0"),
   enabled: z.boolean().default(true),
+})
+
+export const HuntingQuerySchema = z.object({
+  id: z.string().default(""),
+  name: z.string().default(""),
+  description: z.string().default(""),
+  tactics: z.array(z.string()).default([]),
+  relevantTechniques: z.array(z.string()).default([]),
+  query: z.string().default(""),
+  entityMappings: z.array(EntityMappingSchema).default([]),
+  requiredDataConnectors: z.array(RequiredDataConnectorSchema).default([]),
+  version: z.string().default("1.0.0"),
 })
 
 export const AsimParserSchema = z.object({
@@ -332,6 +344,7 @@ export const AppStateSchema = z
     connectors: z.array(ConnectorDataSchema).min(1).default([ConnectorDataSchema.parse({})]),
     activeConnectorIndex: z.number().int().nonnegative().default(0),
     analyticRules: z.array(AnalyticRuleSchema).default([]),
+    huntingQueries: z.array(HuntingQuerySchema).default([]),
     asimParsers: z.array(AsimParserSchema).default([]),
     workbooks: z.array(WorkbookSchema).default([]),
   })
@@ -372,5 +385,6 @@ export type EntityFieldMapping = z.infer<typeof EntityFieldMappingSchema>
 export type EntityMapping = z.infer<typeof EntityMappingSchema>
 export type RequiredDataConnector = z.infer<typeof RequiredDataConnectorSchema>
 export type AnalyticRule = z.infer<typeof AnalyticRuleSchema>
+export type HuntingQuery = z.infer<typeof HuntingQuerySchema>
 export type AsimParser = z.infer<typeof AsimParserSchema>
 export type Workbook = z.infer<typeof WorkbookSchema>

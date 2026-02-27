@@ -1,6 +1,6 @@
 import yaml from "js-yaml"
-import { AnalyticRuleSchema, AsimParserSchema } from "@/lib/schemas"
-import type { AnalyticRule, AsimParser } from "@/lib/schemas"
+import { AnalyticRuleSchema, HuntingQuerySchema, AsimParserSchema } from "@/lib/schemas"
+import type { AnalyticRule, HuntingQuery, AsimParser } from "@/lib/schemas"
 
 const TRIGGER_OPERATOR_MAP: Record<string, AnalyticRule["triggerOperator"]> = {
   gt: "GreaterThan",
@@ -192,4 +192,48 @@ export function parseAsimParserYaml(yamlText: string): AsimParser {
   )
 
   return AsimParserSchema.parse(cleaned)
+}
+
+export function parseHuntingQueryYaml(yamlText: string): HuntingQuery {
+  let doc: unknown
+  try {
+    doc = yaml.load(yamlText)
+  } catch (e) {
+    throw new Error(`Invalid YAML: ${e instanceof Error ? e.message : String(e)}`)
+  }
+
+  if (doc == null || typeof doc !== "object") {
+    throw new Error("YAML must contain a mapping (object) at the top level.")
+  }
+
+  const d = doc as Record<string, unknown>
+
+  if (!d.name && !d.query) {
+    throw new Error("YAML does not appear to be a hunting query — missing 'name' and 'query' fields.")
+  }
+
+  const cleaned = Object.fromEntries(
+    Object.entries({
+      id: crypto.randomUUID(),
+      name: typeof d.name === "string" ? d.name : undefined,
+      description: d.description != null ? cleanString(d.description) : undefined,
+      tactics: Array.isArray(d.tactics) ? d.tactics.filter((t): t is string => typeof t === "string") : undefined,
+      relevantTechniques: Array.isArray(d.relevantTechniques)
+        ? d.relevantTechniques.map((t) => String(t))
+        : undefined,
+      query: typeof d.query === "string" ? d.query.trim() : undefined,
+      entityMappings: d.entityMappings != null ? normalizeEntityMappings(d.entityMappings) : undefined,
+      requiredDataConnectors: Array.isArray(d.requiredDataConnectors)
+        ? d.requiredDataConnectors
+            .filter((r): r is Record<string, unknown> => r != null && typeof r === "object")
+            .map((r) => ({
+              connectorId: typeof r.connectorId === "string" ? r.connectorId : "",
+              dataTypes: Array.isArray(r.dataTypes) ? r.dataTypes.map((dt) => String(dt)) : [],
+            }))
+        : undefined,
+      version: d.version != null ? String(d.version) : undefined,
+    }).filter(([, v]) => v !== undefined),
+  )
+
+  return HuntingQuerySchema.parse(cleaned)
 }

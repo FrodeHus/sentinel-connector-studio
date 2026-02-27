@@ -22,7 +22,7 @@ import type { AnalyticRule } from "@/lib/schemas"
 import { parseAnalyticRuleYaml } from "@/lib/yaml-import"
 import { SEVERITY_COLORS } from "./analytic-rules/constants"
 import { RuleItem } from "./analytic-rules/RuleItem"
-import type { AvailableConnector } from "./analytic-rules/RuleItem"
+import type { AvailableConnector } from "./analytic-rules/types"
 
 export function AnalyticRulesEditor() {
   const { analyticRules, updateAnalyticRules, connectors } = useConnectorConfig()

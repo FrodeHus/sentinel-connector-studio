@@ -1,5 +1,14 @@
 import * as React from "react"
-import type { ConnectorConfig, ConnectorData, AppState, PollerConfig, AnalyticRule, AsimParser, Workbook } from "@/lib/schemas"
+import type {
+  ConnectorConfig,
+  ConnectorData,
+  AppState,
+  PollerConfig,
+  AnalyticRule,
+  HuntingQuery,
+  AsimParser,
+  Workbook,
+} from "@/lib/schemas"
 import { ConnectorDataSchema, AppStateSchema, PollerConfigSchema } from "@/lib/schemas"
 import { saveConfig, loadConfig, clearConfig } from "@/lib/persistence"
 
@@ -28,9 +37,11 @@ interface ConnectorConfigContextValue {
 
   // Content: analytic rules, ASIM parsers & workbooks
   analyticRules: AnalyticRule[]
+  huntingQueries: HuntingQuery[]
   asimParsers: AsimParser[]
   workbooks: Workbook[]
   updateAnalyticRules: (rules: AnalyticRule[]) => void
+  updateHuntingQueries: (queries: HuntingQuery[]) => void
   updateAsimParsers: (parsers: AsimParser[]) => void
   updateWorkbooks: (workbooks: Workbook[]) => void
 }
@@ -197,6 +208,10 @@ export function ConnectorConfigProvider({ children }: { children: React.ReactNod
     setAppState((prev) => ({ ...prev, asimParsers: parsers }))
   }, [])
 
+  const updateHuntingQueries = React.useCallback((queries: HuntingQuery[]) => {
+    setAppState((prev) => ({ ...prev, huntingQueries: queries }))
+  }, [])
+
   const updateWorkbooks = React.useCallback((workbooks: Workbook[]) => {
     setAppState((prev) => ({ ...prev, workbooks }))
   }, [])
@@ -245,9 +260,11 @@ export function ConnectorConfigProvider({ children }: { children: React.ReactNod
       removeConnector,
       setActiveConnector,
       analyticRules: appState.analyticRules,
+      huntingQueries: appState.huntingQueries,
       asimParsers: appState.asimParsers,
       workbooks: appState.workbooks,
       updateAnalyticRules,
+      updateHuntingQueries,
       updateAsimParsers,
       updateWorkbooks,
     }),
@@ -271,9 +288,11 @@ export function ConnectorConfigProvider({ children }: { children: React.ReactNod
       removeConnector,
       setActiveConnector,
       appState.analyticRules,
+      appState.huntingQueries,
       appState.asimParsers,
       appState.workbooks,
       updateAnalyticRules,
+      updateHuntingQueries,
       updateAsimParsers,
       updateWorkbooks,
     ],

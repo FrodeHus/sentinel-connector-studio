@@ -1,5 +1,5 @@
 import yaml from "js-yaml"
-import type { AnalyticRule, AsimParser, Workbook } from "./schemas"
+import type { AnalyticRule, HuntingQuery, AsimParser, Workbook } from "./schemas"
 
 const TRIGGER_OPERATOR_SHORTHAND: Record<AnalyticRule["triggerOperator"], string> = {
   GreaterThan: "gt",
@@ -87,6 +87,43 @@ export function generateAsimParserYaml(parser: AsimParser): string {
     targetSchema: parser.targetSchema,
     version: parser.version,
     query: parser.query || "// Add your KQL parser query here",
+  }
+
+  return yaml.dump(doc, { lineWidth: -1, quotingType: '"', forceQuotes: false })
+}
+
+export function generateHuntingQueryYaml(query: HuntingQuery): string {
+  const doc: Record<string, unknown> = {
+    id: query.id,
+    name: query.name,
+    description: query.description,
+    version: query.version,
+    query: query.query || "// Add your KQL hunting query here",
+  }
+
+  if (query.tactics.length > 0) {
+    doc.tactics = query.tactics
+  }
+
+  if (query.relevantTechniques.length > 0) {
+    doc.relevantTechniques = query.relevantTechniques
+  }
+
+  if (query.entityMappings.length > 0) {
+    doc.entityMappings = query.entityMappings.map((m) => ({
+      entityType: m.entityType,
+      fieldMappings: m.fieldMappings.map((f) => ({
+        identifier: f.identifier,
+        columnName: f.columnName,
+      })),
+    }))
+  }
+
+  if (query.requiredDataConnectors.length > 0) {
+    doc.requiredDataConnectors = query.requiredDataConnectors.map((r) => ({
+      connectorId: r.connectorId,
+      dataTypes: r.dataTypes,
+    }))
   }
 
   return yaml.dump(doc, { lineWidth: -1, quotingType: '"', forceQuotes: false })

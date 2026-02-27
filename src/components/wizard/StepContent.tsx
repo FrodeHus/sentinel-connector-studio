@@ -9,11 +9,12 @@ import {
 } from "@/components/ui/collapsible"
 import { HelpCircle } from "lucide-react"
 import { AnalyticRulesEditor } from "./content/AnalyticRulesEditor"
+import { HuntingQueriesEditor } from "./content/HuntingQueriesEditor"
 import { AsimParsersEditor } from "./content/AsimParsersEditor"
 import { WorkbooksEditor } from "./content/WorkbooksEditor"
 
 export function StepContent() {
-  const { analyticRules, asimParsers, workbooks } = useConnectorConfig()
+  const { analyticRules, huntingQueries, asimParsers, workbooks } = useConnectorConfig()
   const [activeTab, setActiveTab] = React.useState("rules")
 
   return (
@@ -21,7 +22,7 @@ export function StepContent() {
       <Collapsible>
         <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
           <HelpCircle className="w-4 h-4" />
-          What are analytic rules, ASIM parsers, and workbooks?
+          What are analytic rules, hunting queries, ASIM parsers, and workbooks?
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-3 text-sm text-muted-foreground space-y-2 pl-6">
           <p>
@@ -29,6 +30,11 @@ export function StepContent() {
             against your ingested data. They use KQL queries to identify
             suspicious patterns and generate security alerts in Microsoft
             Sentinel.
+          </p>
+          <p>
+            <strong>Hunting Queries</strong> are investigator-focused KQL queries
+            that help analysts proactively hunt for suspicious behavior without
+            creating alerts.
           </p>
           <p>
             <strong>ASIM Parsers</strong> (Advanced Security Information Model)
@@ -41,7 +47,7 @@ export function StepContent() {
             paste it here to include it in your solution package.
           </p>
           <p>
-            All three are optional solution-level content — not tied to individual
+            All four are optional solution-level content — not tied to individual
             connectors.
           </p>
         </CollapsibleContent>
@@ -65,6 +71,14 @@ export function StepContent() {
               </Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="hunting">
+            Hunting Queries
+            {huntingQueries.length > 0 && (
+              <Badge variant="secondary" className="ml-2 text-[10px] px-1.5 py-0">
+                {huntingQueries.length}
+              </Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="workbooks">
             Workbooks
             {workbooks.length > 0 && (
@@ -81,6 +95,10 @@ export function StepContent() {
 
         <TabsContent value="parsers">
           <AsimParsersEditor />
+        </TabsContent>
+
+        <TabsContent value="hunting">
+          <HuntingQueriesEditor />
         </TabsContent>
 
         <TabsContent value="workbooks">

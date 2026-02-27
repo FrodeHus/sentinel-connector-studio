@@ -265,6 +265,7 @@ export function StepExport() {
     connectors,
     activeConnectorIndex,
     analyticRules,
+    huntingQueries,
     asimParsers,
     workbooks,
   } = useConnectorConfig();
@@ -295,6 +296,7 @@ export function StepExport() {
         connectors,
         activeConnectorIndex,
         analyticRules,
+        huntingQueries,
         asimParsers,
         workbooks,
       });
@@ -341,7 +343,7 @@ export function StepExport() {
       setPackagingStatus("failed");
       setPackagingError(String(err instanceof Error ? err.message : err));
     }
-  }, [config.solution, connectors, activeConnectorIndex, analyticRules, asimParsers, workbooks]);
+  }, [config.solution, connectors, activeConnectorIndex, analyticRules, huntingQueries, asimParsers, workbooks]);
 
   // Cancel polling on unmount
   React.useEffect(() => {
@@ -433,6 +435,7 @@ export function StepExport() {
                   connectors,
                   activeConnectorIndex,
                   analyticRules,
+                  huntingQueries,
                   asimParsers,
                   workbooks,
                 })

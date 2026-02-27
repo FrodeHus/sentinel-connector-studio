@@ -56,6 +56,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
     setActiveConnector,
     importAppState,
     analyticRules,
+    huntingQueries,
     asimParsers,
     workbooks,
   } = useConnectorConfig();
@@ -113,10 +114,11 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
       connectors,
       activeConnectorIndex,
       analyticRules,
+      huntingQueries,
       asimParsers,
       workbooks,
     });
-  }, [config.solution, connectors, activeConnectorIndex, analyticRules, asimParsers, workbooks]);
+  }, [config.solution, connectors, activeConnectorIndex, analyticRules, huntingQueries, asimParsers, workbooks]);
 
   // Keyboard shortcuts
   React.useEffect(() => {

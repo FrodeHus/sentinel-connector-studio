@@ -6,7 +6,12 @@ import { generateDcrResource } from "./arm-resources/dcr";
 import { generateConnectorDefinition } from "./arm-resources/connector-def";
 import { generateDataConnector } from "./arm-resources/data-connector";
 import { connectorIdToDcrName } from "./naming";
-import { generateAnalyticRuleYaml, generateAsimParserYaml, generateWorkbookJson } from "./content-export";
+import {
+  generateAnalyticRuleYaml,
+  generateAsimParserYaml,
+  generateHuntingQueryYaml,
+  generateWorkbookJson,
+} from "./content-export";
 
 const PACKAGER_URL = import.meta.env.VITE_PACKAGER_URL || "/api/packager";
 
@@ -73,7 +78,7 @@ export function downloadIndividualFile(
 }
 
 export async function buildSolutionZip(appState: AppState): Promise<Blob> {
-  const { solution, connectors, analyticRules, asimParsers, workbooks } = appState;
+  const { solution, connectors, analyticRules, huntingQueries, asimParsers, workbooks } = appState;
   const solutionName =
     solution.name || connectors[0]?.meta.connectorId || "MySolution";
   const safeSolutionName = toSafeBaseName(solutionName, "MySolution")
@@ -83,6 +88,7 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
   const dataConnectorsFolder = root.folder("Data Connectors")!;
   const connectorPaths: string[] = [];
   const analyticRulePaths: string[] = [];
+  const huntingQueryPaths: string[] = [];
   const parserPaths: string[] = [];
   const workbookPaths: string[] = [];
   const usedConnectorFolderNames = new Set<string>();
@@ -147,6 +153,18 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
     }
   }
 
+  // Generate hunting queries
+  if (huntingQueries.length > 0) {
+    const huntingFolder = root.folder("Hunting Queries")!;
+    const usedHuntingNames = new Set<string>();
+    for (const query of huntingQueries) {
+      const baseName = toSafeBaseName(query.name || query.id, "hunting_query");
+      const fileName = getUniqueFileName(baseName, "yaml", usedHuntingNames);
+      huntingFolder.file(fileName, generateHuntingQueryYaml(query));
+      huntingQueryPaths.push(`Hunting Queries/${fileName}`);
+    }
+  }
+
   // Generate workbooks
   if (workbooks.length > 0) {
     const workbooksFolder = root.folder("Workbooks")!;
@@ -169,6 +187,7 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
     Description: firstConnector?.meta.descriptionMarkdown || "",
     "Data Connectors": connectorPaths,
     ...(analyticRulePaths.length > 0 && { "Analytic Rules": analyticRulePaths }),
+    ...(huntingQueryPaths.length > 0 && { "Hunting Queries": huntingQueryPaths }),
     ...(parserPaths.length > 0 && { Parsers: parserPaths }),
     ...(workbookPaths.length > 0 && { Workbooks: workbookPaths }),
     BasePath: `C:\\GitHub\\Azure-Sentinel\\Solutions\\${safeSolutionName}`,

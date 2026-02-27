@@ -2,7 +2,12 @@ import * as React from "react"
 import DOMPurify from "dompurify"
 import { useConnectorConfig } from "@/hooks/useConnectorConfig"
 import { CONFIG } from "@/config"
-import { generateAnalyticRuleYaml, generateAsimParserYaml, generateWorkbookJson } from "@/lib/content-export"
+import {
+  generateAnalyticRuleYaml,
+  generateAsimParserYaml,
+  generateHuntingQueryYaml,
+  generateWorkbookJson,
+} from "@/lib/content-export"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -63,11 +68,11 @@ function escapeHtml(str: string): string {
 interface TabItem {
   id: string
   label: string
-  kind: "rule" | "parser" | "workbook"
+  kind: "rule" | "parser" | "hunting" | "workbook"
 }
 
 export function ContentPreview() {
-  const { analyticRules, asimParsers, workbooks } = useConnectorConfig()
+  const { analyticRules, asimParsers, huntingQueries, workbooks } = useConnectorConfig()
   const [copied, setCopied] = React.useState(false)
   const [activeTabId, setActiveTabId] = React.useState<string | null>(null)
 
@@ -87,6 +92,13 @@ export function ContentPreview() {
         kind: "parser",
       })
     }
+    for (const query of huntingQueries) {
+      items.push({
+        id: query.id,
+        label: query.name || "Untitled Hunt",
+        kind: "hunting",
+      })
+    }
     for (const wb of workbooks) {
       items.push({
         id: wb.id,
@@ -95,7 +107,7 @@ export function ContentPreview() {
       })
     }
     return items
-  }, [analyticRules, asimParsers, workbooks])
+  }, [analyticRules, asimParsers, huntingQueries, workbooks])
 
   // Auto-select first tab or keep current if still valid
   React.useEffect(() => {
@@ -120,9 +132,13 @@ export function ContentPreview() {
       const parser = asimParsers.find((p) => p.id === activeTab.id)
       return parser ? generateAsimParserYaml(parser) : ""
     }
+    if (activeTab.kind === "hunting") {
+      const query = huntingQueries.find((h) => h.id === activeTab.id)
+      return query ? generateHuntingQueryYaml(query) : ""
+    }
     const wb = workbooks.find((w) => w.id === activeTab.id)
     return wb ? generateWorkbookJson(wb) : ""
-  }, [activeTab, analyticRules, asimParsers, workbooks])
+  }, [activeTab, analyticRules, asimParsers, huntingQueries, workbooks])
 
   const isJsonPreview = activeTab?.kind === "workbook"
   const previewTitle = isJsonPreview ? "JSON Preview" : "YAML Preview"
@@ -147,7 +163,7 @@ export function ContentPreview() {
         </CardHeader>
         <CardContent className="flex-1 flex items-center justify-center">
           <p className="text-sm text-muted-foreground">
-            Add an analytic rule, ASIM parser, or workbook to see a preview.
+            Add an analytic rule, hunting query, ASIM parser, or workbook to see a preview.
           </p>
         </CardContent>
       </Card>

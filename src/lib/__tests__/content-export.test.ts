@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
-import { generateWorkbookJson } from "../content-export"
-import type { Workbook } from "../schemas"
+import { generateHuntingQueryYaml, generateWorkbookJson } from "../content-export"
+import type { HuntingQuery, Workbook } from "../schemas"
 
 describe("generateWorkbookJson", () => {
   const baseWorkbook: Workbook = {
@@ -60,5 +60,34 @@ describe("generateWorkbookJson", () => {
 
     expect(parsed.fromTemplateId).toBe("sentinel-test-workbook")
     expect(parsed.$schema).toContain("workbook.json")
+  })
+})
+
+describe("generateHuntingQueryYaml", () => {
+  it("exports sentinel hunting query fields in yaml", () => {
+    const query: HuntingQuery = {
+      id: "hunt-1",
+      name: "Suspicious Sign-in Hunt",
+      description: "Looks for unusual sign-in behavior.",
+      tactics: ["CredentialAccess", "Discovery"],
+      relevantTechniques: ["T1110"],
+      query: "SigninLogs | where ResultType != 0",
+      entityMappings: [],
+      requiredDataConnectors: [
+        {
+          connectorId: "AzureActiveDirectory",
+          dataTypes: ["SigninLogs"],
+        },
+      ],
+      version: "1.0.0",
+    }
+
+    const result = generateHuntingQueryYaml(query)
+
+    expect(result).toContain("id: hunt-1")
+    expect(result).toContain("name: Suspicious Sign-in Hunt")
+    expect(result).toContain("requiredDataConnectors:")
+    expect(result).toContain("connectorId: AzureActiveDirectory")
+    expect(result).toContain("query: SigninLogs | where ResultType != 0")
   })
 })

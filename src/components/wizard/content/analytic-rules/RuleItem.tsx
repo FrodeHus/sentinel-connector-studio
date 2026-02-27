@@ -8,12 +8,8 @@ import { Plus, Trash2 } from "lucide-react"
 import type { AnalyticRule, EntityMapping } from "@/lib/schemas"
 import { MITRE_TACTICS } from "./constants"
 import { EntityMappingRow } from "./EntityMappingRow"
-
-export interface AvailableConnector {
-  connectorId: string
-  dataTypes: string[]
-  label: string
-}
+import { RequiredDataConnectorsSelector } from "./RequiredDataConnectorsSelector"
+import type { AvailableConnector } from "./types"
 
 /**
  * Extract column names from the last `| project` statement in a KQL query.
@@ -55,27 +51,6 @@ export function RuleItem({ rule, availableConnectors, onChange, onRemove }: Rule
       ? rule.tactics.filter((t) => t !== tactic)
       : [...rule.tactics, tactic]
     onChange({ tactics })
-  }
-
-  const toggleConnector = (connectorId: string) => {
-    const existing = rule.requiredDataConnectors.find((r) => r.connectorId === connectorId)
-    if (existing) {
-      onChange({
-        requiredDataConnectors: rule.requiredDataConnectors.filter(
-          (r) => r.connectorId !== connectorId,
-        ),
-      })
-    } else {
-      const connector = availableConnectors.find((c) => c.connectorId === connectorId)
-      if (connector) {
-        onChange({
-          requiredDataConnectors: [
-            ...rule.requiredDataConnectors,
-            { connectorId: connector.connectorId, dataTypes: connector.dataTypes },
-          ],
-        })
-      }
-    }
   }
 
   const addEntityMapping = () => {
@@ -266,32 +241,11 @@ export function RuleItem({ rule, availableConnectors, onChange, onRemove }: Rule
         ))}
       </div>
 
-      {availableConnectors.length > 0 && (
-        <div>
-          <Label>Required Data Connectors</Label>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {availableConnectors.map((c) => (
-              <label key={c.connectorId} className="flex items-center gap-1.5 text-xs cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={rule.requiredDataConnectors.some((r) => r.connectorId === c.connectorId)}
-                  onChange={() => toggleConnector(c.connectorId)}
-                  className="rounded"
-                />
-                <span>{c.label}</span>
-                {c.dataTypes.length > 0 && (
-                  <span className="text-muted-foreground">
-                    ({c.dataTypes.join(", ")})
-                  </span>
-                )}
-              </label>
-            ))}
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Select which data connectors this rule depends on.
-          </p>
-        </div>
-      )}
+      <RequiredDataConnectorsSelector
+        availableConnectors={availableConnectors}
+        selectedConnectors={rule.requiredDataConnectors}
+        onChange={(requiredDataConnectors) => onChange({ requiredDataConnectors })}
+      />
 
       <div className="grid grid-cols-2 gap-4">
         <div>

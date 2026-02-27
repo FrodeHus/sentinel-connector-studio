@@ -26,6 +26,8 @@ import {
   Save,
   Upload,
   Link,
+  Plug,
+  Package,
 } from "lucide-react";
 import {
   connectorIdToTableName,
@@ -333,23 +335,25 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
             <button
               type="button"
               onClick={() => setMode("connector")}
-              className={`px-3 py-1.5 text-sm rounded-md transition-colors cursor-pointer ${
+              className={`px-3 py-1.5 text-sm rounded-md transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
                 mode === "connector"
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
+              <Plug className="w-3.5 h-3.5" />
               Connector
             </button>
             <button
               type="button"
               onClick={() => setMode("solution")}
-              className={`px-3 py-1.5 text-sm rounded-md transition-colors cursor-pointer ${
+              className={`px-3 py-1.5 text-sm rounded-md transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
                 mode === "solution"
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
+              <Package className="w-3.5 h-3.5" />
               Solution
             </button>
           </div>

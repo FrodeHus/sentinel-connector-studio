@@ -21,11 +21,11 @@ The UX is designed for users who may have no prior experience with ARM templates
 - **Live ARM template preview** — see the generated template update in real time as you fill out the form
 - **JSON schema inference** — paste a sample JSON event and the app auto-generates the table schema
 - **KQL transform editor** — syntax-highlighted editor with template snippets for common patterns
-- **Analytic rules** — define [Scheduled and NRT analytic rules](https://learn.microsoft.com/en-us/azure/sentinel/create-analytics-rules) with entity mappings, MITRE ATT&CK tactics, and custom KQL queries
-- **Hunting queries** — define [hunting queries](https://learn.microsoft.com/en-us/azure/sentinel/sentinel-hunting-rules-creation) with KQL, MITRE ATT&CK tactics/techniques, and required data connectors
-- **ASIM parsers** — create [Advanced Security Information Model (ASIM) parsers](https://learn.microsoft.com/en-us/azure/sentinel/normalization-develop-parsers) to normalize your connector's data into standard schemas
-- **Workbooks** — include [Azure Monitor Workbooks](https://learn.microsoft.com/en-us/azure/sentinel/monitor-your-data) by pasting gallery template JSON exported from the Azure portal
-- **Resizable KQL editor** — vertically resizable code editor with an expand-to-dialog button for comfortable editing of large queries
+- **Bundled content**
+   - **Analytic rules** — define [Scheduled and NRT analytic rules](https://learn.microsoft.com/en-us/azure/sentinel/create-analytics-rules) with entity mappings, MITRE ATT&CK tactics, and custom KQL queries
+   - **Hunting queries** — define [hunting queries](https://learn.microsoft.com/en-us/azure/sentinel/sentinel-hunting-rules-creation) with KQL, MITRE ATT&CK tactics/techniques, and required data connectors
+   - **ASIM parsers** — create [Advanced Security Information Model (ASIM) parsers](https://learn.microsoft.com/en-us/azure/sentinel/normalization-develop-parsers) to normalize your connector's data into standard schemas
+   - **Workbooks** — include [Azure Monitor Workbooks](https://learn.microsoft.com/en-us/azure/sentinel/monitor-your-data) by pasting gallery template JSON exported from the Azure portal
 - **Smart defaults** — table names, stream names, connectivity queries, permissions, and instruction steps are all auto-generated
 - **Session persistence** — your work is saved to `localStorage` so you can resume across sessions
 - **Save / Load projects** — export your project as a `.json` file, reload it later, or load from a URL
@@ -56,19 +56,6 @@ Add the following markdown to your README, replacing `<URL_TO_PROJECT_JSON>` wit
 ```
 
 > **Note:** The project URL must serve valid JSON with the correct CORS headers. Raw GitHub URLs (`raw.githubusercontent.com`) work out of the box.
-
-## Wizard Steps
-
-1. **Basics** — Connector identity and branding (title, publisher, description, optional SVG logo)
-2. **Table Schema** — Define the custom Log Analytics table columns (or paste a sample JSON event to auto-generate)
-3. **Data Collection Rule** — Configure the data flow, stream name, and KQL transform
-4. **Connector UI** — Set up the Sentinel connector page: graph queries, sample queries, permissions, and instruction steps
-5. **Content** — Define solution-level content in four tabs:
-   - **Analytic Rules** — Scheduled or NRT detection rules with KQL queries, entity mappings, and MITRE ATT&CK tactics
-   - **Hunting Queries** — Proactive hunt queries with KQL, MITRE ATT&CK context, and required data connectors
-   - **ASIM Parsers** — Parsers that normalize your connector's data into standard ASIM schemas
-   - **Workbooks** — Interactive Azure Monitor dashboards imported from gallery template JSON
-6. **Export** — Finalize solution metadata and download the ARM template or solution package
 
 ## Learn More
 

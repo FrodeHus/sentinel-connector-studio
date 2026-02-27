@@ -6,8 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { ClipboardPaste, HelpCircle } from "lucide-react"
+import { ClipboardPaste } from "lucide-react"
 import type { Column } from "@/lib/schemas"
 
 export function StepSchema() {
@@ -82,34 +81,6 @@ export function StepSchema() {
           />
         </CardContent>
       </Card>
-
-      <Collapsible>
-        <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-          <HelpCircle className="w-4 h-4" />
-          What is this step about?
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <Card className="mt-2">
-            <CardContent className="pt-4 text-sm text-muted-foreground space-y-2">
-              <p>
-                This table is where your data lands in Log Analytics. Think of
-                columns as the fields in your events.
-              </p>
-              <p>
-                <strong>Tip:</strong> Paste a sample JSON event from your
-                application to auto-generate the schema.
-              </p>
-              <p>
-                Column types: <strong>string</strong> (text),{" "}
-                <strong>long</strong> (integer), <strong>real</strong>{" "}
-                (decimal), <strong>bool</strong> (true/false),{" "}
-                <strong>datetime</strong> (timestamp), <strong>dynamic</strong>{" "}
-                (JSON object/array), <strong>guid</strong> (UUID).
-              </p>
-            </CardContent>
-          </Card>
-        </CollapsibleContent>
-      </Collapsible>
 
       <PasteJsonDialog
         open={pasteDialogOpen}

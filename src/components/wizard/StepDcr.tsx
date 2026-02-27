@@ -14,12 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ClipboardPaste, FlaskConical, HelpCircle } from "lucide-react";
+import { ClipboardPaste, FlaskConical } from "lucide-react";
 import type { Column } from "@/lib/schemas";
 
 export function StepDcr() {
@@ -153,31 +148,6 @@ export function StepDcr() {
         </CardContent>
       </Card>
 
-      <Collapsible>
-        <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-          <HelpCircle className="w-4 h-4" />
-          What is this step about?
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <Card className="mt-2">
-            <CardContent className="pt-4 text-sm text-muted-foreground space-y-2">
-              <p>
-                The DCR acts as a pipeline: data comes in from your app, gets
-                transformed, and lands in the table.
-              </p>
-              <p>
-                If your app already sends a <code>TimeGenerated</code> field,
-                use <code>source</code> as the transform. Otherwise, the default
-                adds it automatically.
-              </p>
-              <p>
-                The <strong>stream name</strong> is used by your application
-                when sending data to the ingestion endpoint.
-              </p>
-            </CardContent>
-          </Card>
-        </CollapsibleContent>
-      </Collapsible>
       <PasteJsonDialog
         open={pasteDialogOpen}
         onOpenChange={setPasteDialogOpen}

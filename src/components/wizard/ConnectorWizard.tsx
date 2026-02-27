@@ -190,6 +190,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
   const steps: StepInfo[] = visibleSteps.map((step) => ({
     label: step.label,
     group: step.group,
+    about: step.about,
     isValid:
       step.id === "export"
         ? connectorTrackValid && solutionTrackValid

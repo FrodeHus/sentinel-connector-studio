@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import {
   Select,
   SelectContent,
@@ -15,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { HelpCircle, Plus, Trash2 } from "lucide-react"
+import { Plus, Trash2 } from "lucide-react"
 import type { InstructionStep } from "@/lib/schemas";
 import {
   generateDefaultGraphQueries,
@@ -582,34 +581,6 @@ export function StepConnectorUI() {
         </AccordionItem>
       </Accordion>
 
-      <Collapsible>
-        <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-          <HelpCircle className="w-4 h-4" />
-          What is this step about?
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <Card className="mt-2">
-            <CardContent className="pt-4 text-sm text-muted-foreground space-y-2">
-              <p>
-                This configures what users see when they open the connector in
-                the Sentinel portal.
-              </p>
-              <p>
-                <strong>Graph queries</strong> show metrics on the connector
-                page (e.g., events over time).
-              </p>
-              <p>
-                <strong>Sample queries</strong> appear in &quot;Next steps&quot;
-                to help users explore the data.
-              </p>
-              <p>
-                <strong>Instruction steps</strong> guide users through deploying
-                and configuring the connector.
-              </p>
-            </CardContent>
-          </Card>
-        </CollapsibleContent>
-      </Collapsible>
     </div>
   );
 }

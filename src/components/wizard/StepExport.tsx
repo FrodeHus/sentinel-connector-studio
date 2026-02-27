@@ -34,7 +34,6 @@ import {
   Download,
   FolderArchive,
   ChevronDown,
-  HelpCircle,
   Hammer,
   Loader2,
   CheckCircle2,
@@ -215,46 +214,6 @@ function NextStepsCard({ usedPackager }: { usedPackager: boolean }) {
         </CardContent>
       </Card>
 
-      <Collapsible>
-        <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-          <HelpCircle className="w-4 h-4" />
-          What is this step about?
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <Card className="mt-2">
-            <CardContent className="pt-4 text-sm text-muted-foreground space-y-2">
-              <p>
-                This final step packages your connector for deployment to Azure.
-              </p>
-              {usedPackager ? (
-                <p>
-                  You used the <strong>Build Deployable Template</strong>{" "}
-                  option, which ran <code>createSolutionV3.ps1</code>{" "}
-                  automatically. Your downloaded ZIP already contains the
-                  deployable <code>mainTemplate.json</code> and{" "}
-                  <code>createUiDefinition.json</code> in the{" "}
-                  <code>Package/</code> directory.
-                </p>
-              ) : (
-                <>
-                  <p>
-                    The <strong>solution package (ZIP)</strong> contains the
-                    individual resource files (<code>table.json</code>,{" "}
-                    <code>DCR.json</code>, <code>connectorDefinition.json</code>
-                    , <code>dataConnector.json</code>) and solution metadata
-                    needed by the Azure-Sentinel packaging tool.
-                  </p>
-                  <p>
-                    Run <code>createSolutionV3.ps1</code> from the
-                    Azure-Sentinel repository to generate the deployable{" "}
-                    <code>mainTemplate.json</code> from these files.
-                  </p>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </CollapsibleContent>
-      </Collapsible>
     </>
   );
 }

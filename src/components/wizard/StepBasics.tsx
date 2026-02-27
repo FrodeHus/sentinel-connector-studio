@@ -7,8 +7,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { HelpCircle } from "lucide-react"
 
 export function StepBasics() {
   const { config, updateMeta, updateSchema, updateDataFlow } = useConnectorConfig()
@@ -171,37 +169,6 @@ export function StepBasics() {
         </CardContent>
       </Card>
 
-      <Collapsible>
-        <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-          <HelpCircle className="w-4 h-4" />
-          What is this step about?
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <Card className="mt-2">
-            <CardContent className="pt-4 text-sm text-muted-foreground space-y-2">
-              <p>
-                This step captures the identity and branding of your connector.
-                The information here determines how your connector appears in
-                the Sentinel Data Connector gallery.
-              </p>
-              <p>
-                <strong>Title</strong> is the main display name users see. Make
-                it descriptive, e.g., &quot;Contoso Security Alerts
-                (Push)&quot;.
-              </p>
-              <p>
-                <strong>Publisher</strong> is shown as the author of the
-                connector.
-              </p>
-              <p>
-                <strong>Description</strong> supports Markdown and appears on
-                the connector&apos;s detail page. Include links to your product
-                documentation.
-              </p>
-            </CardContent>
-          </Card>
-        </CollapsibleContent>
-      </Collapsible>
     </div>
   );
 }

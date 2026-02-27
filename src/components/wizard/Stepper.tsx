@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { Check, AlertCircle } from "lucide-react"
+import { TooltipContent, TooltipProvider, TooltipRoot, TooltipTrigger } from "@/components/ui/tooltip"
+import { Check, AlertCircle, HelpCircle } from "lucide-react"
 
 export interface StepInfo {
   label: string
@@ -8,6 +9,7 @@ export interface StepInfo {
   isValid: boolean
   isVisited: boolean
   badge?: string
+  about?: string[]
 }
 
 interface StepperProps {
@@ -92,6 +94,27 @@ function StepButton({
         )}
       </span>
       <span className="hidden sm:inline">{step.label}</span>
+      {step.about && step.about.length > 0 && (
+        <TooltipRoot>
+          <TooltipTrigger asChild>
+            <span className={cn(
+              "inline-flex items-center",
+              isCurrent ? "text-white/90" : "text-muted-foreground",
+            )}>
+              <HelpCircle className="w-3.5 h-3.5" />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent
+            side="bottom"
+            className="max-w-sm whitespace-normal text-left space-y-1.5"
+          >
+            <p className="font-semibold text-xs">{step.label}</p>
+            {step.about.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </TooltipContent>
+        </TooltipRoot>
+      )}
       {step.badge && (
         <span className={cn(
           "hidden sm:inline text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded-md leading-none border",
@@ -110,43 +133,40 @@ export function Stepper({ steps, currentStep, onStepClick }: StepperProps) {
   const groups = React.useMemo(() => groupSteps(steps), [steps])
 
   return (
-    <nav className="flex items-end justify-center gap-6 md:gap-8 py-6 px-2 overflow-x-auto">
-      {groups.map((group, gi) => (
-        <React.Fragment key={gi}>
-          {gi > 0 && (
-            <div className="w-px self-stretch bg-border shrink-0" />
-          )}
-          <div className="flex flex-col items-center gap-2">
-            {group.label && (
-              <span className="hidden sm:block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 border border-border/50 rounded-full px-3 py-0.5">
-                {group.label}
-              </span>
+    <TooltipProvider>
+      <nav className="flex items-end justify-center gap-6 md:gap-8 py-6 px-2 overflow-x-auto">
+        {groups.map((group, gi) => (
+          <React.Fragment key={gi}>
+            {gi > 0 && (
+              <div className="w-px self-stretch bg-border shrink-0" />
             )}
-            <div className="flex items-center gap-2 md:gap-4">
-              {group.steps.map(({ step, globalIndex }, si) => (
-                <div key={globalIndex} className="flex items-center gap-2 md:gap-4">
-                  <StepButton
-                    step={step}
-                    index={globalIndex}
-                    isCurrent={globalIndex === currentStep}
-                    onClick={() => onStepClick(globalIndex)}
-                  />
-                  {si < group.steps.length - 1 && (
-                    <div
-                      className={cn(
-                        "w-8 h-0.5 rounded-full transition-all",
-                        step.isVisited && step.isValid
-                          ? "bg-gradient-to-r from-primary to-secondary"
-                          : "bg-border/30",
-                      )}
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center gap-2 md:gap-4">
+                {group.steps.map(({ step, globalIndex }, si) => (
+                  <div key={globalIndex} className="flex items-center gap-2 md:gap-4">
+                    <StepButton
+                      step={step}
+                      index={globalIndex}
+                      isCurrent={globalIndex === currentStep}
+                      onClick={() => onStepClick(globalIndex)}
                     />
-                  )}
-                </div>
-              ))}
+                    {si < group.steps.length - 1 && (
+                      <div
+                        className={cn(
+                          "w-8 h-0.5 rounded-full transition-all",
+                          step.isVisited && step.isValid
+                            ? "bg-gradient-to-r from-primary to-secondary"
+                            : "bg-border/30",
+                        )}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        </React.Fragment>
-      ))}
-    </nav>
+          </React.Fragment>
+        ))}
+      </nav>
+    </TooltipProvider>
   )
 }

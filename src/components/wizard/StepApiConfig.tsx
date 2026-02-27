@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { HelpCircle, ChevronDown, Plus, Trash2, FlaskConical } from "lucide-react"
+import { ChevronDown, Plus, Trash2, FlaskConical } from "lucide-react"
 
 function KeyValueEditor({
   value,
@@ -1077,39 +1077,6 @@ export function StepApiConfig() {
           </Accordion>
         </CardContent>
       </Card>
-
-      <Collapsible>
-        <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-          <HelpCircle className="w-4 h-4" />
-          What is this step about?
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <Card className="mt-2">
-            <CardContent className="pt-4 text-sm text-muted-foreground space-y-2">
-              <p>
-                This step configures how Microsoft Sentinel polls a REST API to
-                ingest data.
-              </p>
-              <p>
-                <strong>Authentication</strong> defines how Sentinel
-                authenticates with the API (Basic, API Key, or OAuth2).
-              </p>
-              <p>
-                <strong>Request</strong> specifies the API endpoint, HTTP method,
-                polling interval, and time windowing.
-              </p>
-              <p>
-                <strong>Response</strong> tells Sentinel how to extract events
-                from the API response using JSON paths.
-              </p>
-              <p>
-                <strong>Paging</strong> handles paginated API responses. Choose
-                the paging strategy that matches your API.
-              </p>
-            </CardContent>
-          </Card>
-        </CollapsibleContent>
-      </Collapsible>
 
       <ApiTestDialog
         open={testDialogOpen}

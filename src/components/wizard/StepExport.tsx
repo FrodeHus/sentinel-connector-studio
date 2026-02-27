@@ -266,6 +266,7 @@ export function StepExport() {
     activeConnectorIndex,
     analyticRules,
     asimParsers,
+    workbooks,
   } = useConnectorConfig();
   const [expanded, setExpanded] = React.useState(false);
 
@@ -295,6 +296,7 @@ export function StepExport() {
         activeConnectorIndex,
         analyticRules,
         asimParsers,
+        workbooks,
       });
 
       if (abortRef.current) return;
@@ -339,7 +341,7 @@ export function StepExport() {
       setPackagingStatus("failed");
       setPackagingError(String(err instanceof Error ? err.message : err));
     }
-  }, [config.solution, connectors, activeConnectorIndex, analyticRules, asimParsers]);
+  }, [config.solution, connectors, activeConnectorIndex, analyticRules, asimParsers, workbooks]);
 
   // Cancel polling on unmount
   React.useEffect(() => {
@@ -432,6 +434,7 @@ export function StepExport() {
                   activeConnectorIndex,
                   analyticRules,
                   asimParsers,
+                  workbooks,
                 })
               }
               variant={packagerOnline ? "secondary" : "default"}

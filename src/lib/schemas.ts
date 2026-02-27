@@ -185,6 +185,15 @@ export const AsimParserSchema = z.object({
   version: z.string().default("1.0.0"),
 })
 
+export const WorkbookSchema = z.object({
+  id: z.string().default(""),
+  name: z.string().default(""),
+  description: z.string().default(""),
+  fromTemplateId: z.string().default(""),
+  serializedData: z.string().default(""),
+  version: z.string().default("1.0"),
+})
+
 // --- REST API Poller (pull) connector schemas ---
 
 export const PollerAuthTypeSchema = z.enum(["Basic", "APIKey", "OAuth2"]).default("Basic")
@@ -323,6 +332,7 @@ export const AppStateSchema = z.object({
   activeConnectorIndex: z.number().default(0),
   analyticRules: z.array(AnalyticRuleSchema).default([]),
   asimParsers: z.array(AsimParserSchema).default([]),
+  workbooks: z.array(WorkbookSchema).default([]),
 })
 
 // --- Inferred types ---
@@ -353,3 +363,4 @@ export type EntityMapping = z.infer<typeof EntityMappingSchema>
 export type RequiredDataConnector = z.infer<typeof RequiredDataConnectorSchema>
 export type AnalyticRule = z.infer<typeof AnalyticRuleSchema>
 export type AsimParser = z.infer<typeof AsimParserSchema>
+export type Workbook = z.infer<typeof WorkbookSchema>

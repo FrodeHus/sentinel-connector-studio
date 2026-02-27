@@ -1,5 +1,5 @@
 # ── Stage 1: Build ────────────────────────────────────────
-FROM node:22-alpine AS build
+FROM node:24-alpine AS build
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
@@ -19,7 +19,10 @@ COPY . .
 RUN pnpm build
 
 # ── Stage 2: Serve ────────────────────────────────────────
-FROM nginx:1.28-alpine AS runtime
+FROM nginxinc/nginx-unprivileged:1.28-alpine AS runtime
+
+# Switch to root for package updates and filesystem setup.
+USER root
 
 # Upgrade all Alpine packages to pick up security patches
 RUN apk upgrade --no-cache
@@ -36,14 +39,14 @@ COPY --from=build /app/dist/client /usr/share/nginx/html
 # TanStack Start SPA outputs _shell.html — rename to index.html for nginx
 RUN mv /usr/share/nginx/html/_shell.html /usr/share/nginx/html/index.html
 
-# Run as non-root user
-RUN chown -R nginx:nginx /usr/share/nginx/html && \
-    chown -R nginx:nginx /var/cache/nginx && \
-    chown -R nginx:nginx /var/log/nginx && \
+# Run as non-root user (uid/gid 101 in nginx-unprivileged)
+RUN chown -R 101:101 /usr/share/nginx/html && \
+    chown -R 101:101 /var/cache/nginx && \
+    chown -R 101:101 /var/log/nginx && \
     touch /var/run/nginx.pid && \
-    chown nginx:nginx /var/run/nginx.pid
+    chown 101:101 /var/run/nginx.pid
 
-USER nginx
+USER 101
 
 EXPOSE 8080
 

@@ -3,7 +3,7 @@
 [![CI](https://github.com/FrodeHus/sentinel-connector-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/FrodeHus/sentinel-connector-studio/actions/workflows/ci.yml)
 [![Docker Publish](https://github.com/FrodeHus/sentinel-connector-studio/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/FrodeHus/sentinel-connector-studio/actions/workflows/docker-publish.yml)
 
-A client-side web application that guides you through visually building a **Microsoft Sentinel Codeless Connector Framework (CCF) push connector**, complete with analytic rules, ASIM parsers, and workbooks. The tool produces a deployable ARM template (`mainTemplate.json`) that can be deployed directly to Azure via the portal, CLI, or API.
+A client-side web application that guides you through visually building a **Microsoft Sentinel Codeless Connector Framework (CCF) connector** (Push or RestApiPoller), complete with analytic rules, hunting queries, ASIM parsers, and workbooks. The tool produces a deployable ARM template (`mainTemplate.json`) that can be deployed directly to Azure via the portal, CLI, or API.
 
 No backend required — everything runs in the browser and can be deployed as a static site (GitHub Pages, Azure Static Web Apps, Vercel, etc.).
 
@@ -22,6 +22,7 @@ The UX is designed for users who may have no prior experience with ARM templates
 - **JSON schema inference** — paste a sample JSON event and the app auto-generates the table schema
 - **KQL transform editor** — syntax-highlighted editor with template snippets for common patterns
 - **Analytic rules** — define [Scheduled and NRT analytic rules](https://learn.microsoft.com/en-us/azure/sentinel/create-analytics-rules) with entity mappings, MITRE ATT&CK tactics, and custom KQL queries
+- **Hunting queries** — define [hunting queries](https://learn.microsoft.com/en-us/azure/sentinel/sentinel-hunting-rules-creation) with KQL, MITRE ATT&CK tactics/techniques, and required data connectors
 - **ASIM parsers** — create [Advanced Security Information Model (ASIM) parsers](https://learn.microsoft.com/en-us/azure/sentinel/normalization-develop-parsers) to normalize your connector's data into standard schemas
 - **Workbooks** — include [Azure Monitor Workbooks](https://learn.microsoft.com/en-us/azure/sentinel/monitor-your-data) by pasting gallery template JSON exported from the Azure portal
 - **Resizable KQL editor** — vertically resizable code editor with an expand-to-dialog button for comfortable editing of large queries
@@ -62,8 +63,9 @@ Add the following markdown to your README, replacing `<URL_TO_PROJECT_JSON>` wit
 2. **Table Schema** — Define the custom Log Analytics table columns (or paste a sample JSON event to auto-generate)
 3. **Data Collection Rule** — Configure the data flow, stream name, and KQL transform
 4. **Connector UI** — Set up the Sentinel connector page: graph queries, sample queries, permissions, and instruction steps
-5. **Content** — Define solution-level content in three tabs:
+5. **Content** — Define solution-level content in four tabs:
    - **Analytic Rules** — Scheduled or NRT detection rules with KQL queries, entity mappings, and MITRE ATT&CK tactics
+   - **Hunting Queries** — Proactive hunt queries with KQL, MITRE ATT&CK context, and required data connectors
    - **ASIM Parsers** — Parsers that normalize your connector's data into standard ASIM schemas
    - **Workbooks** — Interactive Azure Monitor dashboards imported from gallery template JSON
 6. **Export** — Finalize solution metadata and download the ARM template or solution package
@@ -72,6 +74,7 @@ Add the following markdown to your README, replacing `<URL_TO_PROJECT_JSON>` wit
 
 - [Create a codeless connector for Microsoft Sentinel (Push)](https://learn.microsoft.com/en-us/azure/sentinel/create-push-codeless-connector) — official guide for Push CCF connectors
 - [Create custom analytics rules](https://learn.microsoft.com/en-us/azure/sentinel/create-analytics-rules) — scheduled and NRT rule authoring
+- [Create hunting queries](https://learn.microsoft.com/en-us/azure/sentinel/sentinel-hunting-rules-creation) — proactive hunt query authoring and schema
 - [Develop ASIM parsers](https://learn.microsoft.com/en-us/azure/sentinel/normalization-develop-parsers) — building parsers that map data to the Advanced Security Information Model
 - [ASIM schemas overview](https://learn.microsoft.com/en-us/azure/sentinel/normalization-about-schemas) — available ASIM schemas and their fields
 - [Azure Monitor Workbooks](https://learn.microsoft.com/en-us/azure/sentinel/monitor-your-data) — creating interactive dashboards for Sentinel solutions
@@ -235,7 +238,7 @@ pnpm run lint
 src/
 ├── components/
 │   ├── wizard/           # Wizard steps and navigation
-│   │   └── content/      # Content editors (analytic rules, ASIM parsers, workbooks)
+│   │   └── content/      # Content editors (analytic rules, hunting queries, ASIM parsers, workbooks)
 │   ├── schema-editor/    # Interactive column editor + paste-JSON dialog
 │   ├── kql-editor/       # Resizable KQL editor with expand-to-dialog
 │   ├── instruction-editor/ # Connector page instruction step editor

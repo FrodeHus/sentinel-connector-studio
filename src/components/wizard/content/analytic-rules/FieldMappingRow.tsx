@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Trash2 } from "lucide-react"
 import type { EntityFieldMapping } from "@/lib/schemas"
 
@@ -21,20 +22,22 @@ export function FieldMappingRow({ fm, identifierOptions, projectCols, onUpdate, 
     <div className="flex items-center gap-2 mb-1">
       <div className="flex-1 min-w-0">
         {identifierOptions.length > 0 ? (
-          <select
-            className="flex h-8 w-full rounded-xl border border-border/50 bg-card px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            value={isIdentifierCustom ? "__custom__" : fm.identifier}
-            onChange={(e) => {
-              const val = e.target.value
+          <Select
+            value={isIdentifierCustom ? "__custom__" : (fm.identifier || undefined)}
+            onValueChange={(val) => {
               onUpdate({ identifier: val === "__custom__" ? "" : val })
             }}
           >
-            <option value="" disabled>Select identifier...</option>
-            {identifierOptions.map((id) => (
-              <option key={id} value={id}>{id}</option>
-            ))}
-            <option value="__custom__">Custom...</option>
-          </select>
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue placeholder="Select identifier..." />
+            </SelectTrigger>
+            <SelectContent>
+              {identifierOptions.map((id) => (
+                <SelectItem key={id} value={id}>{id}</SelectItem>
+              ))}
+              <SelectItem value="__custom__">Custom...</SelectItem>
+            </SelectContent>
+          </Select>
         ) : (
           <Input
             className="h-8 text-xs"
@@ -56,20 +59,19 @@ export function FieldMappingRow({ fm, identifierOptions, projectCols, onUpdate, 
       )}
       {projectCols.length > 0 && (
         <div className="flex-1 min-w-0">
-          <select
-            className="flex h-8 w-full rounded-xl border border-border/50 bg-card px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            value={projectCols.includes(fm.columnName) ? fm.columnName : ""}
-            onChange={(e) => {
-              if (e.target.value) {
-                onUpdate({ columnName: e.target.value })
-              }
-            }}
+          <Select
+            value={projectCols.includes(fm.columnName) ? fm.columnName : undefined}
+            onValueChange={(val) => onUpdate({ columnName: val })}
           >
-            <option value="">Pick from query...</option>
-            {projectCols.map((col) => (
-              <option key={col} value={col}>{col}</option>
-            ))}
-          </select>
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue placeholder="Pick from query..." />
+            </SelectTrigger>
+            <SelectContent>
+              {projectCols.map((col) => (
+                <SelectItem key={col} value={col}>{col}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       )}
       <div className="flex-1 min-w-0">

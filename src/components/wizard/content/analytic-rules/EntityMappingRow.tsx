@@ -1,5 +1,6 @@
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2 } from "lucide-react"
 import type { EntityMapping, EntityFieldMapping } from "@/lib/schemas"
 import { ENTITY_TYPES, ENTITY_IDENTIFIERS } from "./constants"
@@ -37,16 +38,19 @@ export function EntityMappingRow({ mapping, projectCols, onChange, onRemove }: E
       <div className="flex items-center gap-2">
         <div className="flex-1">
           <Label className="text-xs">Entity Type</Label>
-          <select
-            className="flex h-9 w-full rounded-xl border border-border/50 bg-card px-3 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            value={mapping.entityType}
-            onChange={(e) => onChange({ entityType: e.target.value })}
+          <Select
+            value={mapping.entityType || undefined}
+            onValueChange={(val) => onChange({ entityType: val })}
           >
-            <option value="">Select entity type...</option>
-            {ENTITY_TYPES.map((et) => (
-              <option key={et} value={et}>{et}</option>
-            ))}
-          </select>
+            <SelectTrigger>
+              <SelectValue placeholder="Select entity type..." />
+            </SelectTrigger>
+            <SelectContent>
+              {ENTITY_TYPES.map((et) => (
+                <SelectItem key={et} value={et}>{et}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <Button
           size="icon"

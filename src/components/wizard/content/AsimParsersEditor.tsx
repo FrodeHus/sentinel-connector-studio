@@ -20,6 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2, ClipboardPaste } from "lucide-react"
 import type { AsimParser } from "@/lib/schemas"
 import { parseAsimParserYaml } from "@/lib/yaml-import"
@@ -410,20 +411,23 @@ export function AsimParsersEditor() {
               <div className="space-y-4 pt-2">
                 <div>
                   <Label>Target Schema</Label>
-                  <select
-                    className="flex h-10 w-full rounded-xl border border-border/50 bg-card px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    value={parser.targetSchema}
-                    onChange={(e) =>
-                      handleSchemaChange(parserIndex, e.target.value)
+                  <Select
+                    value={parser.targetSchema || undefined}
+                    onValueChange={(val) =>
+                      handleSchemaChange(parserIndex, val)
                     }
                   >
-                    <option value="">Select target schema...</option>
-                    {ASIM_SCHEMAS.map((schema) => (
-                      <option key={schema} value={schema}>
-                        {schema}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select target schema..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ASIM_SCHEMAS.map((schema) => (
+                        <SelectItem key={schema} value={schema}>
+                          {schema}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <p className="text-xs text-muted-foreground mt-1">
                     Selecting a schema auto-generates the parser name and
                     scaffolds the KQL query with the standard fields.

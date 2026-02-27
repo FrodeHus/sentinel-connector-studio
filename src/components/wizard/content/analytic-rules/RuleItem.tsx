@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2 } from "lucide-react"
 import type { AnalyticRule, EntityMapping } from "@/lib/schemas"
 import { MITRE_TACTICS } from "./constants"
@@ -122,27 +123,35 @@ export function RuleItem({ rule, availableConnectors, onChange, onRemove }: Rule
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label>Severity</Label>
-          <select
-            className="flex h-10 w-full rounded-xl border border-border/50 bg-card px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          <Select
             value={rule.severity}
-            onChange={(e) => onChange({ severity: e.target.value as AnalyticRule["severity"] })}
+            onValueChange={(val) => onChange({ severity: val as AnalyticRule["severity"] })}
           >
-            <option value="High">High</option>
-            <option value="Medium">Medium</option>
-            <option value="Low">Low</option>
-            <option value="Informational">Informational</option>
-          </select>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="High">High</SelectItem>
+              <SelectItem value="Medium">Medium</SelectItem>
+              <SelectItem value="Low">Low</SelectItem>
+              <SelectItem value="Informational">Informational</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label>Kind</Label>
-          <select
-            className="flex h-10 w-full rounded-xl border border-border/50 bg-card px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          <Select
             value={rule.kind}
-            onChange={(e) => onChange({ kind: e.target.value as AnalyticRule["kind"] })}
+            onValueChange={(val) => onChange({ kind: val as AnalyticRule["kind"] })}
           >
-            <option value="Scheduled">Scheduled</option>
-            <option value="NRT">NRT (Near Real-Time)</option>
-          </select>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Scheduled">Scheduled</SelectItem>
+              <SelectItem value="NRT">NRT (Near Real-Time)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -170,16 +179,20 @@ export function RuleItem({ rule, availableConnectors, onChange, onRemove }: Rule
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label>Trigger Operator</Label>
-          <select
-            className="flex h-10 w-full rounded-xl border border-border/50 bg-card px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          <Select
             value={rule.triggerOperator}
-            onChange={(e) => onChange({ triggerOperator: e.target.value as AnalyticRule["triggerOperator"] })}
+            onValueChange={(val) => onChange({ triggerOperator: val as AnalyticRule["triggerOperator"] })}
           >
-            <option value="GreaterThan">Greater Than</option>
-            <option value="LessThan">Less Than</option>
-            <option value="Equal">Equal</option>
-            <option value="NotEqual">Not Equal</option>
-          </select>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="GreaterThan">Greater Than</SelectItem>
+              <SelectItem value="LessThan">Less Than</SelectItem>
+              <SelectItem value="Equal">Equal</SelectItem>
+              <SelectItem value="NotEqual">Not Equal</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label>Trigger Threshold</Label>

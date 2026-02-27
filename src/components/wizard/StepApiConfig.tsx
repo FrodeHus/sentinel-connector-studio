@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { HelpCircle, ChevronDown, Plus, Trash2, FlaskConical } from "lucide-react"
 
 function KeyValueEditor({
@@ -114,8 +115,6 @@ export function StepApiConfig() {
     [updatePollerConfig, updateDataFlow, updateSchema],
   )
 
-  const selectClass =
-    "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 
   return (
     <div className="space-y-6">
@@ -323,28 +322,32 @@ export function StepApiConfig() {
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-2">
                           <Label className="text-xs">Grant Type</Label>
-                          <select
+                          <Select
                             value={pc.auth.grantType}
-                            onChange={(e) =>
+                            onValueChange={(val) =>
                               update((prev) => ({
                                 ...prev,
                                 auth: {
                                   ...prev.auth,
-                                  grantType: e.target.value as
+                                  grantType: val as
                                     | "client_credentials"
                                     | "authorization_code",
                                 },
                               }))
                             }
-                            className={selectClass}
                           >
-                            <option value="client_credentials">
-                              Client Credentials
-                            </option>
-                            <option value="authorization_code">
-                              Authorization Code
-                            </option>
-                          </select>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="client_credentials">
+                                Client Credentials
+                              </SelectItem>
+                              <SelectItem value="authorization_code">
+                                Authorization Code
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="space-y-2">
                           <Label className="text-xs">Scope</Label>
@@ -478,22 +481,26 @@ export function StepApiConfig() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
                       <Label className="text-xs">HTTP Method</Label>
-                      <select
+                      <Select
                         value={pc.request.httpMethod}
-                        onChange={(e) =>
+                        onValueChange={(val) =>
                           update((prev) => ({
                             ...prev,
                             request: {
                               ...prev.request,
-                              httpMethod: e.target.value as "GET" | "POST",
+                              httpMethod: val as "GET" | "POST",
                             },
                           }))
                         }
-                        className={selectClass}
                       >
-                        <option value="GET">GET</option>
-                        <option value="POST">POST</option>
-                      </select>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="GET">GET</SelectItem>
+                          <SelectItem value="POST">POST</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-xs">Query Window (min)</Label>
@@ -737,23 +744,27 @@ export function StepApiConfig() {
                   </div>
                   <div className="space-y-2">
                     <Label className="text-xs">Response Format</Label>
-                    <select
+                    <Select
                       value={pc.response.format}
-                      onChange={(e) =>
+                      onValueChange={(val) =>
                         update((prev) => ({
                           ...prev,
                           response: {
                             ...prev.response,
-                            format: e.target.value as "json" | "csv" | "xml",
+                            format: val as "json" | "csv" | "xml",
                           },
                         }))
                       }
-                      className={selectClass}
                     >
-                      <option value="json">JSON</option>
-                      <option value="csv">CSV</option>
-                      <option value="xml">XML</option>
-                    </select>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="json">JSON</SelectItem>
+                        <SelectItem value="csv">CSV</SelectItem>
+                        <SelectItem value="xml">XML</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <Collapsible
@@ -871,27 +882,31 @@ export function StepApiConfig() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label className="text-xs">Paging Type</Label>
-                    <select
+                    <Select
                       value={pc.paging.pagingType}
-                      onChange={(e) =>
+                      onValueChange={(val) =>
                         update((prev) => ({
                           ...prev,
                           paging: {
                             ...prev.paging,
-                            pagingType: e.target.value as PollerConfig["paging"]["pagingType"],
+                            pagingType: val as PollerConfig["paging"]["pagingType"],
                           },
                         }))
                       }
-                      className={selectClass}
                     >
-                      <option value="None">None</option>
-                      <option value="LinkHeader">Link Header</option>
-                      <option value="NextPageUrl">Next Page URL</option>
-                      <option value="NextPageToken">Next Page Token</option>
-                      <option value="Offset">Offset</option>
-                      <option value="PersistentToken">Persistent Token</option>
-                      <option value="PersistentLink">Persistent Link</option>
-                    </select>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="None">None</SelectItem>
+                        <SelectItem value="LinkHeader">Link Header</SelectItem>
+                        <SelectItem value="NextPageUrl">Next Page URL</SelectItem>
+                        <SelectItem value="NextPageToken">Next Page Token</SelectItem>
+                        <SelectItem value="Offset">Offset</SelectItem>
+                        <SelectItem value="PersistentToken">Persistent Token</SelectItem>
+                        <SelectItem value="PersistentLink">Persistent Link</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {pc.paging.pagingType !== "None" && (

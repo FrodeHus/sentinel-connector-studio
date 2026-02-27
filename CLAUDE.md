@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Working Style
+
+When asked to implement a feature, start writing code immediately. Do not spend more than 1-2 messages on planning unless explicitly asked to plan. If exploring the codebase, limit exploration to what's needed for the immediate task.
+
+## Quality Checks
+
+After making code changes, always run the build/lint/type-check commands before considering a task complete. Fix any errors before moving on.
+
 ## Commands
 
 ```bash
@@ -86,6 +94,10 @@ Two preview panels in `src/components/preview/`:
 - `ContentPreview` — analytic rules / ASIM parsers YAML (step 6)
 
 Steps with `preview: null` (Solution, Export) render full-width with no preview panel and no Show/Hide button.
+
+## Tech Stack & Conventions
+
+This is a TypeScript project (primary). For TypeScript: always check for unused imports, ensure SSR/SPA compatibility, and validate that UI state updates don't cause stale references.
 
 ## Key Conventions
 

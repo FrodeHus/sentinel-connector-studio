@@ -5,21 +5,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Textarea } from "@/components/ui/textarea"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { PasteImportDialog } from "@/components/ui/paste-import-dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2, ClipboardPaste } from "lucide-react"
 import type { AsimParser } from "@/lib/schemas"
@@ -314,28 +306,14 @@ function generateParserQuery(
 export function AsimParsersEditor() {
   const { asimParsers, updateAsimParsers, connectors } = useConnectorConfig()
   const [pasteDialogOpen, setPasteDialogOpen] = React.useState(false)
-  const [yamlText, setYamlText] = React.useState("")
-  const [parseError, setParseError] = React.useState("")
 
-  const handleImportYaml = () => {
-    setParseError("")
-    try {
-      const parser = parseAsimParserYaml(yamlText)
+  const handleImportYaml = React.useCallback(
+    (text: string) => {
+      const parser = parseAsimParserYaml(text)
       updateAsimParsers([...asimParsers, parser])
-      setYamlText("")
-      setPasteDialogOpen(false)
-    } catch (e) {
-      setParseError(e instanceof Error ? e.message : "Failed to parse YAML")
-    }
-  }
-
-  const handlePasteDialogClose = (open: boolean) => {
-    if (!open) {
-      setYamlText("")
-      setParseError("")
-    }
-    setPasteDialogOpen(open)
-  }
+    },
+    [asimParsers, updateAsimParsers],
+  )
 
   const primaryConnector = connectors[0]
   const tableName = primaryConnector?.schema.tableName || ""
@@ -492,36 +470,14 @@ export function AsimParsersEditor() {
         ))}
       </Accordion>
 
-      <Dialog open={pasteDialogOpen} onOpenChange={handlePasteDialogClose}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Import ASIM Parser from YAML</DialogTitle>
-            <DialogDescription>
-              Paste a Sentinel ASIM parser YAML definition. The function name, query, and version will be imported automatically.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Textarea
-              placeholder={"FunctionName: ASimAuthenticationVendorProduct\nFunctionQuery: |\n  MyTable_CL\n  | project-rename ..."}
-              rows={12}
-              value={yamlText}
-              onChange={(e) => setYamlText(e.target.value)}
-              className="font-mono text-sm"
-            />
-            {parseError && (
-              <p className="text-sm text-destructive">{parseError}</p>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => handlePasteDialogClose(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleImportYaml} disabled={!yamlText.trim()}>
-              Import
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <PasteImportDialog
+        open={pasteDialogOpen}
+        onOpenChange={setPasteDialogOpen}
+        onImport={handleImportYaml}
+        title="Import ASIM Parser from YAML"
+        description="Paste a Sentinel ASIM parser YAML definition. The function name, query, and version will be imported automatically."
+        placeholder={"FunctionName: ASimAuthenticationVendorProduct\nFunctionQuery: |\n  MyTable_CL\n  | project-rename ..."}
+      />
     </div>
   )
 }

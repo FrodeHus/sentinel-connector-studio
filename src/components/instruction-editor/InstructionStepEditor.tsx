@@ -1,4 +1,5 @@
 import type { InstructionStep, Instruction } from "@/lib/schemas"
+import { updateAtIndex } from "@/lib/array-utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -87,7 +88,7 @@ export function InstructionStepEditor({ steps, onChange }: InstructionStepEditor
   }
 
   const updateStep = (index: number, updates: Partial<InstructionStep>) => {
-    onChange(steps.map((step, i) => i === index ? { ...step, ...updates } : step))
+    onChange(updateAtIndex(steps, index, updates))
   }
 
   const moveStep = (index: number, direction: "up" | "down") => {
@@ -118,9 +119,8 @@ export function InstructionStepEditor({ steps, onChange }: InstructionStepEditor
   }
 
   const updateInstruction = (stepIndex: number, instrIndex: number, instr: Instruction) => {
-    const step = steps[stepIndex]
     updateStep(stepIndex, {
-      instructions: step.instructions.map((inst, i) => i === instrIndex ? instr : inst),
+      instructions: updateAtIndex(steps[stepIndex].instructions, instrIndex, instr),
     })
   }
 

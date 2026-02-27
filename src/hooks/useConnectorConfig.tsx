@@ -11,6 +11,7 @@ import type {
 } from "@/lib/schemas"
 import { ConnectorDataSchema, AppStateSchema, PollerConfigSchema } from "@/lib/schemas"
 import { saveConfig, loadConfig, clearConfig } from "@/lib/persistence"
+import { updateAtIndex } from "@/lib/array-utils"
 
 interface ConnectorConfigContextValue {
   /** Combined view: active connector data + shared solution (backwards-compatible shape) */
@@ -89,11 +90,10 @@ export function ConnectorConfigProvider({ children }: { children: React.ReactNod
   // Helper to update the active connector
   const updateActiveConnector = React.useCallback(
     (updater: (prev: ConnectorData) => ConnectorData) => {
-      setAppState((prev) => {
-        const updated = [...prev.connectors]
-        updated[prev.activeConnectorIndex] = updater(updated[prev.activeConnectorIndex])
-        return { ...prev, connectors: updated }
-      })
+      setAppState((prev) => ({
+        ...prev,
+        connectors: updateAtIndex(prev.connectors, prev.activeConnectorIndex, updater(prev.connectors[prev.activeConnectorIndex])),
+      }))
     },
     [],
   )

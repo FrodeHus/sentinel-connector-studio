@@ -277,15 +277,15 @@ export function ApiTestDialog({
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
       if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("CORS")) {
-        setError(
-          isDev
-            ? "Request blocked by CORS policy. Run \"pnpm proxy\" in a separate terminal to start the local CORS proxy, then retry."
-            : "Request blocked by the browser's CORS policy. " +
-              "The API server does not include Access-Control-Allow-Origin headers, " +
-              "so the browser prevents the request for security reasons. " +
-              "You can work around this by using a browser extension like \"CORS Unblock\" or \"Allow CORS\", " +
-              "or by testing the API with a tool like curl or Postman.",
-        )
+          setError(
+            isDev
+              ? "Request blocked by CORS policy. Run \"pnpm proxy\" in a separate terminal to start the local CORS proxy, then retry."
+              : "Request blocked by the browser's CORS policy. " +
+                "The endpoint is either missing CORS response headers or not allowing this app's origin. " +
+                "From a browser, the API must explicitly allow cross-origin requests (including preflight OPTIONS when required) " +
+                "by returning the appropriate Access-Control-Allow-* headers. " +
+                "Until that is configured on the API side, the request cannot be completed from this page.",
+          )
       } else {
         setError(msg)
       }

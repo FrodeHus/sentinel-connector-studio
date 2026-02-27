@@ -2,16 +2,7 @@ import * as React from "react"
 import { useConnectorConfig } from "@/hooks/useConnectorConfig"
 import { useTheme } from "@/hooks/useTheme"
 import { PollerConfigSchema } from "@/lib/schemas"
-import type { ConnectorKind, ConnectorData } from "@/lib/schemas"
 import { Stepper, type StepInfo } from "./Stepper"
-import { StepBasics } from "./StepBasics"
-import { StepSchema } from "./StepSchema"
-import { StepDcr } from "./StepDcr"
-import { StepApiConfig } from "./StepApiConfig"
-import { StepConnectorUI } from "./StepConnectorUI"
-import { StepContent } from "./StepContent"
-import { StepSolution } from "./StepSolution"
-import { StepExport } from "./StepExport"
 import { ConnectorSidebar } from "./ConnectorSidebar"
 import { ArmTemplatePreview } from "@/components/preview/ArmTemplatePreview"
 import { ContentPreview } from "@/components/preview/ContentPreview"
@@ -42,123 +33,7 @@ import {
 } from "@/lib/naming"
 import { downloadProjectFile } from "@/lib/persistence";
 import { useWizardDialogs } from "./useWizardDialogs";
-
-interface StepDef {
-  id: string
-  label: string
-  group: string
-  component: React.ComponentType
-  isValid: (connectors: ConnectorData[], config: ReturnType<typeof useConnectorConfig>["config"]) => boolean
-  showSidebar: boolean
-  preview: "arm" | "content" | null
-  kinds?: ConnectorKind[]
-  badge?: string
-}
-
-const ALL_STEPS: StepDef[] = [
-  {
-    id: "basics",
-    label: "Basics",
-    group: "Connectors",
-    component: StepBasics,
-    isValid: (cs) =>
-      cs.every(
-        (c) =>
-          !!c.meta.connectorId &&
-          !!c.meta.title &&
-          !!c.meta.publisher &&
-          !!c.meta.descriptionMarkdown,
-      ),
-    showSidebar: true,
-    preview: "arm",
-  },
-  {
-    id: "api-config",
-    label: "API Config",
-    group: "Connectors",
-    component: StepApiConfig,
-    isValid: (cs) =>
-      cs.every((c) => {
-        if (c.meta.connectorKind !== "RestApiPoller") return true;
-        return (
-          !!c.pollerConfig?.request.apiEndpoint &&
-          (c.pollerConfig?.response.eventsJsonPaths?.length ?? 0) > 0
-        );
-      }),
-    showSidebar: true,
-    preview: "arm",
-    kinds: ["RestApiPoller"],
-  },
-  {
-    id: "schema",
-    label: "Schema",
-    group: "Connectors",
-    component: StepSchema,
-    isValid: (cs) =>
-      cs.every(
-        (c) =>
-          !!c.schema.tableName &&
-          c.schema.tableName.endsWith("_CL") &&
-          c.schema.columns.length >= 1,
-      ),
-    showSidebar: true,
-    preview: "arm",
-  },
-  {
-    id: "dcr",
-    label: "DCR",
-    group: "Connectors",
-    component: StepDcr,
-    isValid: (cs) =>
-      cs.every(
-        (c) =>
-          !!c.dataFlow.streamName &&
-          c.dataFlow.streamName.startsWith("Custom-") &&
-          !!c.dataFlow.transformKql,
-      ),
-    showSidebar: true,
-    preview: "arm",
-  },
-  {
-    id: "connector-ui",
-    label: "Connector UI",
-    group: "Connectors",
-    component: StepConnectorUI,
-    isValid: () => true,
-    showSidebar: true,
-    preview: "arm",
-  },
-  {
-    id: "content",
-    label: "Content",
-    group: "Solution",
-    component: StepContent,
-    isValid: () => true,
-    showSidebar: false,
-    preview: "content",
-  },
-  {
-    id: "solution",
-    label: "Solution",
-    group: "Solution",
-    component: StepSolution,
-    isValid: (_cs, config) =>
-      !!config.solution.publisherId &&
-      !!config.solution.offerId &&
-      !!config.solution.support.name,
-    showSidebar: false,
-    preview: null,
-  },
-  {
-    id: "export",
-    label: "Export",
-    group: "Solution",
-    component: StepExport,
-    isValid: () => true,
-    showSidebar: false,
-    preview: null,
-  },
-];
+import { ALL_STEPS } from "./step-definitions";
 
 interface ConnectorWizardProps {
   initialProjectUrl?: string;

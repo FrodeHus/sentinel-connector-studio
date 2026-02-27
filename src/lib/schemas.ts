@@ -326,14 +326,24 @@ export const ConnectorDataSchema = z.object({
 
 // --- Top-level app state (solution shared across connectors) ---
 
-export const AppStateSchema = z.object({
-  solution: SolutionSchema.default({}),
-  connectors: z.array(ConnectorDataSchema).default([ConnectorDataSchema.parse({})]),
-  activeConnectorIndex: z.number().default(0),
-  analyticRules: z.array(AnalyticRuleSchema).default([]),
-  asimParsers: z.array(AsimParserSchema).default([]),
-  workbooks: z.array(WorkbookSchema).default([]),
-})
+export const AppStateSchema = z
+  .object({
+    solution: SolutionSchema.default({}),
+    connectors: z.array(ConnectorDataSchema).min(1).default([ConnectorDataSchema.parse({})]),
+    activeConnectorIndex: z.number().int().nonnegative().default(0),
+    analyticRules: z.array(AnalyticRuleSchema).default([]),
+    asimParsers: z.array(AsimParserSchema).default([]),
+    workbooks: z.array(WorkbookSchema).default([]),
+  })
+  .superRefine((state, ctx) => {
+    if (state.activeConnectorIndex >= state.connectors.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["activeConnectorIndex"],
+        message: "Active connector index is out of range",
+      })
+    }
+  })
 
 // --- Inferred types ---
 

@@ -22,10 +22,10 @@ The UX is designed for users who may have no prior experience with ARM templates
 - **JSON schema inference** — paste a sample JSON event and the app auto-generates the table schema
 - **KQL transform editor** — syntax-highlighted editor with template snippets for common patterns
 - **Bundled content**
-   - **Analytic rules** — define [Scheduled and NRT analytic rules](https://learn.microsoft.com/en-us/azure/sentinel/create-analytics-rules) with entity mappings, MITRE ATT&CK tactics, and custom KQL queries
-   - **Hunting queries** — define [hunting queries](https://learn.microsoft.com/en-us/azure/sentinel/sentinel-hunting-rules-creation) with KQL, MITRE ATT&CK tactics/techniques, and required data connectors
-   - **ASIM parsers** — create [Advanced Security Information Model (ASIM) parsers](https://learn.microsoft.com/en-us/azure/sentinel/normalization-develop-parsers) to normalize your connector's data into standard schemas
-   - **Workbooks** — include [Azure Monitor Workbooks](https://learn.microsoft.com/en-us/azure/sentinel/monitor-your-data) by pasting gallery template JSON exported from the Azure portal
+  - **Analytic rules** — define [Scheduled and NRT analytic rules](https://learn.microsoft.com/en-us/azure/sentinel/create-analytics-rules) with entity mappings, MITRE ATT&CK tactics, and custom KQL queries
+  - **Hunting queries** — define [hunting queries](https://learn.microsoft.com/en-us/azure/sentinel/sentinel-hunting-rules-creation) with KQL, MITRE ATT&CK tactics/techniques, and required data connectors
+  - **ASIM parsers** — create [Advanced Security Information Model (ASIM) parsers](https://learn.microsoft.com/en-us/azure/sentinel/normalization-develop-parsers) to normalize your connector's data into standard schemas
+  - **Workbooks** — include [Azure Monitor Workbooks](https://learn.microsoft.com/en-us/azure/sentinel/monitor-your-data) by pasting gallery template JSON exported from the Azure portal
 - **Smart defaults** — table names, stream names, connectivity queries, permissions, and instruction steps are all auto-generated
 - **Session persistence** — your work is saved to `localStorage` so you can resume across sessions
 - **Save / Load projects** — export your project as a `.json` file, reload it later, or load from a URL

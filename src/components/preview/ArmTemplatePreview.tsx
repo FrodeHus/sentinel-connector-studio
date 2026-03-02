@@ -7,6 +7,7 @@ import { generateConnectorDefinition } from "@/lib/arm-resources/connector-def";
 import { generateDataConnector } from "@/lib/arm-resources/data-connector";
 import { connectorIdToDcrName } from "@/lib/naming";
 import { highlightJson } from "@/lib/highlight";
+import { SafeHtmlSpan } from "@/components/ui/safe-html";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -96,7 +97,7 @@ export function ArmTemplatePreview() {
             <code>{content[activeTab].split("\n").map((line, i) => (
               <div key={i} className="flex">
                 <span className="inline-block w-8 shrink-0 text-right pr-3 select-none text-muted-foreground/50">{i + 1}</span>
-                <span dangerouslySetInnerHTML={{ __html: highlightJson(line) || " " }} />
+                <SafeHtmlSpan html={highlightJson(line)} />
               </div>
             ))}</code>
           </pre>

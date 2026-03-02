@@ -185,7 +185,8 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [handleSaveProject, fileInputRef]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fileInputRef is a stable ref object
+  }, [handleSaveProject]);
 
   const steps: StepInfo[] = visibleSteps.map((step) => ({
     label: step.label,

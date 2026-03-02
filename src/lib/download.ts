@@ -15,6 +15,13 @@ import {
 
 const PACKAGER_URL = import.meta.env.VITE_PACKAGER_URL || "/api/packager";
 
+/** Create a subfolder inside a JSZip instance, throwing a descriptive error on failure. */
+function zipFolder(parent: JSZip, name: string): JSZip {
+  const folder = parent.folder(name)
+  if (!folder) throw new Error(`Failed to create ZIP folder: ${name}`)
+  return folder
+}
+
 function toSafeBaseName(value: string, fallback: string): string {
   const sanitized = value.replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_").replace(/^_+|_+$/g, "")
   return sanitized || fallback
@@ -84,8 +91,8 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
   const safeSolutionName = toSafeBaseName(solutionName, "MySolution")
   const zip = new JSZip();
 
-  const root = zip.folder(safeSolutionName)!;
-  const dataConnectorsFolder = root.folder("Data Connectors")!;
+  const root = zipFolder(zip, safeSolutionName);
+  const dataConnectorsFolder = zipFolder(root, "Data Connectors");
   const connectorPaths: string[] = [];
   const analyticRulePaths: string[] = [];
   const huntingQueryPaths: string[] = [];
@@ -99,9 +106,7 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
     const dcrName = connectorIdToDcrName(meta.connectorId, meta.connectorKind);
     const connectorBaseName = `${toSafeBaseName(meta.connectorId, "connector")}_ccf`
     const connectorFolderName = getUniqueName(connectorBaseName, usedConnectorFolderNames)
-    const connectorFolder = dataConnectorsFolder.folder(
-      connectorFolderName,
-    )!;
+    const connectorFolder = zipFolder(dataConnectorsFolder, connectorFolderName);
 
     connectorFolder.file(
       "table.json",
@@ -131,7 +136,7 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
 
   // Generate analytic rules
   if (analyticRules.length > 0) {
-    const rulesFolder = root.folder("Analytic Rules")!;
+    const rulesFolder = zipFolder(root, "Analytic Rules");
     const usedRuleNames = new Set<string>();
     for (const rule of analyticRules) {
       const baseName = toSafeBaseName(rule.name || rule.id, "analytic_rule");
@@ -143,7 +148,7 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
 
   // Generate ASIM parsers
   if (asimParsers.length > 0) {
-    const parsersFolder = root.folder("Parsers")!;
+    const parsersFolder = zipFolder(root, "Parsers");
     const usedParserNames = new Set<string>();
     for (const parser of asimParsers) {
       const baseName = toSafeBaseName(parser.name || parser.id, "parser");
@@ -155,7 +160,7 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
 
   // Generate hunting queries
   if (huntingQueries.length > 0) {
-    const huntingFolder = root.folder("Hunting Queries")!;
+    const huntingFolder = zipFolder(root, "Hunting Queries");
     const usedHuntingNames = new Set<string>();
     for (const query of huntingQueries) {
       const baseName = toSafeBaseName(query.name || query.id, "hunting_query");
@@ -167,7 +172,7 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
 
   // Generate workbooks
   if (workbooks.length > 0) {
-    const workbooksFolder = root.folder("Workbooks")!;
+    const workbooksFolder = zipFolder(root, "Workbooks");
     const usedWorkbookNames = new Set<string>();
     for (const workbook of workbooks) {
       const baseName = toSafeBaseName(workbook.name || workbook.id, "workbook");
@@ -178,7 +183,7 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
   }
 
   // Data folder with solution metadata
-  const dataFolder = root.folder("Data")!;
+  const dataFolder = zipFolder(root, "Data");
   const firstConnector = connectors[0];
   const solutionDataFile = {
     Name: solutionName,
@@ -228,7 +233,7 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
   return zip.generateAsync({ type: "blob" });
 }
 
-export async function downloadSolutionZip(appState: AppState) {
+export async function downloadSolutionZip(appState: AppState): Promise<void> {
   const solutionName =
     appState.solution.name || appState.connectors[0]?.meta.connectorId || "MySolution";
   const safeSolutionName = toSafeBaseName(solutionName, "MySolution")

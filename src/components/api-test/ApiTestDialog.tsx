@@ -3,6 +3,7 @@ import { useConnectorConfig } from "@/hooks/useConnectorConfig"
 import { extractByJsonPaths } from "@/lib/json-path"
 import { inferSchemaFromJson } from "@/lib/json-inferrer"
 import { highlightJson } from "@/lib/highlight"
+import { SafeHtmlSpan } from "@/components/ui/safe-html"
 import type { Column } from "@/lib/schemas"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -89,12 +90,7 @@ function JsonPreview({ json, label }: { json: string; label: string }) {
                 <span className="inline-block w-8 shrink-0 text-right pr-3 select-none text-muted-foreground/50">
                   {i + 1}
                 </span>
-                {/* highlightJson sanitizes output with DOMPurify */}
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: highlightJson(line) || " ",
-                  }}
-                />
+                <SafeHtmlSpan html={highlightJson(line)} />
               </div>
             ))}
           </code>

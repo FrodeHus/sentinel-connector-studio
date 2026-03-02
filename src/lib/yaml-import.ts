@@ -1,6 +1,7 @@
 import yaml from "js-yaml"
 import { AnalyticRuleSchema, HuntingQuerySchema, AsimParserSchema } from "@/lib/schemas"
 import type { AnalyticRule, HuntingQuery, AsimParser } from "@/lib/schemas"
+import { shorthandToIso } from "@/lib/duration-utils"
 
 const TRIGGER_OPERATOR_MAP: Record<string, AnalyticRule["triggerOperator"]> = {
   gt: "GreaterThan",
@@ -11,28 +12,6 @@ const TRIGGER_OPERATOR_MAP: Record<string, AnalyticRule["triggerOperator"]> = {
   lessthan: "LessThan",
   equal: "Equal",
   notequal: "NotEqual",
-}
-
-/**
- * Convert duration shorthand (1d, 7d, 5h, 30m) or ISO 8601 (PT5H, P1D) to ISO 8601.
- */
-function normalizeDuration(value: unknown): string {
-  if (typeof value !== "string") return ""
-  const trimmed = value.trim().toUpperCase()
-
-  // Already ISO 8601
-  if (/^P/.test(trimmed)) return trimmed
-
-  // Shorthand: e.g. "1d", "7d", "5h", "30m"
-  const match = trimmed.match(/^(\d+)\s*([DHMS])$/i)
-  if (match) {
-    const num = match[1]
-    const unit = match[2].toUpperCase()
-    if (unit === "D") return `P${num}D`
-    return `PT${num}${unit}`
-  }
-
-  return value
 }
 
 function normalizeTriggerOperator(value: unknown): AnalyticRule["triggerOperator"] {
@@ -89,8 +68,8 @@ export function parseAnalyticRuleYaml(yamlText: string): AnalyticRule {
     description: d.description != null ? cleanString(d.description) : undefined,
     severity: undefined,
     kind: undefined,
-    queryPeriod: d.queryPeriod != null ? normalizeDuration(d.queryPeriod) : undefined,
-    queryFrequency: d.queryFrequency != null ? normalizeDuration(d.queryFrequency) : undefined,
+    queryPeriod: d.queryPeriod != null ? shorthandToIso(d.queryPeriod) : undefined,
+    queryFrequency: d.queryFrequency != null ? shorthandToIso(d.queryFrequency) : undefined,
     triggerOperator: d.triggerOperator != null ? normalizeTriggerOperator(d.triggerOperator) : undefined,
     triggerThreshold: typeof d.triggerThreshold === "number" ? d.triggerThreshold : undefined,
     tactics: Array.isArray(d.tactics) ? d.tactics.filter((t): t is string => typeof t === "string") : undefined,

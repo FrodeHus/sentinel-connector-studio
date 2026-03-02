@@ -1,6 +1,5 @@
 import * as React from "react"
 import { useConnectorConfig } from "@/hooks/useConnectorConfig"
-import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -9,14 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { PasteImportDialog } from "@/components/ui/paste-import-dialog"
 import { Plus, ClipboardPaste } from "lucide-react"
 import type { AnalyticRule } from "@/lib/schemas"
 import { parseAnalyticRuleYaml } from "@/lib/yaml-import"
@@ -27,8 +19,6 @@ import type { AvailableConnector } from "./analytic-rules/types"
 export function AnalyticRulesEditor() {
   const { analyticRules, updateAnalyticRules, connectors } = useConnectorConfig()
   const [pasteDialogOpen, setPasteDialogOpen] = React.useState(false)
-  const [yamlText, setYamlText] = React.useState("")
-  const [parseError, setParseError] = React.useState("")
 
   const availableConnectors: AvailableConnector[] = connectors
     .filter((c) => c.meta.connectorId)
@@ -38,25 +28,13 @@ export function AnalyticRulesEditor() {
       label: c.meta.title || c.meta.connectorId,
     }))
 
-  const handleImportYaml = () => {
-    setParseError("")
-    try {
-      const rule = parseAnalyticRuleYaml(yamlText)
+  const handleImportYaml = React.useCallback(
+    (text: string) => {
+      const rule = parseAnalyticRuleYaml(text)
       updateAnalyticRules([...analyticRules, rule])
-      setYamlText("")
-      setPasteDialogOpen(false)
-    } catch (e) {
-      setParseError(e instanceof Error ? e.message : "Failed to parse YAML")
-    }
-  }
-
-  const handlePasteDialogClose = (open: boolean) => {
-    if (!open) {
-      setYamlText("")
-      setParseError("")
-    }
-    setPasteDialogOpen(open)
-  }
+    },
+    [analyticRules, updateAnalyticRules],
+  )
 
   const addRule = () => {
     const newRule: AnalyticRule = {
@@ -147,36 +125,14 @@ export function AnalyticRulesEditor() {
         ))}
       </Accordion>
 
-      <Dialog open={pasteDialogOpen} onOpenChange={handlePasteDialogClose}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Import Analytic Rule from YAML</DialogTitle>
-            <DialogDescription>
-              Paste a Sentinel analytic rule YAML definition. Fields like name, severity, query, tactics, and entity mappings will be imported automatically.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Textarea
-              placeholder={"id: ...\nname: My Detection Rule\nseverity: Medium\nkind: Scheduled\nquery: |\n  MyTable_CL\n  | where ..."}
-              rows={12}
-              value={yamlText}
-              onChange={(e) => setYamlText(e.target.value)}
-              className="font-mono text-sm"
-            />
-            {parseError && (
-              <p className="text-sm text-destructive">{parseError}</p>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => handlePasteDialogClose(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleImportYaml} disabled={!yamlText.trim()}>
-              Import
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <PasteImportDialog
+        open={pasteDialogOpen}
+        onOpenChange={setPasteDialogOpen}
+        onImport={handleImportYaml}
+        title="Import Analytic Rule from YAML"
+        description="Paste a Sentinel analytic rule YAML definition. Fields like name, severity, query, tactics, and entity mappings will be imported automatically."
+        placeholder={"id: ...\nname: My Detection Rule\nseverity: Medium\nkind: Scheduled\nquery: |\n  MyTable_CL\n  | where ..."}
+      />
     </div>
   )
 }

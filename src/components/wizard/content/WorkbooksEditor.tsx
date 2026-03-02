@@ -10,17 +10,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
+import { PasteImportDialog } from "@/components/ui/paste-import-dialog"
 import { Plus, Trash2, ClipboardPaste, RefreshCw } from "lucide-react"
 import type { Workbook } from "@/lib/schemas"
+import { updateAtIndex } from "@/lib/array-utils"
 
 function deriveTemplateId(name: string): string {
   const slug = name
@@ -44,57 +37,45 @@ export function WorkbooksEditor() {
   const { workbooks, updateWorkbooks } = useConnectorConfig()
   const [pasteDialogOpen, setPasteDialogOpen] = React.useState(false)
   const [pasteTarget, setPasteTarget] = React.useState<number | null>(null)
-  const [jsonText, setJsonText] = React.useState("")
-  const [parseError, setParseError] = React.useState("")
 
   const handlePasteDialogClose = (open: boolean) => {
     if (!open) {
-      setJsonText("")
-      setParseError("")
       setPasteTarget(null)
     }
     setPasteDialogOpen(open)
   }
 
-  const handleImportJson = () => {
-    setParseError("")
-    try {
-      const parsed = JSON.parse(jsonText)
+  const handleImportJson = React.useCallback(
+    (text: string) => {
+      const parsed = JSON.parse(text)
       if (typeof parsed !== "object" || parsed === null) {
-        setParseError("Invalid JSON: expected an object")
-        return
+        throw new Error("Invalid JSON: expected an object")
       }
 
       if (pasteTarget !== null) {
-        // Replace existing workbook JSON
-        const updated = [...workbooks]
-        updated[pasteTarget] = {
-          ...updated[pasteTarget],
-          serializedData: jsonText,
-          fromTemplateId: parsed.fromTemplateId || updated[pasteTarget].fromTemplateId,
-        }
-        updateWorkbooks(updated)
+        updateWorkbooks(
+          updateAtIndex(workbooks, pasteTarget, {
+            serializedData: text,
+            fromTemplateId: parsed.fromTemplateId || workbooks[pasteTarget].fromTemplateId,
+          }),
+        )
       } else {
-        // New workbook from pasted JSON
         const name = parsed.name || ""
         const newWorkbook: Workbook = {
           id: crypto.randomUUID(),
           name,
           description: "",
           fromTemplateId: parsed.fromTemplateId || deriveTemplateId(name),
-          serializedData: jsonText,
+          serializedData: text,
           version: parsed.version || "1.0",
         }
         updateWorkbooks([...workbooks, newWorkbook])
       }
 
-      setJsonText("")
       setPasteTarget(null)
-      setPasteDialogOpen(false)
-    } catch (e) {
-      setParseError(e instanceof Error ? e.message : "Failed to parse JSON")
-    }
-  }
+    },
+    [pasteTarget, workbooks, updateWorkbooks],
+  )
 
   const addWorkbook = () => {
     const newWorkbook: Workbook = {
@@ -131,7 +112,6 @@ export function WorkbooksEditor() {
 
   const openReplaceDialog = (index: number) => {
     setPasteTarget(index)
-    setJsonText(workbooks[index].serializedData)
     setPasteDialogOpen(true)
   }
 
@@ -285,41 +265,16 @@ export function WorkbooksEditor() {
         })}
       </Accordion>
 
-      <Dialog open={pasteDialogOpen} onOpenChange={handlePasteDialogClose}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              {pasteTarget !== null ? "Replace Workbook JSON" : "Import Workbook from JSON"}
-            </DialogTitle>
-            <DialogDescription>
-              Paste the gallery template JSON exported from an Azure Monitor Workbook.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Textarea
-              placeholder={'{\n  "$schema": "...",\n  "version": "Notebook/1.0",\n  "items": [...]\n}'}
-              rows={14}
-              value={jsonText}
-              onChange={(e) => setJsonText(e.target.value)}
-              className="font-mono text-sm"
-            />
-            {parseError && (
-              <p className="text-sm text-destructive">{parseError}</p>
-            )}
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => handlePasteDialogClose(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleImportJson} disabled={!jsonText.trim()}>
-              {pasteTarget !== null ? "Replace" : "Import"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <PasteImportDialog
+        open={pasteDialogOpen}
+        onOpenChange={handlePasteDialogClose}
+        onImport={handleImportJson}
+        title={pasteTarget !== null ? "Replace Workbook JSON" : "Import Workbook from JSON"}
+        description="Paste the gallery template JSON exported from an Azure Monitor Workbook."
+        placeholder={'{\n  "$schema": "...",\n  "version": "Notebook/1.0",\n  "items": [...]\n}'}
+        importLabel={pasteTarget !== null ? "Replace" : "Import"}
+        initialValue={pasteTarget !== null ? workbooks[pasteTarget]?.serializedData ?? "" : ""}
+      />
     </div>
   )
 }

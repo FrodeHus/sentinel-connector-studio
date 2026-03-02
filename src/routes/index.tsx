@@ -3,6 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ConnectorConfigProvider } from '@/hooks/useConnectorConfig'
 import { ThemeProvider } from '@/hooks/useTheme'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 interface ProjectSearchParams {
   project?: string;
@@ -44,20 +45,22 @@ const LazyConnectorWizard = React.lazy(() =>
 
 function ClientWizard({ projectUrl }: { projectUrl?: string }) {
   return (
-    <ThemeProvider>
-      <ConnectorConfigProvider>
-        <TooltipProvider>
-          <React.Suspense
-            fallback={
-              <div className="h-screen flex items-center justify-center">
-                <p className="text-muted-foreground">Loading wizard...</p>
-              </div>
-            }
-          >
-            <LazyConnectorWizard initialProjectUrl={projectUrl} />
-          </React.Suspense>
-        </TooltipProvider>
-      </ConnectorConfigProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <ConnectorConfigProvider>
+          <TooltipProvider>
+            <React.Suspense
+              fallback={
+                <div className="h-screen flex items-center justify-center">
+                  <p className="text-muted-foreground">Loading wizard...</p>
+                </div>
+              }
+            >
+              <LazyConnectorWizard initialProjectUrl={projectUrl} />
+            </React.Suspense>
+          </TooltipProvider>
+        </ConnectorConfigProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

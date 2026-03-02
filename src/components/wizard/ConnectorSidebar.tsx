@@ -1,5 +1,14 @@
+import * as React from "react"
 import type { ConnectorData } from "@/lib/schemas"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Plus, Trash2 } from "lucide-react"
 
 interface ConnectorSidebarProps {
@@ -17,6 +26,8 @@ export function ConnectorSidebar({
   onAdd,
   onRemove,
 }: ConnectorSidebarProps) {
+  const [confirmRemoveIndex, setConfirmRemoveIndex] = React.useState<number | null>(null)
+
   return (
     <div className="w-60 shrink-0 bg-transparent flex flex-col px-3 py-4">
       <div className="px-1 py-2">
@@ -72,11 +83,7 @@ export function ConnectorSidebar({
             </button>
             {connectors.length > 1 && (
               <button
-                onClick={() => {
-                  if (confirm("Remove this connector?")) {
-                    onRemove(index)
-                  }
-                }}
+                onClick={() => setConfirmRemoveIndex(index)}
                 title="Remove connector"
                 className={`
                   opacity-0 group-hover:opacity-100
@@ -106,6 +113,40 @@ export function ConnectorSidebar({
           New Connector
         </Button>
       </div>
+
+      <Dialog
+        open={confirmRemoveIndex !== null}
+        onOpenChange={(open) => { if (!open) setConfirmRemoveIndex(null) }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove connector</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove{" "}
+              {confirmRemoveIndex !== null
+                ? connectors[confirmRemoveIndex]?.meta.title || `Connector ${confirmRemoveIndex + 1}`
+                : "this connector"}
+              ? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmRemoveIndex(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (confirmRemoveIndex !== null) {
+                  onRemove(confirmRemoveIndex)
+                  setConfirmRemoveIndex(null)
+                }
+              }}
+            >
+              Remove
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

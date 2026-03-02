@@ -1,32 +1,12 @@
 import yaml from "js-yaml"
 import type { AnalyticRule, HuntingQuery, AsimParser, Workbook } from "./schemas"
+import { isoToShorthand } from "./duration-utils"
 
 const TRIGGER_OPERATOR_SHORTHAND: Record<AnalyticRule["triggerOperator"], string> = {
   GreaterThan: "gt",
   LessThan: "lt",
   Equal: "eq",
   NotEqual: "ne",
-}
-
-/**
- * Convert ISO 8601 duration (PT5H, P1D, PT30M) to Sentinel shorthand (5h, 1d, 30m).
- * Falls through to the original value if the pattern isn't recognised.
- */
-function formatDuration(iso: string): string {
-  const upper = iso.toUpperCase()
-  // P<n>D
-  const days = upper.match(/^P(\d+)D$/)
-  if (days) return `${days[1]}d`
-  // PT<n>H
-  const hours = upper.match(/^PT(\d+)H$/)
-  if (hours) return `${hours[1]}h`
-  // PT<n>M
-  const minutes = upper.match(/^PT(\d+)M$/)
-  if (minutes) return `${minutes[1]}m`
-  // PT<n>S
-  const seconds = upper.match(/^PT(\d+)S$/)
-  if (seconds) return `${seconds[1]}s`
-  return iso
 }
 
 export function generateAnalyticRuleYaml(rule: AnalyticRule): string {
@@ -43,8 +23,8 @@ export function generateAnalyticRuleYaml(rule: AnalyticRule): string {
   }
 
   if (rule.kind === "Scheduled") {
-    doc.queryPeriod = formatDuration(rule.queryPeriod ?? "")
-    doc.queryFrequency = formatDuration(rule.queryFrequency ?? "")
+    doc.queryPeriod = isoToShorthand(rule.queryPeriod ?? "")
+    doc.queryFrequency = isoToShorthand(rule.queryFrequency ?? "")
   }
 
   doc.triggerOperator = TRIGGER_OPERATOR_SHORTHAND[rule.triggerOperator] ?? rule.triggerOperator
@@ -133,7 +113,16 @@ export function generateWorkbookJson(workbook: Workbook): string {
   let parsed: Record<string, unknown> = {}
   if (workbook.serializedData) {
     try {
-      parsed = JSON.parse(workbook.serializedData)
+      const raw: unknown = JSON.parse(workbook.serializedData)
+      if (raw != null && typeof raw === "object" && !Array.isArray(raw)) {
+        // Only accept plain object keys — reject prototype-polluting keys
+        const safe: Record<string, unknown> = {}
+        for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+          if (k === "__proto__" || k === "constructor" || k === "prototype") continue
+          safe[k] = v
+        }
+        parsed = safe
+      }
     } catch {
       parsed = {}
     }

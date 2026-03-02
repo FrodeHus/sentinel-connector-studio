@@ -12,14 +12,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { PasteImportDialog } from "@/components/ui/paste-import-dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2, ClipboardPaste } from "lucide-react"
 import type { HuntingQuery } from "@/lib/schemas"
@@ -35,8 +28,6 @@ export function HuntingQueriesEditor() {
     updateHuntingQueries,
   } = useConnectorConfig()
   const [pasteDialogOpen, setPasteDialogOpen] = React.useState(false)
-  const [yamlText, setYamlText] = React.useState("")
-  const [parseError, setParseError] = React.useState("")
 
   const availableConnectors = React.useMemo<AvailableConnector[]>(
     () =>
@@ -82,25 +73,13 @@ export function HuntingQueriesEditor() {
     updateHuntingQueries(huntingQueries.filter((_, i) => i !== index))
   }
 
-  const handleImportYaml = () => {
-    setParseError("")
-    try {
-      const query = parseHuntingQueryYaml(yamlText)
+  const handleImportYaml = React.useCallback(
+    (text: string) => {
+      const query = parseHuntingQueryYaml(text)
       updateHuntingQueries([...huntingQueries, query])
-      setYamlText("")
-      setPasteDialogOpen(false)
-    } catch (e) {
-      setParseError(e instanceof Error ? e.message : "Failed to parse YAML")
-    }
-  }
-
-  const handlePasteDialogClose = (open: boolean) => {
-    if (!open) {
-      setYamlText("")
-      setParseError("")
-    }
-    setPasteDialogOpen(open)
-  }
+    },
+    [huntingQueries, updateHuntingQueries],
+  )
 
   return (
     <div className="space-y-4">
@@ -252,36 +231,14 @@ export function HuntingQueriesEditor() {
         ))}
       </Accordion>
 
-      <Dialog open={pasteDialogOpen} onOpenChange={handlePasteDialogClose}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Import Hunting Query from YAML</DialogTitle>
-            <DialogDescription>
-              Paste a Sentinel hunting query YAML definition. The name, description, tactics, techniques, and query fields will be imported.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Textarea
-              placeholder={"id: ...\nname: Suspicious Activity Hunt\nquery: |\n  MyTable_CL\n  | where ..."}
-              rows={12}
-              value={yamlText}
-              onChange={(e) => setYamlText(e.target.value)}
-              className="font-mono text-sm"
-            />
-            {parseError && (
-              <p className="text-sm text-destructive">{parseError}</p>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => handlePasteDialogClose(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleImportYaml} disabled={!yamlText.trim()}>
-              Import
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <PasteImportDialog
+        open={pasteDialogOpen}
+        onOpenChange={setPasteDialogOpen}
+        onImport={handleImportYaml}
+        title="Import Hunting Query from YAML"
+        description="Paste a Sentinel hunting query YAML definition. The name, description, tactics, techniques, and query fields will be imported."
+        placeholder={"id: ...\nname: Suspicious Activity Hunt\nquery: |\n  MyTable_CL\n  | where ..."}
+      />
     </div>
   )
 }

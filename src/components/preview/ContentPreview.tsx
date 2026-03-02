@@ -1,5 +1,4 @@
 import * as React from "react"
-import DOMPurify from "dompurify"
 import { useConnectorConfig } from "@/hooks/useConnectorConfig"
 import { CONFIG } from "@/config"
 import {
@@ -12,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Copy, Check } from "lucide-react"
+import { SafeHtmlSpan } from "@/components/ui/safe-html"
 
 function highlightYaml(line: string): string {
   // Comment lines
@@ -170,13 +170,9 @@ export function ContentPreview() {
     )
   }
 
-  const highlightedLines = previewContent.split("\n").map((line) => {
-    const html = isJsonPreview ? escapeHtml(line) : highlightYaml(line)
-    return DOMPurify.sanitize(html, {
-      ALLOWED_TAGS: ["span"],
-      ALLOWED_ATTR: ["class"],
-    })
-  })
+  const highlightedLines = previewContent.split("\n").map((line) =>
+    isJsonPreview ? escapeHtml(line) : highlightYaml(line)
+  )
 
   return (
     <Tabs value={activeTabId ?? ""} onValueChange={setActiveTabId}>
@@ -222,7 +218,7 @@ export function ContentPreview() {
                   <span className="inline-block w-8 shrink-0 text-right pr-3 select-none text-muted-foreground/50">
                     {i + 1}
                   </span>
-                  <span dangerouslySetInnerHTML={{ __html: html || " " }} />
+                  <SafeHtmlSpan html={html} />
                 </div>
               ))}
             </code>

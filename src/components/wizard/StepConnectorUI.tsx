@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select"
 import { Plus, Trash2 } from "lucide-react"
 import type { InstructionStep } from "@/lib/schemas";
+import { updateAtIndex } from "@/lib/array-utils";
 import {
   generateDefaultGraphQueries,
   generateDefaultSampleQueries,
@@ -130,30 +131,24 @@ export function StepConnectorUI() {
                       <Input
                         placeholder="Metric name"
                         value={gq.metricName}
-                        onChange={(e) => {
-                          const updated = [...connectorUI.graphQueries];
-                          updated[i] = { ...gq, metricName: e.target.value };
-                          updateConnectorUI({ graphQueries: updated });
-                        }}
+                        onChange={(e) =>
+                          updateConnectorUI({ graphQueries: updateAtIndex(connectorUI.graphQueries, i, { metricName: e.target.value }) })
+                        }
                         className="text-sm"
                       />
                       <Input
                         placeholder="Legend"
                         value={gq.legend}
-                        onChange={(e) => {
-                          const updated = [...connectorUI.graphQueries];
-                          updated[i] = { ...gq, legend: e.target.value };
-                          updateConnectorUI({ graphQueries: updated });
-                        }}
+                        onChange={(e) =>
+                          updateConnectorUI({ graphQueries: updateAtIndex(connectorUI.graphQueries, i, { legend: e.target.value }) })
+                        }
                         className="text-sm"
                       />
                       <KqlEditor
                         value={gq.baseQuery}
-                        onChange={(val) => {
-                          const updated = [...connectorUI.graphQueries];
-                          updated[i] = { ...gq, baseQuery: val };
-                          updateConnectorUI({ graphQueries: updated });
-                        }}
+                        onChange={(val) =>
+                          updateConnectorUI({ graphQueries: updateAtIndex(connectorUI.graphQueries, i, { baseQuery: val }) })
+                        }
                         height="60px"
                         showSnippets={false}
                         mode="full"
@@ -207,20 +202,16 @@ export function StepConnectorUI() {
                       <Input
                         placeholder="Description"
                         value={sq.description}
-                        onChange={(e) => {
-                          const updated = [...connectorUI.sampleQueries];
-                          updated[i] = { ...sq, description: e.target.value };
-                          updateConnectorUI({ sampleQueries: updated });
-                        }}
+                        onChange={(e) =>
+                          updateConnectorUI({ sampleQueries: updateAtIndex(connectorUI.sampleQueries, i, { description: e.target.value }) })
+                        }
                         className="text-sm"
                       />
                       <KqlEditor
                         value={sq.query}
-                        onChange={(val) => {
-                          const updated = [...connectorUI.sampleQueries];
-                          updated[i] = { ...sq, query: val };
-                          updateConnectorUI({ sampleQueries: updated });
-                        }}
+                        onChange={(val) =>
+                          updateConnectorUI({ sampleQueries: updateAtIndex(connectorUI.sampleQueries, i, { query: val }) })
+                        }
                         height="80px"
                         showSnippets={false}
                         mode="full"
@@ -247,14 +238,14 @@ export function StepConnectorUI() {
                       <div className="flex items-center gap-2">
                         <Select
                           value={cc.type}
-                          onValueChange={(v) => {
-                            const updated = [...connectorUI.connectivityCriteria];
-                            updated[i] = {
-                              type: v,
-                              value: v === "HasDataConnectors" ? [] : cc.value,
-                            };
-                            updateConnectorUI({ connectivityCriteria: updated });
-                          }}
+                          onValueChange={(v) =>
+                            updateConnectorUI({
+                              connectivityCriteria: updateAtIndex(connectorUI.connectivityCriteria, i, {
+                                type: v,
+                                value: v === "HasDataConnectors" ? [] : cc.value,
+                              }),
+                            })
+                          }
                         >
                           <SelectTrigger className="h-8 text-xs flex-1">
                             <SelectValue />
@@ -287,11 +278,11 @@ export function StepConnectorUI() {
                       {cc.type === "IsConnectedQuery" && (
                         <KqlEditor
                           value={cc.value.join("\n")}
-                          onChange={(val) => {
-                            const updated = [...connectorUI.connectivityCriteria];
-                            updated[i] = { ...cc, value: [val] };
-                            updateConnectorUI({ connectivityCriteria: updated });
-                          }}
+                          onChange={(val) =>
+                            updateConnectorUI({
+                              connectivityCriteria: updateAtIndex(connectorUI.connectivityCriteria, i, { value: [val] }),
+                            })
+                          }
                           height="80px"
                           showSnippets={false}
                           mode="full"
@@ -386,9 +377,12 @@ export function StepConnectorUI() {
                     </div>
                     {connectorUI.permissions.resourceProvider.map((rp, i) => {
                       const updateRp = (patch: Partial<typeof rp>) => {
-                        const updated = [...connectorUI.permissions.resourceProvider];
-                        updated[i] = { ...rp, ...patch };
-                        updateConnectorUI({ permissions: { ...connectorUI.permissions, resourceProvider: updated } });
+                        updateConnectorUI({
+                          permissions: {
+                            ...connectorUI.permissions,
+                            resourceProvider: updateAtIndex(connectorUI.permissions.resourceProvider, i, patch),
+                          },
+                        });
                       };
                       return (
                         <Card key={i} className="mb-2">
@@ -538,21 +532,27 @@ export function StepConnectorUI() {
                           <Input
                             placeholder="Name (e.g. Microsoft Entra application)"
                             value={cp.name}
-                            onChange={(e) => {
-                              const updated = [...connectorUI.permissions.customs];
-                              updated[i] = { ...cp, name: e.target.value };
-                              updateConnectorUI({ permissions: { ...connectorUI.permissions, customs: updated } });
-                            }}
+                            onChange={(e) =>
+                              updateConnectorUI({
+                                permissions: {
+                                  ...connectorUI.permissions,
+                                  customs: updateAtIndex(connectorUI.permissions.customs, i, { name: e.target.value }),
+                                },
+                              })
+                            }
                             className="text-xs"
                           />
                           <Input
                             placeholder="Description"
                             value={cp.description}
-                            onChange={(e) => {
-                              const updated = [...connectorUI.permissions.customs];
-                              updated[i] = { ...cp, description: e.target.value };
-                              updateConnectorUI({ permissions: { ...connectorUI.permissions, customs: updated } });
-                            }}
+                            onChange={(e) =>
+                              updateConnectorUI({
+                                permissions: {
+                                  ...connectorUI.permissions,
+                                  customs: updateAtIndex(connectorUI.permissions.customs, i, { description: e.target.value }),
+                                },
+                              })
+                            }
                             className="text-xs"
                           />
                         </CardContent>

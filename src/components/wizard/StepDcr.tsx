@@ -101,7 +101,7 @@ export function StepDcr() {
               )}
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2" data-tutorial="kql-editor">
             <Label>Transform KQL *</Label>
             <KqlEditor
               value={dataFlow.transformKql}

@@ -12,7 +12,7 @@ export function StepContent() {
   const [activeTab, setActiveTab] = React.useState("rules")
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-tutorial="content-section">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="rules">

@@ -68,6 +68,7 @@ export function StepSchema() {
             </p>
           </div>
 
+          <div data-tutorial="column-editor" className="space-y-4">
           <div className="flex items-center justify-between">
             <Label>Columns</Label>
             <Button variant="outline" size="sm" onClick={handleOpenPasteDialog}>
@@ -79,6 +80,7 @@ export function StepSchema() {
             columns={schema.columns}
             onChange={handleColumnsChange}
           />
+          </div>
         </CardContent>
       </Card>
 

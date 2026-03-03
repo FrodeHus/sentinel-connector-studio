@@ -50,6 +50,7 @@ export function StepBasics() {
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
+              data-tutorial="kind-Push"
               onClick={() => updateMeta({ connectorKind: "Push" })}
               className={`p-4 rounded-lg border-2 text-left transition-all cursor-pointer ${
                 meta.connectorKind !== "RestApiPoller"
@@ -64,6 +65,7 @@ export function StepBasics() {
             </button>
             <button
               type="button"
+              data-tutorial="kind-RestApiPoller"
               onClick={() => updateMeta({ connectorKind: "RestApiPoller" })}
               className={`p-4 rounded-lg border-2 text-left transition-all cursor-pointer ${
                 meta.connectorKind === "RestApiPoller"

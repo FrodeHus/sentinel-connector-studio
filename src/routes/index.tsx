@@ -2,6 +2,7 @@ import * as React from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { ConnectorConfigProvider } from '@/hooks/useConnectorConfig'
 import { ThemeProvider } from '@/hooks/useTheme'
+import { TutorialProvider } from '@/hooks/useTutorial'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 
@@ -48,6 +49,7 @@ function ClientWizard({ projectUrl }: { projectUrl?: string }) {
     <ErrorBoundary>
       <ThemeProvider>
         <ConnectorConfigProvider>
+          <TutorialProvider>
           <TooltipProvider>
             <React.Suspense
               fallback={
@@ -59,6 +61,7 @@ function ClientWizard({ projectUrl }: { projectUrl?: string }) {
               <LazyConnectorWizard initialProjectUrl={projectUrl} />
             </React.Suspense>
           </TooltipProvider>
+          </TutorialProvider>
         </ConnectorConfigProvider>
       </ThemeProvider>
     </ErrorBoundary>

@@ -66,7 +66,7 @@ export function StepConnectorUI() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-tutorial="connector-ui-section">
       {needsAutoGenerate && (
         <Card className="border-dashed">
           <CardContent className="pt-6 text-center">

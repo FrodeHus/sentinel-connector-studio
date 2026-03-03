@@ -77,7 +77,7 @@ export function StepApiConfig() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Auth Type</Label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-3 gap-2" data-tutorial="auth-type">
                       {(["Basic", "APIKey", "OAuth2"] as const).map((type) => (
                         <button
                           key={type}
@@ -402,6 +402,7 @@ export function StepApiConfig() {
                   <div className="space-y-2">
                     <Label className="text-xs">API Endpoint *</Label>
                     <Input
+                      id="apiEndpoint"
                       value={pc.request.apiEndpoint}
                       onChange={(e) =>
                         update((prev) => ({
@@ -417,7 +418,7 @@ export function StepApiConfig() {
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
+                    <div className="space-y-2" data-tutorial="http-method">
                       <Label className="text-xs">HTTP Method</Label>
                       <Select
                         value={pc.request.httpMethod}
@@ -656,7 +657,7 @@ export function StepApiConfig() {
               <AccordionTrigger>Response</AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-4">
-                  <div className="space-y-2">
+                  <div className="space-y-2" data-tutorial="events-json-paths">
                     <Label className="text-xs">Events JSON Paths *</Label>
                     <Input
                       value={pc.response.eventsJsonPaths.join(", ")}
@@ -818,7 +819,7 @@ export function StepApiConfig() {
               <AccordionTrigger>Paging</AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-4">
-                  <div className="space-y-2">
+                  <div className="space-y-2" data-tutorial="paging-type">
                     <Label className="text-xs">Paging Type</Label>
                     <Select
                       value={pc.paging.pagingType}

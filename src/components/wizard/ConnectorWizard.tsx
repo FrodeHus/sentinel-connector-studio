@@ -1,6 +1,7 @@
 import * as React from "react"
 import { useConnectorConfig } from "@/hooks/useConnectorConfig"
 import { useTheme } from "@/hooks/useTheme"
+import { useTutorial } from "@/hooks/useTutorial"
 import { PollerConfigSchema } from "@/lib/schemas"
 import { Stepper, type StepInfo } from "./Stepper"
 import { ConnectorSidebar } from "./ConnectorSidebar"
@@ -36,6 +37,8 @@ import {
 import { downloadProjectFile } from "@/lib/persistence";
 import { useWizardDialogs } from "./useWizardDialogs";
 import { ALL_STEPS } from "./step-definitions";
+import { TutorialButton } from "@/components/tutorial/TutorialButton";
+import type { NavigateToStepFn } from "@/lib/tutorial/tour-engine";
 
 interface ConnectorWizardProps {
   initialProjectUrl?: string;
@@ -65,6 +68,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
     workbooks,
   } = useConnectorConfig();
   const { theme, toggleTheme } = useTheme();
+  const { registerNavigator } = useTutorial();
   const [mode, setMode] = React.useState<WizardMode>("connector");
   const [currentStepByMode, setCurrentStepByMode] = React.useState<Record<WizardMode, number>>({
     connector: 0,
@@ -188,6 +192,30 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- fileInputRef is a stable ref object
   }, [handleSaveProject]);
 
+  // Register tutorial navigator
+  React.useEffect(() => {
+    const navigateToStep: NavigateToStepFn = (targetMode, stepId) => {
+      setMode(targetMode);
+      const targetSteps = targetMode === "connector" ? connectorSteps : solutionSteps;
+      const idx = targetSteps.findIndex((s) => s.id === stepId);
+      if (idx >= 0) {
+        setCurrentStepByMode((prev) => ({ ...prev, [targetMode]: idx }));
+      }
+    };
+    registerNavigator(navigateToStep);
+  }, [registerNavigator, connectorSteps, solutionSteps]);
+
+  // Handler for tutorial reset-and-start
+  const handleTutorialStart = React.useCallback(
+    (_kind: "Push" | "RestApiPoller") => {
+      reset();
+      setMode("connector");
+      setCurrentStepByMode({ connector: 0, solution: 0 });
+      setVisitedStepIds(new Set());
+    },
+    [reset],
+  );
+
   const steps: StepInfo[] = visibleSteps.map((step) => ({
     label: step.label,
     group: step.group,
@@ -267,6 +295,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
             </p>
           </div>
           <div className="flex items-center gap-1">
+            <TutorialButton onResetAndStart={handleTutorialStart} />
             <a
               href="https://github.com/FrodeHus/sentinel-connector-studio"
               target="_blank"

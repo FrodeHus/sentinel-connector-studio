@@ -291,3 +291,107 @@ body {
 .dark .cm-editor .cm-lintRange-warning {
   text-decoration: underline wavy #fbbf24;
 }
+
+/* ── driver.js tutorial overrides ────────────────────── */
+.driver-popover.tutorial-popover {
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 360px;
+}
+
+.driver-popover.tutorial-popover .driver-popover-title {
+  color: var(--popover-foreground);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.driver-popover.tutorial-popover .driver-popover-description {
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.driver-popover.tutorial-popover .driver-popover-close-btn {
+  color: var(--muted-foreground);
+}
+.driver-popover.tutorial-popover .driver-popover-close-btn:hover {
+  color: var(--popover-foreground);
+}
+
+.driver-popover.tutorial-popover .driver-popover-arrow {
+  border-color: var(--popover);
+}
+.driver-popover.tutorial-popover .driver-popover-arrow-side-left {
+  border-right-color: var(--popover);
+}
+.driver-popover.tutorial-popover .driver-popover-arrow-side-right {
+  border-left-color: var(--popover);
+}
+.driver-popover.tutorial-popover .driver-popover-arrow-side-top {
+  border-bottom-color: var(--popover);
+}
+.driver-popover.tutorial-popover .driver-popover-arrow-side-bottom {
+  border-top-color: var(--popover);
+}
+
+.driver-popover.tutorial-popover .driver-popover-footer {
+  display: none;
+}
+
+.tutorial-custom-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem 0.25rem;
+}
+
+.driver-popover-next-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: calc(var(--radius) - 4px);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  margin-left: auto;
+}
+.driver-popover-next-btn:hover {
+  opacity: 0.9;
+}
+
+/* ── Tutorial validation badge ──────────────────────── */
+.tutorial-validation-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: #22c55e;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.tutorial-checkmark {
+  width: 18px;
+  height: 18px;
+}
+
+.tutorial-checkmark-path {
+  stroke-dasharray: 30;
+  stroke-dashoffset: 30;
+  animation: tutorial-checkmark-draw 0.4s ease forwards;
+}
+
+@keyframes tutorial-checkmark-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}

@@ -74,6 +74,7 @@ export function createTourEngine(
       if (nextBtn) nextBtn.style.display = valid ? "inline-flex" : "none"
     }
 
+    el.focus()
     updateValidation()
 
     el.addEventListener("input", updateValidation)

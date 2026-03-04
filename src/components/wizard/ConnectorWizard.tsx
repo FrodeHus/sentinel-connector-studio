@@ -39,6 +39,7 @@ import { useWizardDialogs } from "./useWizardDialogs";
 import { ALL_STEPS } from "./step-definitions";
 import { TutorialButton } from "@/components/tutorial/TutorialButton";
 import type { NavigateToStepFn } from "@/lib/tutorial/tour-engine";
+import type { ConnectorKind } from "@/lib/schemas";
 
 interface ConnectorWizardProps {
   initialProjectUrl?: string;
@@ -207,7 +208,7 @@ export function ConnectorWizard({ initialProjectUrl }: ConnectorWizardProps) {
 
   // Handler for tutorial reset-and-start
   const handleTutorialStart = React.useCallback(
-    (_kind: "Push" | "RestApiPoller") => {
+    (_kind: ConnectorKind) => {
       reset();
       setMode("connector");
       setCurrentStepByMode({ connector: 0, solution: 0 });

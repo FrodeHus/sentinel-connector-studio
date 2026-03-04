@@ -1,20 +1,20 @@
 import * as React from "react"
 import type { Driver } from "driver.js"
-import type { TourDefinition } from "@/lib/tutorial/types"
+import type { TourDefinition, TourId } from "@/lib/tutorial/types"
 import { createTourEngine, type NavigateToStepFn } from "@/lib/tutorial/tour-engine"
 import { pushTour } from "@/lib/tutorial/push-tour"
 import { pollerTour } from "@/lib/tutorial/poller-tour"
 
 interface TutorialContextValue {
   isRunning: boolean
-  startTour: (tourId: "push" | "poller") => void
+  startTour: (tourId: TourId) => void
   stopTour: () => void
   registerNavigator: (fn: NavigateToStepFn) => void
 }
 
 const TutorialContext = React.createContext<TutorialContextValue | null>(null)
 
-const tours: Record<string, TourDefinition> = {
+const tours: Record<TourId, TourDefinition> = {
   push: pushTour,
   poller: pollerTour,
 }
@@ -37,7 +37,7 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const startTour = React.useCallback(
-    (tourId: "push" | "poller") => {
+    (tourId: TourId) => {
       // Stop any existing tour
       if (driverRef.current) {
         driverRef.current.destroy()
@@ -66,9 +66,6 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
         requestAnimationFrame(() => {
           const driverInstance = createTourEngine(tour, {
             navigateToStep: navigate,
-            onComplete: () => {
-              setIsRunning(false)
-            },
             onDestroy: () => {
               driverRef.current = null
               setIsRunning(false)

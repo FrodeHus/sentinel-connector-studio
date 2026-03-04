@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button"
 import { GraduationCap } from "lucide-react"
 import { useTutorial } from "@/hooks/useTutorial"
 import { TutorialPickerDialog } from "./TutorialPickerDialog"
+import type { ConnectorKind } from "@/lib/schemas"
 
 interface TutorialButtonProps {
-  onResetAndStart: (kind: "Push" | "RestApiPoller") => void
+  onResetAndStart: (kind: ConnectorKind) => void
 }
 
 export function TutorialButton({ onResetAndStart }: TutorialButtonProps) {
@@ -24,8 +25,8 @@ export function TutorialButton({ onResetAndStart }: TutorialButtonProps) {
         <GraduationCap className="w-4 h-4" />
       </Button>
       <TutorialPickerDialog
-        isOpen={dialogOpen}
-        onClose={() => setDialogOpen(false)}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
         onResetAndStart={onResetAndStart}
       />
     </>

@@ -2,40 +2,38 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { useTutorial } from "@/hooks/useTutorial"
 import { Upload, Radio } from "lucide-react"
+import type { ConnectorKind } from "@/lib/schemas"
 
 interface TutorialPickerDialogProps {
-  isOpen: boolean
-  onClose: () => void
-  onResetAndStart: (kind: "Push" | "RestApiPoller") => void
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onResetAndStart: (kind: ConnectorKind) => void
 }
 
 export function TutorialPickerDialog({
-  isOpen,
-  onClose,
+  open,
+  onOpenChange,
   onResetAndStart,
 }: TutorialPickerDialogProps) {
   const { startTour } = useTutorial()
 
   const handleSelect = (tourId: "push" | "poller") => {
-    onClose()
-    const kind = tourId === "push" ? "Push" as const : "RestApiPoller" as const
+    onOpenChange(false)
+    const kind: ConnectorKind = tourId === "push" ? "Push" : "RestApiPoller"
     onResetAndStart(kind)
-    // Start tour after reset + navigation settles
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        startTour(tourId)
-      })
-    })
+    // startTour already has its own double-rAF for DOM settle
+    startTour(tourId)
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Choose a Tutorial</DialogTitle>
@@ -78,11 +76,11 @@ export function TutorialPickerDialog({
             </div>
           </button>
         </div>
-        <div className="flex justify-end pt-2">
-          <Button variant="outline" size="sm" onClick={onClose}>
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

@@ -1,3 +1,7 @@
+import type { ConnectorKind } from "@/lib/schemas"
+
+export type TourId = "push" | "poller"
+
 export interface TourStop {
   id: string
   elementSelector: string
@@ -11,9 +15,9 @@ export interface TourStop {
 }
 
 export interface TourDefinition {
-  id: string
+  id: TourId
   label: string
   description: string
-  connectorKind: "Push" | "RestApiPoller"
+  connectorKind: ConnectorKind
   stops: TourStop[]
 }

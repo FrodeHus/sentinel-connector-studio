@@ -10,7 +10,6 @@ export type NavigateToStepFn = (
 
 interface TourEngineCallbacks {
   navigateToStep: NavigateToStepFn
-  onComplete: () => void
   onDestroy: () => void
 }
 
@@ -34,49 +33,54 @@ function createCheckmarkElement(): HTMLElement {
   return svg as unknown as HTMLElement
 }
 
-let activeCleanup: (() => void) | null = null
-
-function cleanupListener() {
-  if (activeCleanup) {
-    activeCleanup()
-    activeCleanup = null
-  }
-}
-
-function attachFieldListener(stop: TourStop) {
-  cleanupListener()
-
-  if (stop.expectedValue === null) return
-
-  const el = document.querySelector(stop.elementSelector) as HTMLInputElement | HTMLTextAreaElement | null
-  if (!el) return
-
-  const updateValidation = () => {
-    const valid = validateStopValue(stop, el.value)
-    const footer = document.querySelector(".tutorial-custom-footer")
-    if (!footer) return
-
-    const badge = footer.querySelector(".tutorial-validation-badge") as HTMLElement | null
-    const nextBtn = footer.querySelector(".driver-popover-next-btn") as HTMLElement | null
-
-    if (badge) badge.style.display = valid ? "flex" : "none"
-    if (nextBtn) nextBtn.style.display = valid ? "inline-flex" : "none"
-  }
-
-  // Check current value immediately
-  updateValidation()
-
-  el.addEventListener("input", updateValidation)
-  activeCleanup = () => {
-    el.removeEventListener("input", updateValidation)
-  }
-}
-
 export function createTourEngine(
   tour: TourDefinition,
   callbacks: TourEngineCallbacks,
 ): Driver {
-  const { navigateToStep, onComplete, onDestroy } = callbacks
+  const { navigateToStep, onDestroy } = callbacks
+
+  // Scoped cleanup state (not module-level)
+  let activeCleanup: (() => void) | null = null
+  let pendingTimeout: ReturnType<typeof setTimeout> | null = null
+
+  function cleanupListener() {
+    if (pendingTimeout !== null) {
+      clearTimeout(pendingTimeout)
+      pendingTimeout = null
+    }
+    if (activeCleanup) {
+      activeCleanup()
+      activeCleanup = null
+    }
+  }
+
+  function attachFieldListener(stop: TourStop) {
+    cleanupListener()
+
+    if (stop.expectedValue === null) return
+
+    const el = document.querySelector(stop.elementSelector) as HTMLInputElement | HTMLTextAreaElement | null
+    if (!el) return
+
+    // Cache DOM refs once instead of querying on every keystroke
+    const footer = document.querySelector(".tutorial-custom-footer")
+    if (!footer) return
+    const badge = footer.querySelector(".tutorial-validation-badge") as HTMLElement | null
+    const nextBtn = footer.querySelector(".driver-popover-next-btn") as HTMLElement | null
+
+    const updateValidation = () => {
+      const valid = validateStopValue(stop, el.value)
+      if (badge) badge.style.display = valid ? "flex" : "none"
+      if (nextBtn) nextBtn.style.display = valid ? "inline-flex" : "none"
+    }
+
+    updateValidation()
+
+    el.addEventListener("input", updateValidation)
+    activeCleanup = () => {
+      el.removeEventListener("input", updateValidation)
+    }
+  }
 
   const steps: DriveStep[] = tour.stops.map((stop, stopIndex) => ({
     element: stop.elementSelector,
@@ -120,8 +124,10 @@ export function createTourEngine(
         wrapper.appendChild(customFooter)
 
         // Attach field listener after a short delay so the DOM is ready
-        // (onPopoverRender fires before animation completes)
-        setTimeout(() => attachFieldListener(stop), 500)
+        pendingTimeout = setTimeout(() => {
+          pendingTimeout = null
+          attachFieldListener(stop)
+        }, 500)
       },
     },
   }))
@@ -146,12 +152,8 @@ export function createTourEngine(
 
       navigateToStep(stop.mode, stop.stepId)
     },
-    onDestroyStarted: () => {
-      cleanupListener()
-      driverInstance.destroy()
-    },
     onDestroyed: () => {
-      onComplete()
+      cleanupListener()
       onDestroy()
     },
   })

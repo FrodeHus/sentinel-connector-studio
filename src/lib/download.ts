@@ -186,7 +186,7 @@ export async function buildSolutionZip(appState: AppState): Promise<Blob> {
   const dataFolder = zipFolder(root, "Data");
   const firstConnector = connectors[0];
   const solutionDataFile = {
-    Name: solutionName,
+    Name: safeSolutionName,
     Author: `${firstConnector?.meta.publisher || "Publisher"} - ${solution.support.email}`,
     Logo: firstConnector?.meta.logo ?? "",
     Description: firstConnector?.meta.descriptionMarkdown || "",

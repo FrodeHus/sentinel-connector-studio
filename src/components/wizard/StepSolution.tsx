@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { SOLUTION_NAME_ERROR, SOLUTION_NAME_PATTERN } from "@/lib/schemas"
 
 export function StepSolution() {
   const { config, updateSolution } = useConnectorConfig()
@@ -39,6 +40,11 @@ export function StepSolution() {
               value={solution.name}
               onChange={(e) => updateSolution({ name: e.target.value })}
             />
+            {solution.name && !SOLUTION_NAME_PATTERN.test(solution.name) && (
+              <p className="text-xs text-destructive">
+                {SOLUTION_NAME_ERROR}
+              </p>
+            )}
             <p className="text-xs text-muted-foreground">
               Name used for the solution package folder. Defaults to the first
               connector ID if empty.

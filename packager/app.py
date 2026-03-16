@@ -276,12 +276,19 @@ async def _process_job(job: Job) -> None:
         # Pre-create the Package output directory
         (solution_work_dir / "Package").mkdir(exist_ok=True)
 
-        # Rewrite BasePath in Solution_*.json to the container path
+        # Rewrite BasePath in Solution_*.json to the container path and ensure
+        # Name has no spaces (spaces cause createSolutionV3.ps1 to fail).
         work_data_dir = solution_work_dir / "Data"
         for sol_file in work_data_dir.glob("Solution_*.json"):
             with open(sol_file, "r") as f:
                 sol_data = json.load(f)
             sol_data["BasePath"] = str(solution_work_dir)
+            if "Name" in sol_data:
+                # Mirror the toSafeBaseName() logic from the frontend (download.ts):
+                # replace invalid chars with _, collapse consecutive underscores, strip edges.
+                safe_name = re.sub(r"[^a-zA-Z0-9_-]", "_", sol_data["Name"])
+                safe_name = re.sub(r"_+", "_", safe_name).strip("_")
+                sol_data["Name"] = safe_name or solution_name
             with open(sol_file, "w") as f:
                 json.dump(sol_data, f, indent=2)
 

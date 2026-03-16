@@ -284,6 +284,8 @@ async def _process_job(job: Job) -> None:
                 sol_data = json.load(f)
             sol_data["BasePath"] = str(solution_work_dir)
             if "Name" in sol_data:
+                # Mirror the toSafeBaseName() logic from the frontend (download.ts):
+                # replace invalid chars with _, collapse consecutive underscores, strip edges.
                 safe_name = re.sub(r"[^a-zA-Z0-9_-]", "_", sol_data["Name"])
                 safe_name = re.sub(r"_+", "_", safe_name).strip("_")
                 sol_data["Name"] = safe_name or solution_name

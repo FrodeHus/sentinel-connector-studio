@@ -317,7 +317,11 @@ export const DataFlowValidation = z.object({
   transformKql: z.string().min(1, "Transform KQL is required"),
 })
 
+export const SOLUTION_NAME_PATTERN = /^[a-zA-Z0-9_-]*$/
+export const SOLUTION_NAME_ERROR = "Solution name can only contain letters, numbers, hyphens, and underscores — no spaces"
+
 export const SolutionValidation = z.object({
+  name: z.string().regex(SOLUTION_NAME_PATTERN, SOLUTION_NAME_ERROR),
   publisherId: z.string().min(1, "Publisher ID is required").regex(/^[a-z][a-z0-9]*$/, "Lowercase alphanumeric only"),
   offerId: z.string().min(1, "Offer ID is required").regex(/^[a-z][a-z0-9-]*$/, "Lowercase alphanumeric with hyphens"),
   version: z.string().regex(/^\d+\.\d+\.\d+$/, "Must be semver format (e.g., 1.0.0)"),

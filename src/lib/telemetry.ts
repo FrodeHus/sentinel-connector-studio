@@ -2,15 +2,35 @@ import { ApplicationInsights } from "@microsoft/applicationinsights-web";
 
 let appInsights: ApplicationInsights | null = null;
 
+declare global {
+  interface Window {
+    __APP_CONFIG__?: {
+      appInsightsConnectionString?: string;
+    };
+  }
+}
+
 /**
- * Initialise Application Insights once using the connection string stored in
- * VITE_APPINSIGHTS_CONNECTION_STRING.  When the variable is absent the module
- * is a complete no-op so the app works identically without it.
+ * Initialise Application Insights once.  The connection string is resolved in
+ * priority order:
+ *   1. VITE_APPINSIGHTS_CONNECTION_STRING — baked in at build time (dev / CI
+ *      builds where the var is available during `vite build`).
+ *   2. window.__APP_CONFIG__.appInsightsConnectionString — injected at
+ *      container start by docker-entrypoint.sh from the runtime env var
+ *      APPINSIGHTS_CONNECTION_STRING (used with pre-built Docker images where
+ *      the value cannot be baked in at build time).
+ *
+ * When neither source provides a value the module is a complete no-op so the
+ * app works identically without it.
  */
 export function initTelemetry(): void {
-  const connectionString = import.meta.env.VITE_APPINSIGHTS_CONNECTION_STRING as
-    | string
-    | undefined;
+  // || is intentional: an empty build-time value means "not configured", so
+  // we fall through to the runtime window.__APP_CONFIG__ in that case too.
+  const connectionString =
+    (import.meta.env.VITE_APPINSIGHTS_CONNECTION_STRING as string | undefined) ||
+    (typeof window !== "undefined"
+      ? window.__APP_CONFIG__?.appInsightsConnectionString
+      : undefined);
 
   if (!connectionString) {
     return;

@@ -29,6 +29,7 @@ describe("telemetry", () => {
   beforeEach(async () => {
     vi.resetModules()
     vi.clearAllMocks()
+    vi.unstubAllGlobals()
   })
 
   it("does not initialise when VITE_APPINSIGHTS_CONNECTION_STRING is absent", async () => {
@@ -37,6 +38,39 @@ describe("telemetry", () => {
     const { initTelemetry, getAppInsights } = await import("@/lib/telemetry")
     initTelemetry()
     expect(getAppInsights()).toBeNull()
+  })
+
+  it("initialises via window.__APP_CONFIG__ when build-time env var is absent", async () => {
+    vi.stubEnv("VITE_APPINSIGHTS_CONNECTION_STRING", "")
+    vi.stubGlobal("window", {
+      __APP_CONFIG__: {
+        appInsightsConnectionString:
+          "InstrumentationKey=runtime-key;IngestionEndpoint=https://example.com/",
+      },
+    })
+
+    const { initTelemetry, getAppInsights } = await import("@/lib/telemetry")
+    initTelemetry()
+    expect(getAppInsights()).not.toBeNull()
+    expect(mockLoadAppInsights).toHaveBeenCalledTimes(1)
+  })
+
+  it("build-time env var takes priority over window.__APP_CONFIG__", async () => {
+    vi.stubEnv(
+      "VITE_APPINSIGHTS_CONNECTION_STRING",
+      "InstrumentationKey=build-key;IngestionEndpoint=https://example.com/",
+    )
+    vi.stubGlobal("window", {
+      __APP_CONFIG__: {
+        appInsightsConnectionString:
+          "InstrumentationKey=runtime-key;IngestionEndpoint=https://example.com/",
+      },
+    })
+
+    const { initTelemetry, getAppInsights } = await import("@/lib/telemetry")
+    initTelemetry()
+    expect(getAppInsights()).not.toBeNull()
+    expect(mockLoadAppInsights).toHaveBeenCalledTimes(1)
   })
 
   it("initialises Application Insights when connection string is provided", async () => {

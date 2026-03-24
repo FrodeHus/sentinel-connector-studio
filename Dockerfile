@@ -33,6 +33,10 @@ RUN rm -rf /etc/nginx/conf.d/default.conf /usr/share/nginx/html/*
 # Add hardened nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Add entrypoint script that injects runtime env vars before starting nginx
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # Copy built static assets from build stage
 COPY --from=build /app/dist/client /usr/share/nginx/html
 
@@ -53,4 +57,5 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget -qO- http://localhost:8080/ || exit 1
 
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

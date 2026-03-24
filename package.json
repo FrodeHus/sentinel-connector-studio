@@ -19,7 +19,7 @@
   "dependencies": {
     "@codemirror/language": "^6.12.2",
     "@codemirror/lint": "^6.9.5",
-    "@codemirror/state": "^6.5.4",
+    "@codemirror/state": "^6.6.0",
     "@lezer/highlight": "^1.2.3",
     "@microsoft/applicationinsights-web": "^3.3.11",
     "@radix-ui/react-dialog": "^1.1.15",

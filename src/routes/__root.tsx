@@ -1,6 +1,8 @@
 import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
+import * as React from 'react'
 
 import appCss from '../styles.css?url'
+import { flushTelemetry, initTelemetry } from '@/lib/telemetry'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -34,6 +36,11 @@ export const Route = createRootRoute({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  React.useEffect(() => {
+    initTelemetry();
+    return () => { flushTelemetry(); };
+  }, []);
+
   return (
     <html lang="en">
       <head>

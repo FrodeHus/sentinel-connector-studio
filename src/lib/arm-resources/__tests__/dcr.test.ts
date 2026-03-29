@@ -13,6 +13,12 @@ describe("generateDcrResource", () => {
     expect(result.apiVersion).toBe("2021-09-01-preview")
   })
 
+  it("depends on the workspace custom table", () => {
+    expect(result.dependsOn).toEqual([
+      "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'TestConnector_CL')]",
+    ])
+  })
+
   it("uses provided dcrName as the resource name", () => {
     expect(result.name).toBe("TestConnectorPushDCR")
   })

@@ -29,6 +29,9 @@ export function generateDcrResource(
     apiVersion: "2021-09-01-preview",
     type: "Microsoft.Insights/dataCollectionRules",
     location: "[parameters('workspace-location')]",
+    dependsOn: [
+      `[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), '${schema.tableName}')]`,
+    ],
     properties: {
       dataCollectionEndpointId: `[concat(subscription().id, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Insights/dataCollectionEndpoints/', parameters('workspace'), '-dce')]`,
       streamDeclarations: {

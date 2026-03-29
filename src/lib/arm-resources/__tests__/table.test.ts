@@ -41,4 +41,35 @@ describe("generateTableResource", () => {
       },
     })
   })
+
+  it("adds TimeGenerated if it is missing from schema.columns", () => {
+    const resultWithoutTimeGenerated = generateTableResource({
+      ...testSchema,
+      columns: [
+        { name: "Message", type: "string" },
+        { name: "Severity", type: "int" },
+      ],
+    }, "")
+
+    expect(resultWithoutTimeGenerated.properties.schema.columns).toEqual([
+      { name: "TimeGenerated", type: "datetime" },
+      { name: "Message", type: "string" },
+      { name: "Severity", type: "int" },
+    ])
+  })
+
+  it("normalizes TimeGenerated to datetime when present with a wrong type", () => {
+    const resultWithWrongTimeGenerated = generateTableResource({
+      ...testSchema,
+      columns: [
+        { name: "TimeGenerated", type: "string" as const },
+        { name: "Message", type: "string" },
+      ],
+    }, "")
+
+    expect(resultWithWrongTimeGenerated.properties.schema.columns).toEqual([
+      { name: "TimeGenerated", type: "datetime" },
+      { name: "Message", type: "string" },
+    ])
+  })
 })

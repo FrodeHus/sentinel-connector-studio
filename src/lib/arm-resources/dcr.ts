@@ -1,14 +1,26 @@
 import type { TableSchema, DataFlow } from "../schemas"
 import { tableNameToOutputStreamName } from "../naming"
 
+function buildStreamColumns(schema: TableSchema, dataFlow: DataFlow) {
+  const configuredColumns =
+    dataFlow.inputColumnsOverride && dataFlow.inputColumns.length > 0
+      ? dataFlow.inputColumns
+      : schema.columns
+
+  const otherColumns = configuredColumns.filter((col) => col.name !== "TimeGenerated")
+
+  return [
+    { name: "TimeGenerated", type: "datetime" as const },
+    ...otherColumns,
+  ]
+}
+
 export function generateDcrResource(
   schema: TableSchema,
   dataFlow: DataFlow,
   dcrName: string
 ) {
-  const inputColumns = dataFlow.inputColumnsOverride && dataFlow.inputColumns.length > 0
-    ? dataFlow.inputColumns
-    : schema.columns.filter(c => c.name !== "TimeGenerated")
+  const inputColumns = buildStreamColumns(schema, dataFlow)
 
   const outputStreamName = tableNameToOutputStreamName(schema.tableName)
 

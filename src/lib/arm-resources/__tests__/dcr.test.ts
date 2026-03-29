@@ -21,9 +21,10 @@ describe("generateDcrResource", () => {
     expect(result.properties.streamDeclarations).toHaveProperty("Custom-TestConnector")
   })
 
-  it("excludes TimeGenerated from stream columns by default", () => {
+  it("includes TimeGenerated in stream columns by default", () => {
     const columns = result.properties.streamDeclarations["Custom-TestConnector"].columns
     expect(columns).toEqual([
+      { name: "TimeGenerated", type: "datetime" },
       { name: "Message", type: "string" },
       { name: "Severity", type: "int" },
     ])
@@ -33,8 +34,21 @@ describe("generateDcrResource", () => {
     const overrideResult = generateDcrResource(testSchema, testDataFlowWithOverride, dcrName)
     const columns = overrideResult.properties.streamDeclarations["Custom-TestConnector"].columns
     expect(columns).toEqual([
+      { name: "TimeGenerated", type: "datetime" },
       { name: "msg", type: "string" },
       { name: "sev", type: "int" },
+    ])
+  })
+
+  it("adds TimeGenerated when override columns omit it", () => {
+    const overrideResult = generateDcrResource(testSchema, {
+      ...testDataFlowWithOverride,
+      inputColumns: [{ name: "msg", type: "string" }],
+    }, dcrName)
+
+    expect(overrideResult.properties.streamDeclarations["Custom-TestConnector"].columns).toEqual([
+      { name: "TimeGenerated", type: "datetime" },
+      { name: "msg", type: "string" },
     ])
   })
 

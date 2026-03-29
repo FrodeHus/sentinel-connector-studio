@@ -1,5 +1,14 @@
 import type { TableSchema } from "../schemas"
 
+function buildTableColumns(schema: TableSchema) {
+  const otherColumns = schema.columns.filter((col) => col.name !== "TimeGenerated")
+
+  return [
+    { name: "TimeGenerated", type: "datetime" as const },
+    ...otherColumns,
+  ]
+}
+
 export function generateTableResource(schema: TableSchema, _workspaceResourceId: string) {
   return {
     type: "Microsoft.OperationalInsights/workspaces/tables",
@@ -8,7 +17,7 @@ export function generateTableResource(schema: TableSchema, _workspaceResourceId:
     properties: {
       schema: {
         name: schema.tableName,
-        columns: schema.columns.map((col) => ({
+        columns: buildTableColumns(schema).map((col) => ({
           name: col.name,
           type: col.type,
         })),
